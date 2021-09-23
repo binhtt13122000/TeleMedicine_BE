@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31515.178
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeleMedicine_BE", "TeleMedicine_BE\TeleMedicine_BE.csproj", "{BA0862A9-E948-4CF3-AA3E-10EF3324CEB5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{0C1BC2C4-4280-4322-B10B-52575CD58EE3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BA0862A9-E948-4CF3-AA3E-10EF3324CEB5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA0862A9-E948-4CF3-AA3E-10EF3324CEB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA0862A9-E948-4CF3-AA3E-10EF3324CEB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA0862A9-E948-4CF3-AA3E-10EF3324CEB5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C1BC2C4-4280-4322-B10B-52575CD58EE3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C1BC2C4-4280-4322-B10B-52575CD58EE3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C1BC2C4-4280-4322-B10B-52575CD58EE3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C1BC2C4-4280-4322-B10B-52575CD58EE3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EB2663D5-22F3-4C3D-A417-B2563B5452A9}
+	EndGlobalSection
+EndGlobal
