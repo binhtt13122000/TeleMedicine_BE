@@ -45,17 +45,17 @@ namespace BusinessLogic.Services
 
         public IQueryable<TimeFrame> GetAll(params Expression<Func<TimeFrame, object>>[] includes)
         {
-            throw new NotImplementedException();
+            return _timeFrameRepository.GetAll(includes);
         }
 
-        public Task<TimeFrame> GetByIdAsync(int id)
+        public async Task<TimeFrame> GetByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            return await _timeFrameRepository.GetByIdAsync(id);
         }
 
-        public Task<bool> UpdateAsync(TimeFrame entity)
+        public async Task<bool> UpdateAsync(TimeFrame entity)
         {
-            throw new NotImplementedException();
+            return await _timeFrameRepository.UpdateAsync(entity);
         }
     }
 }
