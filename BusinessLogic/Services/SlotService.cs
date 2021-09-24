@@ -27,9 +27,9 @@ namespace BusinessLogic.Services
             return await _slotRepository.AddAsync(entity);
         }
 
-        public Task<bool> AddSlotsAsync(List<Slot> slots)
+        public async Task<bool> AddSlotsAsync(List<Slot> slots)
         {
-            throw new NotImplementedException();
+            return await _slotRepository.AddSlotsAsync(slots);
         }
 
         public async Task<bool> DeleteAsync(Slot entity)
