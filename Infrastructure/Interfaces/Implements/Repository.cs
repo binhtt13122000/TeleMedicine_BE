@@ -23,7 +23,7 @@ namespace Infrastructure.Interfaces.Implements
             try
             {
                 IQueryable<T> queryList = _dbContext.Set<T>().AsNoTracking();
-                foreach (var expression in predicate)
+                foreach (Expression<Func<T, object>> expression in predicate)
                 {
                     queryList = queryList.Include(expression);
                 }
@@ -107,6 +107,23 @@ namespace Infrastructure.Interfaces.Implements
         {
             IQueryable<T> lstRemove = _dbContext.Set<T>().Where(predicate);
             _dbContext.RemoveRange(lstRemove);
+        }
+
+        public int Count(params Expression<Func<T, object>>[] predicate)
+        {
+            try
+            {
+                IQueryable<T> queryList = _dbContext.Set<T>().AsNoTracking();
+                foreach (var expression in predicate)
+                {
+                    queryList = queryList.Include(expression);
+                }
+                return queryList.Count();
+            }
+            catch (Exception ex)
+            {
+                throw new ArgumentNullException($"Couldn't retrieve entities: {nameof(GetAll)} because: {ex.Message}");
+            }
         }
     }
 }
