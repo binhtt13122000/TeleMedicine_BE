@@ -1,10 +1,8 @@
-﻿using Infrastructure.Interfaces;
+﻿using Infrastructure.Repositories;
 using Infrastructure.Models;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace BusinessLogic.Services
@@ -15,36 +13,36 @@ namespace BusinessLogic.Services
     }
     public class DiseaseService : IDiseaseService
     {
-        private readonly IRepository<Disease, int> _iRepository;
+        private readonly DiseaseRepository _iDiseaseRepository;
 
-        public DiseaseService(IRepository<Disease, int> iRepository)
+        public DiseaseService(DiseaseRepository iDiseaseRepository)
         {
-            _iRepository = iRepository;
+            _iDiseaseRepository = iDiseaseRepository;
         }
 
         public async Task<Disease> AddAsync(Disease entity)
         {
-            return await _iRepository.AddAsync(entity);
+            return await _iDiseaseRepository.AddAsync(entity);
         }
 
         public async Task<bool> DeleteAsync(Disease entity)
         {
-            return await _iRepository.Delete(entity);
+            return await _iDiseaseRepository.Delete(entity);
         }
 
         public IQueryable<Disease> GetAll(params Expression<Func<Disease, object>>[] includes)
         {
-            return _iRepository.GetAll(includes);    
+            return _iDiseaseRepository.GetAll(includes);    
         }
 
         public async Task<Disease> GetByIdAsync(int id)
         {
-            return await _iRepository.GetByIdAsync(id);
+            return await _iDiseaseRepository.GetByIdAsync(id);
         }
 
         public async Task<bool> UpdateAsync(Disease entity)
         {
-            return await _iRepository.UpdateAsync(entity);
+            return await _iDiseaseRepository.UpdateAsync(entity);
         }
     }
 }

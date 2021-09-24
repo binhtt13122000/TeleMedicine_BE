@@ -1,10 +1,8 @@
-﻿using Infrastructure.Interfaces;
-using Infrastructure.Models;
+﻿using Infrastructure.Models;
+using Infrastructure.Repositories;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace BusinessLogic.Services
@@ -15,35 +13,35 @@ namespace BusinessLogic.Services
     }
     public class DrugTypeService : IDrugTypeService
     {
-        private readonly IRepository<DrugType, int> _iRepository;
+        private readonly DrugTypeRepository _iDrugTypeRepository;
 
-        public DrugTypeService(IRepository<DrugType, int> iRepository)
+        public DrugTypeService(DrugTypeRepository iDrugTypeRepository)
         {
-            _iRepository = iRepository;
+            _iDrugTypeRepository = iDrugTypeRepository;
         }
         public async Task<DrugType> AddAsync(DrugType entity)
         {
-            return await _iRepository.AddAsync(entity);
+            return await _iDrugTypeRepository.AddAsync(entity);
         }
 
         public async Task<bool> DeleteAsync(DrugType entity)
         {
-            return await _iRepository.Delete(entity);
+            return await _iDrugTypeRepository.Delete(entity);
         }
 
         public IQueryable<DrugType> GetAll(params Expression<Func<DrugType, object>>[] includes)
         {
-            return _iRepository.GetAll(includes);
+            return _iDrugTypeRepository.GetAll(includes);
         }
 
         public async Task<DrugType> GetByIdAsync(int id)
         {
-            return await _iRepository.GetByIdAsync(id);
+            return await _iDrugTypeRepository.GetByIdAsync(id);
         }
 
         public async Task<bool> UpdateAsync(DrugType entity)
         {
-            return await _iRepository.UpdateAsync(entity);
+            return await _iDrugTypeRepository.UpdateAsync(entity);
         }
     }
 }

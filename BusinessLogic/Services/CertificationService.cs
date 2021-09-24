@@ -1,10 +1,8 @@
-﻿using Infrastructure.Interfaces;
-using Infrastructure.Models;
+﻿using Infrastructure.Models;
+using Infrastructure.Repositories;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace BusinessLogic.Services
@@ -15,36 +13,36 @@ namespace BusinessLogic.Services
     }
     public class CertificationService : ICertificationService
     {
-        private readonly IRepository<Certification, int> _iRepository;
+        private readonly CertificationRepository _iCertificationRepository;
 
-        public CertificationService(IRepository<Certification, int> iRepository)
+        public CertificationService(CertificationRepository iCertificationRepository)
         {
-            _iRepository = iRepository;
+            _iCertificationRepository = iCertificationRepository;
         }
 
         public async Task<Certification> AddAsync(Certification entity)
         {
-            return await _iRepository.AddAsync(entity);
+            return await _iCertificationRepository.AddAsync(entity);
         }
 
         public async Task<bool> DeleteAsync(Certification entity)
         {
-            return await _iRepository.Delete(entity);
+            return await _iCertificationRepository.Delete(entity);
         }
 
         public IQueryable<Certification> GetAll(params Expression<Func<Certification, object>>[] includes)
         {
-            return _iRepository.GetAll(includes);
+            return _iCertificationRepository.GetAll(includes);
         }
 
         public async Task<Certification> GetByIdAsync(int id)
         {
-            return await _iRepository.GetByIdAsync(id);
+            return await _iCertificationRepository.GetByIdAsync(id);
         }
 
         public async Task<bool> UpdateAsync(Certification entity)
         {
-            return await _iRepository.UpdateAsync(entity);
+            return await _iCertificationRepository.UpdateAsync(entity);
         }
     }
 }

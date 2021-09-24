@@ -1,10 +1,8 @@
-﻿using Infrastructure.Interfaces;
-using Infrastructure.Models;
+﻿using Infrastructure.Models;
+using Infrastructure.Repositories;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace BusinessLogic.Services
@@ -15,35 +13,35 @@ namespace BusinessLogic.Services
     }
     public class HealthCheckService : IHealthCheckService
     {
-        private readonly IRepository<HealthCheck, int> _iRepository;
+        private readonly HealthCheckRepository _iHealthCheckRepository;
 
-        public HealthCheckService(IRepository<HealthCheck, int> iRepository)
+        public HealthCheckService(HealthCheckRepository iHealthCheckRepository)
         {
-            _iRepository = iRepository;
+            _iHealthCheckRepository = iHealthCheckRepository;
         }
         public async Task<HealthCheck> AddAsync(HealthCheck entity)
         {
-            return await _iRepository.AddAsync(entity);
+            return await _iHealthCheckRepository.AddAsync(entity);
         }
 
         public async Task<bool> DeleteAsync(HealthCheck entity)
         {
-            return await _iRepository.Delete(entity);
+            return await _iHealthCheckRepository.Delete(entity);
         }
 
         public IQueryable<HealthCheck> GetAll(params Expression<Func<HealthCheck, object>>[] includes)
         {
-            return _iRepository.GetAll(includes);
+            return _iHealthCheckRepository.GetAll(includes);
         }
 
         public async Task<HealthCheck> GetByIdAsync(int id)
         {
-            return await _iRepository.GetByIdAsync(id);
+            return await _iHealthCheckRepository.GetByIdAsync(id);
         }
 
         public async Task<bool> UpdateAsync(HealthCheck entity)
         {
-            return await _iRepository.UpdateAsync(entity);
+            return await _iHealthCheckRepository.UpdateAsync(entity);
         }
     }
 }
