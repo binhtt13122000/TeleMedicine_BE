@@ -15,5 +15,6 @@ namespace Infrastructure.Interfaces
         Task<bool> UpdateAsync(T entity);
         Task<bool> Delete(T entity);
         void DeleteRange(Expression<Func<T, bool>> predicate);
+        int Count(params Expression<Func<T, object>>[] predicate);
     }
 }
