@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TeleMedicine_BE.Utils;
 
 namespace TeleMedicine_BE
 {
@@ -29,6 +30,8 @@ namespace TeleMedicine_BE
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddCors();
+
+            services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
 
             services.AddDbContext<TeleMedicineContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("DBConnection")));
