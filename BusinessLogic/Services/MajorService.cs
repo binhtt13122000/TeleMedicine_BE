@@ -13,36 +13,36 @@ namespace BusinessLogic.Services
     }
     public class MajorService : IMajorService
     {
-        private readonly MajorRepository _iMajorRepository;
+        private readonly MajorRepository _majorRepository;
 
-        public MajorService(MajorRepository iMajorRepository)
+        public MajorService(MajorRepository majorRepository)
         {
-            _iMajorRepository = iMajorRepository;
+            _majorRepository = majorRepository;
         }
 
         public async Task<Major> AddAsync(Major entity)
         {
-            return await _iMajorRepository.AddAsync(entity);
+            return await _majorRepository.AddAsync(entity);
         }
 
         public async Task<bool> DeleteAsync(Major entity)
         {
-            return await _iMajorRepository.Delete(entity);
+            return await _majorRepository.Delete(entity);
         }
 
         public IQueryable<Major> GetAll(params Expression<Func<Major, object>>[] includes)
         {
-            return _iMajorRepository.GetAll(includes);
+            return _majorRepository.GetAll(includes);
         }
 
         public async Task<Major> GetByIdAsync(int id)
         {
-            return await _iMajorRepository.GetByIdAsync(id);
+            return await _majorRepository.GetByIdAsync(id);
         }
 
         public async Task<bool> UpdateAsync(Major entity)
         {
-            return await _iMajorRepository.UpdateAsync(entity);
+            return await _majorRepository.UpdateAsync(entity);
         }
     }
 }

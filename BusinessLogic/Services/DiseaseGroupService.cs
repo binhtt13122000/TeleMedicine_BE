@@ -13,35 +13,35 @@ namespace BusinessLogic.Services
     }
     public class DiseaseGroupService : IDiseaseGroupService
     {
-        private readonly DiseaseGroupRepository _iDiseaseGroupRepository;
+        private readonly DiseaseGroupRepository _diseaseGroupRepository;
 
-        public DiseaseGroupService(DiseaseGroupRepository iDiseaseGroupRepository)
+        public DiseaseGroupService(DiseaseGroupRepository diseaseGroupRepository)
         {
-            _iDiseaseGroupRepository = iDiseaseGroupRepository;
+            _diseaseGroupRepository = diseaseGroupRepository;
         }
         public async Task<DiseaseGroup> AddAsync(DiseaseGroup entity)
         {
-            return await _iDiseaseGroupRepository.AddAsync(entity);
+            return await _diseaseGroupRepository.AddAsync(entity);
         }
 
         public async Task<bool> DeleteAsync(DiseaseGroup entity)
         {
-            return await _iDiseaseGroupRepository.Delete(entity);
+            return await _diseaseGroupRepository.Delete(entity);
         }
 
         public IQueryable<DiseaseGroup> GetAll(params Expression<Func<DiseaseGroup, object>>[] includes)
         {
-            return _iDiseaseGroupRepository.GetAll(includes);
+            return _diseaseGroupRepository.GetAll(includes);
         }
 
         public async Task<DiseaseGroup> GetByIdAsync(int id)
         {
-            return await _iDiseaseGroupRepository.GetByIdAsync(id);
+            return await _diseaseGroupRepository.GetByIdAsync(id);
         }
 
         public async Task<bool> UpdateAsync(DiseaseGroup entity)
         {
-            return await _iDiseaseGroupRepository.UpdateAsync(entity);
+            return await _diseaseGroupRepository.UpdateAsync(entity);
         }
     }
 }

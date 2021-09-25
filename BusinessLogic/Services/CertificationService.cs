@@ -13,36 +13,36 @@ namespace BusinessLogic.Services
     }
     public class CertificationService : ICertificationService
     {
-        private readonly CertificationRepository _iCertificationRepository;
+        private readonly CertificationRepository _certificationRepository;
 
-        public CertificationService(CertificationRepository iCertificationRepository)
+        public CertificationService(CertificationRepository certificationRepository)
         {
-            _iCertificationRepository = iCertificationRepository;
+            _certificationRepository = certificationRepository;
         }
 
         public async Task<Certification> AddAsync(Certification entity)
         {
-            return await _iCertificationRepository.AddAsync(entity);
+            return await _certificationRepository.AddAsync(entity);
         }
 
         public async Task<bool> DeleteAsync(Certification entity)
         {
-            return await _iCertificationRepository.Delete(entity);
+            return await _certificationRepository.Delete(entity);
         }
 
         public IQueryable<Certification> GetAll(params Expression<Func<Certification, object>>[] includes)
         {
-            return _iCertificationRepository.GetAll(includes);
+            return _certificationRepository.GetAll(includes);
         }
 
         public async Task<Certification> GetByIdAsync(int id)
         {
-            return await _iCertificationRepository.GetByIdAsync(id);
+            return await _certificationRepository.GetByIdAsync(id);
         }
 
         public async Task<bool> UpdateAsync(Certification entity)
         {
-            return await _iCertificationRepository.UpdateAsync(entity);
+            return await _certificationRepository.UpdateAsync(entity);
         }
     }
 }

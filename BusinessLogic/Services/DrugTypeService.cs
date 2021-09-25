@@ -13,35 +13,35 @@ namespace BusinessLogic.Services
     }
     public class DrugTypeService : IDrugTypeService
     {
-        private readonly DrugTypeRepository _iDrugTypeRepository;
+        private readonly DrugTypeRepository _drugTypeRepository;
 
-        public DrugTypeService(DrugTypeRepository iDrugTypeRepository)
+        public DrugTypeService(DrugTypeRepository drugTypeRepository)
         {
-            _iDrugTypeRepository = iDrugTypeRepository;
+            _drugTypeRepository = drugTypeRepository;
         }
         public async Task<DrugType> AddAsync(DrugType entity)
         {
-            return await _iDrugTypeRepository.AddAsync(entity);
+            return await _drugTypeRepository.AddAsync(entity);
         }
 
         public async Task<bool> DeleteAsync(DrugType entity)
         {
-            return await _iDrugTypeRepository.Delete(entity);
+            return await _drugTypeRepository.Delete(entity);
         }
 
         public IQueryable<DrugType> GetAll(params Expression<Func<DrugType, object>>[] includes)
         {
-            return _iDrugTypeRepository.GetAll(includes);
+            return _drugTypeRepository.GetAll(includes);
         }
 
         public async Task<DrugType> GetByIdAsync(int id)
         {
-            return await _iDrugTypeRepository.GetByIdAsync(id);
+            return await _drugTypeRepository.GetByIdAsync(id);
         }
 
         public async Task<bool> UpdateAsync(DrugType entity)
         {
-            return await _iDrugTypeRepository.UpdateAsync(entity);
+            return await _drugTypeRepository.UpdateAsync(entity);
         }
     }
 }

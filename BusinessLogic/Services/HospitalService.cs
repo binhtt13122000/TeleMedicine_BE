@@ -17,36 +17,36 @@ namespace BusinessLogic.Services
     }
     public class HospitalService : IHospitalService
     {
-        private readonly HospitalRepository _iHospitalRepository;
+        private readonly HospitalRepository _hospitalRepository;
 
-        public HospitalService(HospitalRepository iHospitalRepository)
+        public HospitalService(HospitalRepository hospitalRepository)
         {
-            _iHospitalRepository = iHospitalRepository;
+            _hospitalRepository = hospitalRepository;
         }
 
         public async Task<Hospital> AddAsync(Hospital entity)
         {
-            return await _iHospitalRepository.AddAsync(entity);
+            return await _hospitalRepository.AddAsync(entity);
         }
 
         public async Task<bool> DeleteAsync(Hospital entity)
         {
-            return await _iHospitalRepository.Delete(entity);
+            return await _hospitalRepository.Delete(entity);
         }
 
         public IQueryable<Hospital> GetAll(params Expression<Func<Hospital, object>>[] includes)
         {
-            return _iHospitalRepository.GetAll(includes);
+            return _hospitalRepository.GetAll(includes);
         }
 
         public async Task<Hospital> GetByIdAsync(int id)
         {
-            return await _iHospitalRepository.GetByIdAsync(id);
+            return await _hospitalRepository.GetByIdAsync(id);
         }
 
         public async Task<bool> UpdateAsync(Hospital entity)
         {
-            return await _iHospitalRepository.UpdateAsync(entity);
+            return await _hospitalRepository.UpdateAsync(entity);
         }
     }
 }
