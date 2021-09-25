@@ -13,9 +13,9 @@ namespace BusinessLogic.Services
     }
     public class CertificationService : ICertificationService
     {
-        private readonly CertificationRepository _certificationRepository;
+        private readonly ICertificationRepository _certificationRepository;
 
-        public CertificationService(CertificationRepository certificationRepository)
+        public CertificationService(ICertificationRepository certificationRepository)
         {
             _certificationRepository = certificationRepository;
         }

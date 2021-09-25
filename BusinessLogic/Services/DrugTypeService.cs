@@ -13,9 +13,9 @@ namespace BusinessLogic.Services
     }
     public class DrugTypeService : IDrugTypeService
     {
-        private readonly DrugTypeRepository _drugTypeRepository;
+        private readonly IDrugTypeRepository _drugTypeRepository;
 
-        public DrugTypeService(DrugTypeRepository drugTypeRepository)
+        public DrugTypeService(IDrugTypeRepository drugTypeRepository)
         {
             _drugTypeRepository = drugTypeRepository;
         }

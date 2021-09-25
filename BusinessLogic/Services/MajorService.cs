@@ -13,9 +13,9 @@ namespace BusinessLogic.Services
     }
     public class MajorService : IMajorService
     {
-        private readonly MajorRepository _majorRepository;
+        private readonly IMajorRepository _majorRepository;
 
-        public MajorService(MajorRepository majorRepository)
+        public MajorService(IMajorRepository majorRepository)
         {
             _majorRepository = majorRepository;
         }

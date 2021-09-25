@@ -13,9 +13,9 @@ namespace BusinessLogic.Services
     }
     public class DiseaseService : IDiseaseService
     {
-        private readonly DiseaseRepository _diseaseRepository;
+        private readonly IDiseaseRepository _diseaseRepository;
 
-        public DiseaseService(DiseaseRepository diseaseRepository)
+        public DiseaseService(IDiseaseRepository diseaseRepository)
         {
             _diseaseRepository = diseaseRepository;
         }

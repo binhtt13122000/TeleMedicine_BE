@@ -13,9 +13,9 @@ namespace BusinessLogic.Services
     }
     public class HealthCheckService : IHealthCheckService
     {
-        private readonly HealthCheckRepository _healthCheckRepository;
+        private readonly IHealthCheckRepository _healthCheckRepository;
 
-        public HealthCheckService(HealthCheckRepository healthCheckRepository)
+        public HealthCheckService(IHealthCheckRepository healthCheckRepository)
         {
             _healthCheckRepository = healthCheckRepository;
         }

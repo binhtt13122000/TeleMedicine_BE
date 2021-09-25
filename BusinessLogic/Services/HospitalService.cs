@@ -1,11 +1,7 @@
 ﻿using Infrastructure.Models;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Infrastructure.Models;
-using Infrastructure.Interfaces;
 using System.Linq.Expressions;
 using Infrastructure.Repositories;
 
@@ -17,9 +13,9 @@ namespace BusinessLogic.Services
     }
     public class HospitalService : IHospitalService
     {
-        private readonly HospitalRepository _hospitalRepository;
+        private readonly IHospitalRepository _hospitalRepository;
 
-        public HospitalService(HospitalRepository hospitalRepository)
+        public HospitalService(IHospitalRepository hospitalRepository)
         {
             _hospitalRepository = hospitalRepository;
         }
