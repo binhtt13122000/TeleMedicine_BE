@@ -13,7 +13,7 @@ namespace Infrastructure.Repositories
     {
 
     }
-    class DiseaseRepository : Repository<Disease, int>, IDiseaseRepository
+    public class DiseaseRepository : Repository<Disease, int>, IDiseaseRepository
     {
         public DiseaseRepository(TeleMedicineContext dbContext) : base(dbContext)
         {
