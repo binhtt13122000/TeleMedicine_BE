@@ -19,6 +19,13 @@ namespace TeleMedicine_BE.Utils
             CreateMap<SymptomUM, Symptom>();
             #endregion
 
+            #region AutoMapper HospitalViewModels
+            CreateMap<Hospital, HospitalVM>();
+            CreateMap<Hospital, HospitalWithDoctorVM>();
+            CreateMap<HospitalVM, Hospital>();
+            CreateMap<HospitalCM, Hospital>();
+            CreateMap<HospitalUM, Hospital>();
+            #endregion
         }
     }
 }

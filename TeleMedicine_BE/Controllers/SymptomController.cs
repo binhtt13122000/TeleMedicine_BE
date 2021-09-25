@@ -67,7 +67,7 @@ namespace TeleMedicine_BE.Controllers
 
 
                 Paged<SymptomVM> result = _pagingSupport.From(symptomsQuery)
-                   .GetRange(offset = 1, limit = 20, s => s.Id, 1)
+                   .GetRange(offset, limit, s => s.Id, 1)
                    .Paginate<SymptomVM>();
 
                 return Ok(result);
@@ -226,7 +226,13 @@ namespace TeleMedicine_BE.Controllers
             {
                 return NotFound();
             }
-
+            if (!model.SymptomCode.ToUpper().Equals(currentSymptom.SymptomCode.ToUpper()) && _symptomService.IsDuplicated(model.SymptomCode))
+            {
+                return BadRequest(new
+                {
+                    message = "Symptom Code is duplicated"
+                });
+            }
             try
             {
                 currentSymptom.Description = model.Description;

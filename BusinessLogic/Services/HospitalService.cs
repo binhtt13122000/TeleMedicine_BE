@@ -9,7 +9,7 @@ namespace BusinessLogic.Services
 {
     public interface IHospitalService : IService<Hospital, int>
     {
-
+        bool IsDuplicated(string hospitalCode);
     }
     public class HospitalService : IHospitalService
     {
@@ -38,6 +38,11 @@ namespace BusinessLogic.Services
         public async Task<Hospital> GetByIdAsync(int id)
         {
             return await _hospitalRepository.GetByIdAsync(id);
+        }
+
+        public bool IsDuplicated(string hospitalCode)
+        {
+            return _hospitalRepository.IsDuplicatedHospitalCode(hospitalCode);
         }
 
         public async Task<bool> UpdateAsync(Hospital entity)
