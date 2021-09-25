@@ -22,7 +22,7 @@ namespace Infrastructure.Repositories
 
         public bool IsDuplicatedSymptomCode(string symptomCode)
         {
-            Symptom currentSymptom = GetAll().Where(x => x.SymptomCode == symptomCode).FirstOrDefault();
+            Symptom currentSymptom = GetAll().Where(x => symptomCode.ToUpper().Equals(x.SymptomCode.ToUpper())).FirstOrDefault();
 
             return currentSymptom != null; 
         }
