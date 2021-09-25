@@ -11,12 +11,20 @@ namespace Infrastructure.Repositories
 {
     public interface ISymptomRepository : IRepository<Symptom, int>
     {
+        bool IsDuplicatedSymptomCode(string symptomCode);
     }
     public class SymptomRepository : Repository<Symptom, int>, ISymptomRepository
     {
         public SymptomRepository(TeleMedicineContext dbContext) : base(dbContext)
         {
 
+        }
+
+        public bool IsDuplicatedSymptomCode(string symptomCode)
+        {
+            Symptom currentSymptom = GetAll().Where(x => x.SymptomCode == symptomCode).FirstOrDefault();
+
+            return currentSymptom != null; 
         }
     }
 }

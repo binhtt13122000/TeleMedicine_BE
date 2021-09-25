@@ -7,5 +7,6 @@ namespace TeleMedicine_BE.Utils
 {
     public class JWTProvider
     {
+
     }
 }
