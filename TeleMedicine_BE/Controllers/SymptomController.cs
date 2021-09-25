@@ -17,7 +17,6 @@ namespace TeleMedicine_BE.Controllers
     [ApiController]
     public class SymptomController : ControllerBase
     {
-        private const string V = "symptom-code";
         private readonly ISymptomService _symptomService;
         private readonly IMapper _mapper;
         private readonly IPagingSupport<Symptom> _pagingSupport;
