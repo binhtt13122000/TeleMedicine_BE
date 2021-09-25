@@ -1,10 +1,14 @@
+using BusinessLogic.Services;
 using Infrastructure.Models;
+using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Infrastructure.Interfaces;
+using Infrastructure.Interfaces.Implements;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
@@ -14,6 +18,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TeleMedicine_BE.Utils;
+using System.Reflection;
+using System.IO;
 
 namespace TeleMedicine_BE
 {
@@ -36,10 +42,16 @@ namespace TeleMedicine_BE
             services.AddDbContext<TeleMedicineContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("DBConnection")));
 
+            services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
+            services.AddScoped(typeof(IPagingSupport<>), typeof(PagingSupport<>));
+
+            services.AddTransient<ISymptomRepository, SymptomRepository>();
+            services.AddTransient<ISymptomService, SymptomService>();
             services.AddControllers().AddNewtonsoftJson(options =>
             {
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             });
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Telemedicine", Version = "v1" });
@@ -68,6 +80,10 @@ namespace TeleMedicine_BE
                       new List<string>()
                     }
                 });
+                // Set the comments path for the Swagger JSON and UI.
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
             });
         }
 
