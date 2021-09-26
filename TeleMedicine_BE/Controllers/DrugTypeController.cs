@@ -54,9 +54,8 @@ namespace TeleMedicine_BE.Controllers
                 IQueryable<DrugType> drugTypesQuery = _drugTypeService.GetAll();
                 if (!string.IsNullOrWhiteSpace(name))
                 {
-                    drugTypesQuery = drugTypesQuery.Where(_ => _.Name.Contains(name));
+                    drugTypesQuery = drugTypesQuery.Where(_ => _.Name.ToUpper().Contains(name.Trim().ToUpper()));
                 }
-
 
                 Paged<DrugTypeVM> result = _pagingSupport.From(drugTypesQuery)
                    .GetRange(offset, limit, s => s.Id, 1)

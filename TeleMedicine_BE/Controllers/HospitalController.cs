@@ -50,11 +50,11 @@ namespace TeleMedicine_BE.Controllers
                 IQueryable<Hospital> hospitalList = _hospitalService.GetAll();
                 if (!String.IsNullOrEmpty(hospitalCode))
                 {
-                    hospitalList = hospitalList.Where(s => s.HospitalCode.Contains(hospitalCode));
+                    hospitalList = hospitalList.Where(s => s.HospitalCode.ToUpper().Contains(hospitalCode.ToUpper()));
                 }
                 if (!String.IsNullOrEmpty(name))
                 {
-                    hospitalList = hospitalList.Where(s => s.Name.Contains(name.Trim()));
+                    hospitalList = hospitalList.Where(s => s.Name.ToUpper().Contains(name.Trim().ToUpper()));
                 }
                 Paged<HospitalVM> pageModel = _pagingSupport.From(hospitalList).GetRange(offset, limit, s => s.Id, 1).Paginate<HospitalVM>();
                 return Ok(pageModel);
@@ -123,6 +123,7 @@ namespace TeleMedicine_BE.Controllers
             }
             try
             {
+                hospital.HospitalCode = hospital.HospitalCode.ToUpper();
                 Hospital hospitalCreated = await _hospitalService.AddAsync(hospital);
                 if(hospitalCreated != null)
                 {
