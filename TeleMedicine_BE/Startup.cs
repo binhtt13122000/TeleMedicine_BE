@@ -57,6 +57,9 @@ namespace TeleMedicine_BE
             services.AddTransient<IDrugRepository, DrugRepository>();
             services.AddTransient<IDrugService, DrugService>();
 
+            services.AddTransient<IMajorRepository, MajorRepository>();
+            services.AddTransient<IMajorService, MajorService>();
+
             services.AddControllers().AddNewtonsoftJson(options =>
             {
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
