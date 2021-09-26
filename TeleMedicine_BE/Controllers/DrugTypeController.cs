@@ -57,7 +57,6 @@ namespace TeleMedicine_BE.Controllers
                     drugTypesQuery = drugTypesQuery.Where(_ => _.Name.ToUpper().Contains(name.Trim().ToUpper()));
                 }
 
-
                 Paged<DrugTypeVM> result = _pagingSupport.From(drugTypesQuery)
                    .GetRange(offset, limit, s => s.Id, 1)
                    .Paginate<DrugTypeVM>();

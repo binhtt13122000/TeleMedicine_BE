@@ -140,6 +140,7 @@ namespace TeleMedicine_BE.Controllers
             }
             try
             {
+                symptom.SymptomCode = symptom.SymptomCode.Trim().ToUpper();
                 Symptom createdSymptom = await _symptomService.AddAsync(symptom);
 
                 if(createdSymptom != null)

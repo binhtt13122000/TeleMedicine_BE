@@ -50,7 +50,7 @@ namespace TeleMedicine_BE.Controllers
                 IQueryable<Major> majorList = _majorService.GetAll();
                 if(!String.IsNullOrEmpty(name))
                 {
-                    majorList = majorList.Where(s => s.Name.Contains(name.Trim()));
+                    majorList = majorList.Where(s => s.Name.ToUpper().Contains(name.Trim().ToUpper()));
                 }
                 Paged<MajorVM> paged = _pagingSupport.From(majorList).GetRange(offset, limit, s => s.Id, 1).Paginate<MajorVM>();
                 return Ok(paged);
