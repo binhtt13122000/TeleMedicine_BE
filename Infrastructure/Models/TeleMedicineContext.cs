@@ -44,7 +44,7 @@ namespace Infrastructure.Models
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseNpgsql("");
+                optionsBuilder.UseNpgsql("Host=52.221.193.237;Database=TeleMedicine;Username=postgres;Password=thanhbinh");
             }
         }
 
@@ -294,6 +294,8 @@ namespace Infrastructure.Models
 
                 entity.Property(e => e.CreatedDate).HasColumnType("timestamp with time zone");
 
+                entity.Property(e => e.IsSeen).HasDefaultValueSql("false");
+
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.Notifications)
                     .HasForeignKey(d => d.UserId)
@@ -396,9 +398,9 @@ namespace Infrastructure.Models
             {
                 entity.ToTable("TimeFrame");
 
-                entity.Property(e => e.EndTime).HasColumnType("timestamp with time zone");
+                entity.Property(e => e.EndTime).HasColumnType("time with time zone");
 
-                entity.Property(e => e.StartTime).HasColumnType("timestamp with time zone");
+                entity.Property(e => e.StartTime).HasColumnType("time with time zone");
             });
 
             OnModelCreatingPartial(modelBuilder);
