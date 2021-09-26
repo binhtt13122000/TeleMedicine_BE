@@ -35,6 +35,13 @@ namespace TeleMedicine_BE.Utils
             CreateMap<DrugType, DrugTypeCM>();
             CreateMap<DrugTypeUM, DrugType>();
             #endregion
+
+            #region AutoMapper MajorViewModel
+            CreateMap<Major, MajorVM>();
+            CreateMap<MajorVM, Major>();
+            CreateMap<MajorCM, Major>();
+            CreateMap<MajorUM, Major>();
+            #endregion
         }
     }
 }

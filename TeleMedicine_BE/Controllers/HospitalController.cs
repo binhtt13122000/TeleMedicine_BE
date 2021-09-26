@@ -207,7 +207,7 @@ namespace TeleMedicine_BE.Controllers
                 return BadRequest(new
                 {
                     message = "Can not found hospital by id: " + id
-                });;
+                });
             }
             try
             {
