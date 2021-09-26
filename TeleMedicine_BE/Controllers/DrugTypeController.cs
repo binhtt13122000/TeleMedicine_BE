@@ -3,7 +3,6 @@ using BusinessLogic.Services;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,23 +12,22 @@ using TeleMedicine_BE.ViewModels;
 
 namespace TeleMedicine_BE.Controllers
 {
-    [Route("api/v1/symptoms")]
+    [Route("api/v1/drug-types")]
     [ApiController]
-    public class SymptomController : ControllerBase
+    public class DrugTypeController : ControllerBase
     {
-        private readonly ISymptomService _symptomService;
+        private readonly IDrugTypeService _drugTypeService;
         private readonly IMapper _mapper;
-        private readonly IPagingSupport<Symptom> _pagingSupport;
-        public SymptomController(ISymptomService symptomService, IMapper mapper, IPagingSupport<Symptom> pagingSupport)
+        private readonly IPagingSupport<DrugType> _pagingSupport;
+        public DrugTypeController(IDrugTypeService drugTypeService, IMapper mapper, IPagingSupport<DrugType> pagingSupport)
         {
-            _symptomService = symptomService;
+            _drugTypeService = drugTypeService;
             _mapper = mapper;
             _pagingSupport = pagingSupport;
         }
 
-
         /// <summary>
-        /// Get all symptoms
+        /// Get all drug types
         /// </summary>
         /// <remarks>
         /// Sample request:
@@ -40,68 +38,31 @@ namespace TeleMedicine_BE.Controllers
         ///     }
         ///
         /// </remarks>
-        /// <returns>All symptoms</returns>
-        /// <response code="200">Returns all symptoms</response>
+        /// <returns>All drug types</returns>
+        /// <response code="200">Returns all drug types</response>
         /// <response code="500">Internal server error</response>
         [HttpGet]
         [Produces("application/json")]
-        public ActionResult<Paged<SymptomVM>> GetAllSymptom(
-            [FromQuery(Name = "code")] string symptomCode, 
-            [FromQuery(Name = "name")] string name, 
-            [FromQuery(Name = "limit")] int limit = 20, 
+        public ActionResult<Paged<DrugTypeVM>> GetAllDrugTypes(
+            [FromQuery(Name = "name")] string name,
+            [FromQuery(Name = "limit")] int limit = 20,
             [FromQuery(Name = "offset")] int offset = 1
         )
         {
             try
             {
-                IQueryable<Symptom> symptomsQuery= _symptomService.GetAll();
-                if (!string.IsNullOrWhiteSpace(symptomCode))
-                {
-                    symptomsQuery = symptomsQuery.Where(_ => _.SymptomCode.Contains(symptomCode));
-                }
+                IQueryable<DrugType> drugTypesQuery = _drugTypeService.GetAll();
                 if (!string.IsNullOrWhiteSpace(name))
                 {
-                    symptomsQuery = symptomsQuery.Where(_ => _.Name.Contains(name));
+                    drugTypesQuery = drugTypesQuery.Where(_ => _.Name.Contains(name));
                 }
 
 
-                Paged<SymptomVM> result = _pagingSupport.From(symptomsQuery)
+                Paged<DrugTypeVM> result = _pagingSupport.From(drugTypesQuery)
                    .GetRange(offset, limit, s => s.Id, 1)
-                   .Paginate<SymptomVM>();
+                   .Paginate<DrugTypeVM>();
 
                 return Ok(result);
-            } catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
-        }
-
-        /// <summary>
-        /// Get a specific symptom by symptom id
-        /// </summary>
-        /// <remarks>
-        /// Sample Request:
-        /// 
-        ///     GET {
-        ///         "id" : 1
-        ///     }
-        /// </remarks>
-        /// <returns>Return the symptom with the corresponding id</returns>
-        /// <response code="200">Returns the symptom type with the specified id</response>
-        /// <response code="404">No symptom found with the specified id</response>
-        /// <response code="500">Internal server error</response>
-        [HttpGet("{id}")]
-        [Produces("application/json")]
-        public async Task<ActionResult<SymptomVM>> GetSymptomById([FromRoute] int id)
-        {
-            try
-            {
-                Symptom symptom = await _symptomService.GetByIdAsync(id);
-                if (symptom == null)
-                {
-                    return NotFound();
-                }
-                return Ok(_mapper.Map<SymptomVM>(symptom));
             }
             catch (Exception)
             {
@@ -110,41 +71,66 @@ namespace TeleMedicine_BE.Controllers
         }
 
         /// <summary>
-        /// Create a new symptom
+        /// Get a specific drug type by drug type id
+        /// </summary>
+        /// <remarks>
+        /// Sample Request:
+        /// 
+        ///     GET {
+        ///         "id" : 1
+        ///     }
+        /// </remarks>
+        /// <returns>Return the drug type with the corresponding id</returns>
+        /// <response code="200">Returns the drug type with the specified id</response>
+        /// <response code="404">No drug type found with the specified id</response>
+        /// <response code="500">Internal server error</response>
+        [HttpGet("{id}")]
+        [Produces("application/json")]
+        public async Task<ActionResult<DrugTypeVM>> GetDrugTypeById([FromRoute] int id)
+        {
+            try
+            {
+                DrugType drugType = await _drugTypeService.GetByIdAsync(id);
+                if (drugType == null)
+                {
+                    return NotFound();
+                }
+                return Ok(_mapper.Map<DrugTypeVM>(drugType));
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        /// <summary>
+        /// Create a new drug type
         /// </summary>
         /// <remarks>
         /// Sample request:
         ///
         ///     POST 
         ///     {
-        ///         "symptomCode": "SS12",    
-        ///         "name": "Động kinh",    
-        ///         "description": "Ngất xỉu",    
+        ///         "name": "Thuốc hỗ trợ hóa trị",    
+        ///         "description": "Các loại thuốc này thường có nồng độ Radium cao",    
         ///     }
         ///
         /// </remarks>
-        /// <response code="201">Created new symptoms</response>
+        /// <response code="201">Created new drug type</response>
         /// <response code="400">Field is not matched or duplicated</response>
         /// <response code="500">Failed to save request</response>
         [HttpPost]
         [Produces("application/json")]
-        public async Task<ActionResult<SymptomVM>> CreateSymptom([FromBody] SymptomCM model)
+        public async Task<ActionResult<DrugTypeVM>> CreateDrugType([FromBody] DrugTypeCM model)
         {
-            Symptom symptom = _mapper.Map<Symptom>(model);
-            if (_symptomService.IsDuplicated(model.SymptomCode))
-            {
-                return BadRequest(new
-                {
-                    message = "duplicate"
-                });
-            }
+            DrugType drugType = _mapper.Map<DrugType>(model);
             try
             {
-                Symptom createdSymptom = await _symptomService.AddAsync(symptom);
+                DrugType createdDrugType = await _drugTypeService.AddAsync(drugType);
 
-                if(createdSymptom != null)
+                if (createdDrugType != null)
                 {
-                    return CreatedAtAction("GetSymptomById", new { id = createdSymptom.Id }, _mapper.Map<SymptomVM>(createdSymptom));
+                    return CreatedAtAction("GetDrugTypeById", new { id = createdDrugType.Id }, _mapper.Map<DrugTypeVM>(createdDrugType));
                 }
                 return BadRequest();
             }
@@ -154,9 +140,8 @@ namespace TeleMedicine_BE.Controllers
             }
         }
 
-
         /// <summary>
-        /// Delete symptom
+        /// Delete drug type
         /// </summary>
         /// <remarks>
         /// Sample request:
@@ -172,21 +157,22 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="500">Internal server error</response>
         [HttpDelete("{id}")]
         [Produces("application/json")]
-        public async Task<ActionResult> DeleteSymptom([FromRoute] int id)
+        public async Task<ActionResult> DeleteDrugType([FromRoute] int id)
         {
-            Symptom currentSymptom = await _symptomService.GetByIdAsync(id);
-            if (currentSymptom == null)
+            DrugType currentDrugType = await _drugTypeService.GetByIdAsync(id);
+            if (currentDrugType == null)
             {
                 return NotFound();
             }
 
             try
             {
-                bool isDeleted = await _symptomService.DeleteAsync(currentSymptom);
+                bool isDeleted = await _drugTypeService.DeleteAsync(currentDrugType);
                 if (isDeleted)
                 {
-                    return Ok(new { 
-                        message="success"
+                    return Ok(new
+                    {
+                        message = "success"
                     });
                 }
                 return BadRequest();
@@ -198,7 +184,7 @@ namespace TeleMedicine_BE.Controllers
         }
 
         /// <summary>
-        /// Update a symptom
+        /// Update a drug type
         /// </summary>
         /// <remarks>
         /// Sample request:
@@ -206,9 +192,8 @@ namespace TeleMedicine_BE.Controllers
         ///     PUT 
         ///     {
         ///         "id": 11,
-        ///         "symptomCode": "SS12",    
-        ///         "name": "Động kinh",    
-        ///         "description": "Ngất xỉu",    
+        ///         "name": "Thuốc gây tê",    
+        ///         "description": "Các thuốc này chứa thành phần morphin cao",    
         ///     }
         ///
         /// </remarks>
@@ -218,29 +203,21 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="500">Failed to save request</response>
         [HttpPut]
         [Produces("application/json")]
-        public async Task<ActionResult<SymptomVM>> UpdateSymptom([FromBody] SymptomUM model)
+        public async Task<ActionResult<DrugTypeVM>> UpdateDrugType([FromBody] DrugTypeUM model)
         {
-            Symptom currentSymptom = await _symptomService.GetByIdAsync(model.Id);
-            if(currentSymptom == null)
+            DrugType currentDrugType = await _drugTypeService.GetByIdAsync(model.Id);
+            if (currentDrugType == null)
             {
                 return NotFound();
             }
-            if (!model.SymptomCode.ToUpper().Equals(currentSymptom.SymptomCode.ToUpper()) && _symptomService.IsDuplicated(model.SymptomCode))
-            {
-                return BadRequest(new
-                {
-                    message = "Symptom Code is duplicated"
-                });
-            }
             try
             {
-                currentSymptom.Description = model.Description;
-                currentSymptom.Name = model.Name;
-                currentSymptom.SymptomCode = model.SymptomCode;
-                bool isSuccess = await _symptomService.UpdateAsync(currentSymptom);
+                currentDrugType.Description = model.Description;
+                currentDrugType.Name = model.Name;
+                bool isSuccess = await _drugTypeService.UpdateAsync(currentDrugType);
                 if (isSuccess)
                 {
-                    return Ok(_mapper.Map<SymptomVM>(currentSymptom));
+                    return Ok(_mapper.Map<DrugTypeVM>(currentDrugType));
                 }
                 return BadRequest();
             }
