@@ -35,9 +35,6 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="500">Internal server error</response>
         [HttpGet]
         [Produces("application/json")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public ActionResult<IEnumerable<HospitalVM>> GetAllHospital(
             [FromQuery(Name = "hospital-code")] String hospitalCode,
             [FromQuery(Name = "name")] String name,
@@ -75,9 +72,6 @@ namespace TeleMedicine_BE.Controllers
         [HttpGet]
         [Route("{id}")]
         [Produces("application/json")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<HospitalVM>> GetHospitalById(int id)
         {
             try
@@ -107,9 +101,6 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="500">Failed to save request</response>
         [HttpPost]
         [Produces("application/json")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<HospitalCM>> CreateHospital([FromBody] HospitalCM model)
         {
             Hospital hospital = _mapper.Map<Hospital>(model);
@@ -147,11 +138,7 @@ namespace TeleMedicine_BE.Controllers
         [HttpPut]
         [Route("{id}")]
         [Produces("application/json")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> PutHospital(int id, [FromBody] HospitalUM model)
+        public async Task<ActionResult<HospitalVM>> PutHospital(int id, [FromBody] HospitalUM model)
         {
             Hospital currentHospital = await _hospitalService.GetByIdAsync(id);
             if (currentHospital == null)
@@ -197,9 +184,6 @@ namespace TeleMedicine_BE.Controllers
         [HttpDelete]
         [Route("{id}")]
         [Produces("application/json")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> DeleteById(int id)
         {
             Hospital currentHospital = await _hospitalService.GetByIdAsync(id);

@@ -12,31 +12,31 @@ using TeleMedicine_BE.ViewModels;
 
 namespace TeleMedicine_BE.Controllers
 {
-    [Route("api/v1/roles")]
+    [Route("api/v1/certifications")]
     [ApiController]
-    public class RoleController : Controller
+    public class CertificationController : Controller
     {
-        private readonly IRoleService _roleService;
-        private readonly IMapper _mapper;
-        private readonly IPagingSupport<Role> _pagingSupport;
+        private readonly ICertificationService _certificationService;
+        private IMapper _mapper;
+        private IPagingSupport<Certification> _pagingSupport;
 
-        public RoleController(IRoleService roleService, IMapper mapper, IPagingSupport<Role> pagingSupport)
+        public CertificationController(ICertificationService certificationService, IMapper mapper, IPagingSupport<Certification> pagingSupport)
         {
-            _roleService = roleService;
+            _certificationService = certificationService;
             _mapper = mapper;
             _pagingSupport = pagingSupport;
         }
 
         /// <summary>
-        /// Get all roles
+        /// Get all certifications
         /// </summary>
-        /// <returns>All roles</returns>
-        /// <response code="200">Returns all roles</response>
-        /// <response code="404">Not found roles</response>
+        /// <returns>All certifications</returns>
+        /// <response code="200">Returns all certifications</response>
+        /// <response code="404">Not found certifications</response>
         /// <response code="500">Internal server error</response>
         [HttpGet]
         [Produces("application/json")]
-        public ActionResult<IEnumerable<RoleVM>> GetAllRole(
+        public ActionResult<IEnumerable<CertificationVM>> GetAllCertifications(
             [FromQuery(Name = "name")] String name,
             int offset = 1,
             int limit = 20
@@ -44,12 +44,12 @@ namespace TeleMedicine_BE.Controllers
         {
             try
             {
-                IQueryable<Role> roleList = _roleService.GetAll();
+                IQueryable<Certification> certificationList = _certificationService.GetAll();
                 if (!String.IsNullOrEmpty(name))
                 {
-                    roleList = roleList.Where(s => s.Name.ToUpper().Contains(name.Trim().ToUpper()));
+                    certificationList = certificationList.Where(s => s.Name.ToUpper().Contains(name.Trim().ToUpper()));
                 }
-                Paged<RoleVM> paged = _pagingSupport.From(roleList).GetRange(offset, limit, s => s.Id, 1).Paginate<RoleVM>();
+                Paged<CertificationVM> paged = _pagingSupport.From(certificationList).GetRange(offset, limit, s => s.Id, 1).Paginate<CertificationVM>();
                 return Ok(paged);
             }
             catch (Exception)
@@ -59,25 +59,25 @@ namespace TeleMedicine_BE.Controllers
         }
 
         /// <summary>
-        /// Get role by id
+        /// Get certification by id
         /// </summary>
-        /// <returns>Return the role with the corresponding id</returns>
-        /// <response code="200">Returns the role type with the specified id</response>
-        /// <response code="404">No role found with the specified id</response>
+        /// <returns>Return the certification with the corresponding id</returns>
+        /// <response code="200">Returns the certification type with the specified id</response>
+        /// <response code="404">No certification found with the specified id</response>
         /// <response code="500">Internal server error</response>
         [HttpGet]
         [Route("{id}")]
         [Produces("application/json")]
-        public async Task<ActionResult<RoleVM>> GetRoleById(int id)
+        public async Task<ActionResult<CertificationVM>> GetCertificationById(int id)
         {
             try
             {
-                Role currentRole = await _roleService.GetByIdAsync(id);
-                if (currentRole != null)
+                Certification currentCertification = await _certificationService.GetByIdAsync(id);
+                if (currentCertification != null)
                 {
-                    return Ok(_mapper.Map<RoleVM>(currentRole));
+                    return Ok(_mapper.Map<CertificationVM>(currentCertification));
                 }
-                return NotFound("Can not found role by id: " + id);
+                return NotFound("Can not found certification by id: " + id);
             }
             catch (Exception)
             {
@@ -86,31 +86,22 @@ namespace TeleMedicine_BE.Controllers
         }
 
         /// <summary>
-        /// Create a new role
+        /// Create a new certification
         /// </summary>
-        /// <response code="200">Created new role successfull</response>
+        /// <response code="200">Created new certification successfull</response>
         /// <response code="400">Field is not matched or duplicated</response>
         /// <response code="500">Failed to save request</response>
         [HttpPost]
         [Produces("application/json")]
-        public async Task<ActionResult<RoleVM>> CreateRole([FromBody] RoleCM model)
+        public async Task<ActionResult<CertificationCM>> CreateCertification([FromBody] CertificationCM model)
         {
-            Role role = _mapper.Map<Role>(model);
+            Certification certification = _mapper.Map<Certification>(model);
             try
             {
-                bool isDuplicated = _roleService.IsDuplicated(model.Name);
-                if(isDuplicated)
+                Certification certificationCreated = await _certificationService.AddAsync(certification);
+                if (certificationCreated != null)
                 {
-                    return BadRequest(new
-                    {
-                        message = "Role Name is duplicated"
-                    });
-                }
-                role.Name = role.Name.ToUpper();
-                Role roleCreated = await _roleService.AddAsync(role);
-                if (roleCreated != null)
-                {
-                    return CreatedAtAction("GetRoleById", new { id = roleCreated.Id }, _mapper.Map<RoleVM>(roleCreated));
+                    return CreatedAtAction("GetCertificationById", new { id = certificationCreated.Id }, _mapper.Map<CertificationVM>(certificationCreated));
                 }
                 return BadRequest();
             }
@@ -121,40 +112,33 @@ namespace TeleMedicine_BE.Controllers
         }
 
         /// <summary>
-        /// Update a role
+        /// Update a certification
         /// </summary>
         /// <response code="200">Success</response>
         /// <response code="404">Not Found</response>
         /// <response code="400">Field is not matched</response>
         /// <response code="500">Failed to save request</response>
         [HttpPut]
-        [Route("{id}")]
         [Produces("application/json")]
-        public async Task<ActionResult<RoleVM>> PutRole(int id, [FromBody] RoleUM model)
+        public async Task<ActionResult<CertificationVM>> PutCertification([FromBody] CertificationUM model)
         {
-            Role currentRole = await _roleService.GetByIdAsync(id);
-            if (currentRole == null)
+            Certification currentCertification = await _certificationService.GetByIdAsync(model.Id);
+            if (currentCertification == null)
             {
                 return NotFound();
             }
-            if (currentRole.Id != model.Id)
+            if (currentCertification.Id != model.Id)
             {
                 return BadRequest();
             }
-            if(!currentRole.Name.ToUpper().Equals(model.Name.ToUpper()) && _roleService.IsDuplicated(model.Name))
-            {
-                return BadRequest(new
-                {
-                    message = "Role Name is duplicated!"
-                });
-            }
             try
             {
-                currentRole.Name = model.Name.ToUpper();
-                bool isUpdated = await _roleService.UpdateAsync(currentRole);
+                currentCertification.Name = model.Name;
+                currentCertification.Description = model.Description;
+                bool isUpdated = await _certificationService.UpdateAsync(currentCertification);
                 if (isUpdated)
                 {
-                    return Ok(_mapper.Map<RoleVM>(currentRole));
+                    return Ok(_mapper.Map<CertificationVM>(currentCertification));
                 }
                 return BadRequest();
             }
@@ -165,7 +149,7 @@ namespace TeleMedicine_BE.Controllers
         }
 
         /// <summary>
-        /// Delete role By Id
+        /// Delete certification By Id
         /// </summary>
         /// <response code="200">Success</response>
         /// <response code="400">Bad Request</response>
@@ -175,17 +159,17 @@ namespace TeleMedicine_BE.Controllers
         [Produces("application/json")]
         public async Task<ActionResult> DeleteById(int id)
         {
-            Role currentRole = await _roleService.GetByIdAsync(id);
-            if (currentRole == null)
+            Certification currentCertification = await _certificationService.GetByIdAsync(id);
+            if (currentCertification == null)
             {
                 return BadRequest(new
                 {
-                    message = "Can not found role by id: " + id
+                    message = "Can not found certification by id: " + id
                 });
             }
             try
             {
-                bool isDeleted = await _roleService.DeleteAsync(currentRole);
+                bool isDeleted = await _certificationService.DeleteAsync(currentCertification);
                 if (isDeleted)
                 {
                     return Ok(new
