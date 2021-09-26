@@ -57,11 +57,11 @@ namespace TeleMedicine_BE.Controllers
                 IQueryable<Symptom> symptomsQuery= _symptomService.GetAll();
                 if (!string.IsNullOrWhiteSpace(symptomCode))
                 {
-                    symptomsQuery = symptomsQuery.Where(_ => _.SymptomCode.ToUpper().Contains(symptomCode.ToUpper()));
+                    symptomsQuery = symptomsQuery.Where(_ => _.SymptomCode.ToUpper().Contains(symptomCode.Trim().ToUpper()));
                 }
                 if (!string.IsNullOrWhiteSpace(name))
                 {
-                    symptomsQuery = symptomsQuery.Where(_ => _.Name.ToUpper().Contains(name.ToUpper()));
+                    symptomsQuery = symptomsQuery.Where(_ => _.Name.ToUpper().Contains(name.Trim().ToUpper()));
                 }
 
 

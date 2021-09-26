@@ -60,19 +60,19 @@ namespace TeleMedicine_BE.Controllers
                 IQueryable<Drug> drugsQuery = _drugService.GetAll(_ => _.DrugType);
                 if (!string.IsNullOrWhiteSpace(name))
                 {
-                    drugsQuery = drugsQuery.Where(_ => _.Name.ToUpper().Contains(name.ToUpper()));
+                    drugsQuery = drugsQuery.Where(_ => _.Name.ToUpper().Contains(name.Trim().ToUpper()));
                 }
                 if (!string.IsNullOrWhiteSpace(producer))
                 {
-                    drugsQuery = drugsQuery.Where(_ => _.Producer.ToUpper().Contains(producer.ToUpper()));
+                    drugsQuery = drugsQuery.Where(_ => _.Producer.ToUpper().Contains(producer.Trim().ToUpper()));
                 }
                 if (!string.IsNullOrWhiteSpace(drugOrigin))
                 {
-                    drugsQuery = drugsQuery.Where(_ => _.DrugOrigin.ToUpper().Contains(drugOrigin.ToUpper()));
+                    drugsQuery = drugsQuery.Where(_ => _.DrugOrigin.ToUpper().Contains(drugOrigin.Trim().ToUpper()));
                 }
                 if (!string.IsNullOrWhiteSpace(drugForm))
                 {
-                    drugsQuery = drugsQuery.Where(_ => _.DrugForm.ToUpper().Contains(drugForm.ToUpper()));
+                    drugsQuery = drugsQuery.Where(_ => _.DrugForm.ToUpper().Contains(drugForm.Trim().ToUpper()));
                 }
                 if(drugTypeIds != null && drugTypeIds.Length > 0)
                 {
