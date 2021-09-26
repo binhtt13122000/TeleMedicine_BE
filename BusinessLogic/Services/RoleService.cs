@@ -11,6 +11,7 @@ namespace BusinessLogic.Services
 {
     public interface IRoleService : IService<Role, int>
     {
+        bool IsDuplicated(String name);
     }
     public class RoleService : IRoleService
     {
@@ -38,6 +39,11 @@ namespace BusinessLogic.Services
         public async Task<Role> GetByIdAsync(int id)
         {
             return await _roleRepository.GetByIdAsync(id);
+        }
+
+        public bool IsDuplicated(string name)
+        {
+            return _roleRepository.IsDuplicated(name);
         }
 
         public async Task<bool> UpdateAsync(Role entity)
