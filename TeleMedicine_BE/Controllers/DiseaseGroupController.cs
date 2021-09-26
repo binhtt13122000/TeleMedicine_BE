@@ -36,9 +36,6 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="500">Internal server error</response>
         [HttpGet]
         [Produces("application/json")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public ActionResult<IEnumerable<DiseaseGroupVM>> GetAllDiseaseGroups(
             [FromQuery(Name = "group-name")] String groupName,
             int offset = 1,
@@ -70,9 +67,6 @@ namespace TeleMedicine_BE.Controllers
         [HttpGet]
         [Route("{id}")]
         [Produces("application/json")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<DiseaseGroupVM>> GetDiseaseGroupById(int id)
         {
             try
@@ -97,9 +91,6 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="500">Failed to save request</response>
         [HttpPost]
         [Produces("application/json")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<DiseaseGroupCM>> CreateDiseaseGroup([FromBody] DiseaseGroupCM model)
         {
             DiseaseGroup diseaseGroup = _mapper.Map<DiseaseGroup>(model);
@@ -127,11 +118,7 @@ namespace TeleMedicine_BE.Controllers
         [HttpPut]
         [Route("{id}")]
         [Produces("application/json")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> PutDiseaseGroup(int id, [FromBody] DiseaseGroupUM model)
+        public async Task<ActionResult<DiseaseGroupVM>> PutDiseaseGroup(int id, [FromBody] DiseaseGroupUM model)
         {
             DiseaseGroup currentDiseaseGroup= await _diseaseGroupService.GetByIdAsync(id);
             if (currentDiseaseGroup == null)
@@ -167,9 +154,6 @@ namespace TeleMedicine_BE.Controllers
         [HttpDelete]
         [Route("{id}")]
         [Produces("application/json")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> DeleteById(int id)
         {
             DiseaseGroup currentDiseaseGroup = await _diseaseGroupService.GetByIdAsync(id);

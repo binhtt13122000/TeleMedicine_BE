@@ -38,9 +38,6 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="500">Internal server error</response>
         [HttpGet]
         [Produces("application/json")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public ActionResult<IEnumerable<NotificationVM>> GetAllRole(
             [FromQuery(Name = "content")] String content,
             [FromQuery(Name = "user-id")] int[] userId,
@@ -97,9 +94,6 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="500">Internal server error</response>
         [HttpGet("{id}")]
         [Produces("application/json")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public ActionResult<NotificationVM> GetNotificationyId([FromRoute] int id)
         {
             try
