@@ -50,7 +50,7 @@ namespace TeleMedicine_BE.Controllers
                 IQueryable<Hospital> hospitalList = _hospitalService.GetAll();
                 if (!String.IsNullOrEmpty(hospitalCode))
                 {
-                    hospitalList = hospitalList.Where(s => s.HospitalCode.ToUpper().Contains(hospitalCode.ToUpper()));
+                    hospitalList = hospitalList.Where(s => s.HospitalCode.ToUpper().Contains(hospitalCode.Trim().ToUpper()));
                 }
                 if (!String.IsNullOrEmpty(name))
                 {
@@ -123,7 +123,7 @@ namespace TeleMedicine_BE.Controllers
             }
             try
             {
-                hospital.HospitalCode = hospital.HospitalCode.ToUpper();
+                hospital.HospitalCode = hospital.HospitalCode.Trim().ToUpper();
                 Hospital hospitalCreated = await _hospitalService.AddAsync(hospital);
                 if(hospitalCreated != null)
                 {
@@ -162,7 +162,7 @@ namespace TeleMedicine_BE.Controllers
             {
                 return BadRequest();
             }
-            if(!model.HospitalCode.ToUpper().Equals(currentHospital.HospitalCode.ToUpper()) && _hospitalService.IsDuplicated(model.HospitalCode))
+            if(!model.HospitalCode.Trim().ToUpper().Equals(currentHospital.HospitalCode.ToUpper()) && _hospitalService.IsDuplicated(model.HospitalCode.Trim().ToUpper()))
             {
                 return BadRequest(new
                 {
@@ -171,10 +171,10 @@ namespace TeleMedicine_BE.Controllers
             }
             try
             {
-                currentHospital.Name = model.Name;
-                currentHospital.Address = model.Address;
-                currentHospital.Description = model.Description;
-                currentHospital.HospitalCode = model.HospitalCode;
+                currentHospital.Name = model.Name.Trim();
+                currentHospital.Address = model.Address.Trim();
+                currentHospital.Description = model.Description.Trim();
+                currentHospital.HospitalCode = model.HospitalCode.Trim().ToUpper();
                 bool isUpdated = await _hospitalService.UpdateAsync(currentHospital);
                 if(isUpdated)
                 {
