@@ -12,6 +12,8 @@ namespace Infrastructure.Models
         public int UserId { get; set; }
         public DateTime? CreatedDate { get; set; }
 
+        public bool? IsSeen { get; set; }
+
         public virtual Account User { get; set; }
     }
 }
