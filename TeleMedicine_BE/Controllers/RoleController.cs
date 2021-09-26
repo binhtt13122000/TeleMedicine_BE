@@ -50,7 +50,7 @@ namespace TeleMedicine_BE.Controllers
                 IQueryable<Role> roleList = _roleService.GetAll();
                 if (!String.IsNullOrEmpty(name))
                 {
-                    roleList = roleList.Where(s => s.Name.Contains(name.Trim()));
+                    roleList = roleList.Where(s => s.Name.ToUpper().Contains(name.Trim().ToUpper()));
                 }
                 Paged<RoleVM> paged = _pagingSupport.From(roleList).GetRange(offset, limit, s => s.Id, 1).Paginate<RoleVM>();
                 return Ok(paged);
