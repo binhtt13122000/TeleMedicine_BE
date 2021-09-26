@@ -11,12 +11,19 @@ namespace Infrastructure.Repositories
 {
     public interface IRoleRepository : IRepository<Role, int>
     {
+        bool IsDuplicated(String name);
     }
     public class RoleRepository: Repository<Role, int>, IRoleRepository
     {
         public RoleRepository(TeleMedicineContext dbContext) : base(dbContext)
         {
 
+        }
+
+        public bool IsDuplicated(string name)
+        {
+            Role checkRoleExisted = GetAll().Where(s => name.Trim().ToUpper().Equals(s.Name.ToUpper())).FirstOrDefault();
+            return checkRoleExisted != null;
         }
     }
 }

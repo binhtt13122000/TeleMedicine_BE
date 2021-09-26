@@ -42,6 +42,13 @@ namespace TeleMedicine_BE.Utils
             CreateMap<MajorCM, Major>();
             CreateMap<MajorUM, Major>();
             #endregion
+
+            #region AutoMapper RoleViewModel
+            CreateMap<Role, RoleVM>();
+            CreateMap<RoleVM, Role>();
+            CreateMap<RoleCM, Role>();
+            CreateMap<RoleUM, Role>();
+            #endregion
         }
     }
 }
