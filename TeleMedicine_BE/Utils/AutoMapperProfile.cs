@@ -71,6 +71,20 @@ namespace TeleMedicine_BE.Utils
             CreateMap<DiseaseCM, Disease>();
             CreateMap<DiseaseUM, Disease>();
             #endregion
+
+            #region AutoMapper TimeFrameViewModel
+            CreateMap<TimeFrame, TimeFrameVM>();
+            CreateMap<TimeFrameVM, TimeFrame>();
+            CreateMap<TimeFrameCM, TimeFrame>();
+            CreateMap<TimeFrameUM, TimeFrame>();
+            #endregion
+
+            #region AutoMapper NotificationViewModel
+            CreateMap<Notification, NotificationVM>();
+            CreateMap<NotificationVM, Notification>();
+            CreateMap<NotificationCM, Notification>();
+            CreateMap<NotificationUM, Notification>();
+            #endregion
         }
     }
 }
