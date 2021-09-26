@@ -57,7 +57,7 @@ namespace TeleMedicine_BE.Controllers
                 IQueryable<Symptom> symptomsQuery= _symptomService.GetAll();
                 if (!string.IsNullOrWhiteSpace(symptomCode))
                 {
-                    symptomsQuery = symptomsQuery.Where(_ => _.SymptomCode.ToUpper().Contains(symptomCode.ToUpper()));
+                    symptomsQuery = symptomsQuery.Where(_ => _.SymptomCode.ToUpper().Contains(symptomCode.Trim().ToUpper()));
                 }
                 if (!string.IsNullOrWhiteSpace(name))
                 {
@@ -140,6 +140,7 @@ namespace TeleMedicine_BE.Controllers
             }
             try
             {
+                symptom.SymptomCode = symptom.SymptomCode.Trim().ToUpper();
                 Symptom createdSymptom = await _symptomService.AddAsync(symptom);
 
                 if(createdSymptom != null)
