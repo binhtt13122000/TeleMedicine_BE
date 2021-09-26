@@ -57,6 +57,20 @@ namespace TeleMedicine_BE.Utils
             CreateMap<RoleCM, Role>();
             CreateMap<RoleUM, Role>();
             #endregion
+
+            #region AutoMapper DiseaseGroupViewModel
+            CreateMap<DiseaseGroup, DiseaseGroupVM>();
+            CreateMap<DiseaseGroupVM, DiseaseGroup>();
+            CreateMap<DiseaseGroupCM, DiseaseGroup>();
+            CreateMap<DiseaseGroupUM, DiseaseGroup>();
+            #endregion
+
+            #region AutoMapper DiseaseViewModel
+            CreateMap<Disease, DiseaseVM>();
+            CreateMap<DiseaseVM, Disease>();
+            CreateMap<DiseaseCM, Disease>();
+            CreateMap<DiseaseUM, Disease>();
+            #endregion
         }
     }
 }
