@@ -36,9 +36,6 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="500">Internal server error</response>
         [HttpGet]
         [Produces("application/json")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public ActionResult<IEnumerable<MajorVM>> GetAllMajor(
             [FromQuery(Name = "name")] String name,
             int offset = 1,
@@ -70,9 +67,6 @@ namespace TeleMedicine_BE.Controllers
         [HttpGet]
         [Route("{id}")]
         [Produces("application/json")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<MajorVM>> GetMajorById(int id)
         {
             try
@@ -97,9 +91,6 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="500">Failed to save request</response>
         [HttpPost]
         [Produces("application/json")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<MajorCM>> CreateMajor([FromBody] MajorCM model)
         {
             Major major = _mapper.Map<Major>(model);
@@ -127,11 +118,7 @@ namespace TeleMedicine_BE.Controllers
         [HttpPut]
         [Route("{id}")]
         [Produces("application/json")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> PutMajor(int id, [FromBody] MajorUM model)
+        public async Task<ActionResult<MajorVM>> PutMajor(int id, [FromBody] MajorUM model)
         {
             Major currentMajor = await _majorService.GetByIdAsync(id);
             if(currentMajor == null)
@@ -167,9 +154,6 @@ namespace TeleMedicine_BE.Controllers
         [HttpDelete]
         [Route("{id}")]
         [Produces("application/json")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> DeleteById(int id)
         {
             Major currentMajor = await _majorService.GetByIdAsync(id);

@@ -38,9 +38,6 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="500">Internal server error</response>
         [HttpGet]
         [Produces("application/json")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public ActionResult<IEnumerable<DiseaseVM>> GetDiseases(
             [FromQuery(Name = "disease-code")] String diseaseCode,
             [FromQuery(Name = "name")] String name,
@@ -215,7 +212,7 @@ namespace TeleMedicine_BE.Controllers
         [HttpPut]
         [Route("{id}")]
         [Produces("application/json")]
-        public async Task<ActionResult> UpdateDisease(int id, [FromBody] DiseaseUM model)
+        public async Task<ActionResult<DiseaseVM>> UpdateDisease(int id, [FromBody] DiseaseUM model)
         {
             DiseaseGroup diseaseGroup = await _diseaseGroupService.GetByIdAsync(model.DiseaseGroupId);
             if (diseaseGroup == null)

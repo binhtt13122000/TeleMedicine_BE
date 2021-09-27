@@ -78,6 +78,8 @@ namespace TeleMedicine_BE
             services.AddTransient<IAccountRepository, AccountRepository>();
             services.AddTransient<IAccountService, AccountService>();
 
+            services.AddTransient<ICertificationRepository, CertificationRepository>();
+            services.AddTransient<ICertificationService, CertificationService>();
 
             services.AddControllers().AddNewtonsoftJson(options =>
             {
