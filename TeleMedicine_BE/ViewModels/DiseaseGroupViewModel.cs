@@ -9,14 +9,14 @@ namespace TeleMedicine_BE.ViewModels
     public class DiseaseGroupVM
     {
         public int Id { get; set; }
-        public String GroupName { get; set; }
+        public string GroupName { get; set; }
     }
 
     public class DiseaseGroupCM
     {
         [Required(AllowEmptyStrings = false)]
         [StringLength(128)]
-        public String GroupName { get; set; }
+        public string GroupName { get; set; }
     }
 
     public class DiseaseGroupUM
@@ -26,6 +26,6 @@ namespace TeleMedicine_BE.ViewModels
 
         [Required(AllowEmptyStrings = false)]
         [StringLength(128)]
-        public String GroupName { get; set; }
+        public string GroupName { get; set; }
     }
 }

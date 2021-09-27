@@ -36,6 +36,8 @@ namespace TeleMedicine_BE.Controllers
         [HttpGet]
         [Produces("application/json")]
         public ActionResult<Paged<TimeFrameVM>> GetAllTimeFrames(
+            TimeSpan startTime,
+            TimeSpan endTime,
             int offset = 1,
             int limit = 20
         )
@@ -43,9 +45,18 @@ namespace TeleMedicine_BE.Controllers
             try
             {
                 IQueryable<TimeFrame> timeFrames = _timeFrameService.GetAll();
+                if(startTime.CompareTo(TimeSpan.Zero) != 0)
+                {
+                    timeFrames = timeFrames.Where(s => s.StartTime.CompareTo(startTime) >= 0);
+                }
+                if(endTime.CompareTo(TimeSpan.Zero) != 0)
+                {
+                    timeFrames = timeFrames.Where(s => s.EndTime.CompareTo(endTime) <= 0);
+                }
                 Paged<TimeFrameVM> paged = _pagingSupport.From(timeFrames).GetRange(offset, limit, s => s.Id, 1).Paginate<TimeFrameVM>();
                 return Ok(paged);
-            }catch(Exception e)
+            }
+            catch (Exception e)
             {
                 return BadRequest(e);
             }
@@ -70,7 +81,8 @@ namespace TeleMedicine_BE.Controllers
                     return NotFound("Can not found time frame by id: " + id);
                 }
                 return Ok(_mapper.Map<TimeFrameVM>(timeFrame));
-            }catch(Exception)
+            }
+            catch (Exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
@@ -88,8 +100,9 @@ namespace TeleMedicine_BE.Controllers
         {
             try
             {
-                TimeFrame timeFrameCreated = await _timeFrameService.AddAsync(_mapper.Map<TimeFrame>(model));
-                if(timeFrameCreated != null)
+                TimeFrame timeFrame = _mapper.Map<TimeFrame>(model);
+                TimeFrame timeFrameCreated = await _timeFrameService.AddAsync(timeFrame);
+                if (timeFrameCreated != null)
                 {
                     return CreatedAtAction("GetTimeFrameById", new { id = timeFrameCreated.Id }, _mapper.Map<TimeFrameVM>(timeFrameCreated));
                 }
@@ -97,9 +110,10 @@ namespace TeleMedicine_BE.Controllers
                 {
                     message = "Create time frame failed!"
                 });
-            }catch(Exception)
+            }
+            catch (Exception e)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError);
+                return BadRequest(e);
             }
         }
 
@@ -119,7 +133,8 @@ namespace TeleMedicine_BE.Controllers
             {
                 return BadRequest();
             }
-            TimeFrame currentTimeFrame =  await _timeFrameService.GetByIdAsync(model.Id);
+
+            TimeFrame currentTimeFrame = await _timeFrameService.GetByIdAsync(model.Id);
             try
             {
                 currentTimeFrame.StartTime = model.StartTime;
@@ -156,7 +171,7 @@ namespace TeleMedicine_BE.Controllers
                     return BadRequest();
                 }
                 bool isDeleted = await _timeFrameService.DeleteAsync(currentTimeFrame);
-                if(isDeleted)
+                if (isDeleted)
                 {
                     return Ok(new
                     {
@@ -167,7 +182,8 @@ namespace TeleMedicine_BE.Controllers
                 {
                     message = "Delete time frame failed!"
                 });
-            }catch(Exception)
+            }
+            catch (Exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }

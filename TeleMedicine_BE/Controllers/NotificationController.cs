@@ -39,7 +39,7 @@ namespace TeleMedicine_BE.Controllers
         [HttpGet]
         [Produces("application/json")]
         public ActionResult<IEnumerable<NotificationVM>> GetAllRole(
-            [FromQuery(Name = "content")] String content,
+            [FromQuery(Name = "content")] string content,
             [FromQuery(Name = "user-id")] int[] userId,
             [FromQuery(Name = "start-date")] DateTime? startDate,
             [FromQuery(Name = "end-date")] DateTime? endDate,

@@ -10,21 +10,17 @@ namespace TeleMedicine_BE.ViewModels
     {
         public int Id { get; set; }
 
-        public DateTime StartTime { get; set; }
-        public DateTime EndTime { get; set; }
+        public TimeSpan StartTime { get; set; }
+        public TimeSpan EndTime { get; set; }
     }
 
     public class TimeFrameCM
     {
         [Required]
-        [DataType(DataType.DateTime)]
-        [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}", ApplyFormatInEditMode = true)]
-        public DateTime? StartTime { get; set; }
+        public TimeSpan StartTime { get; set; }
 
         [Required]
-        [DataType(DataType.DateTime)]
-        [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}", ApplyFormatInEditMode = true)]
-        public DateTime? EndTime { get; set; }
+        public TimeSpan EndTime { get; set; }
     }
 
     public class TimeFrameUM
@@ -33,13 +29,9 @@ namespace TeleMedicine_BE.ViewModels
         public int Id;
 
         [Required]
-        [DataType(DataType.DateTime)]
-        [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}", ApplyFormatInEditMode = true)]
-        public DateTime? StartTime { get; set; }
+        public TimeSpan StartTime { get; set; }
 
         [Required]
-        [DataType(DataType.DateTime)]
-        [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}", ApplyFormatInEditMode = true)]
-        public DateTime? EndTime { get; set; }
+        public TimeSpan EndTime { get; set; }
     }
 }

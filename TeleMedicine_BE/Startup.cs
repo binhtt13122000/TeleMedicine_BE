@@ -20,6 +20,7 @@ using System.Threading.Tasks;
 using TeleMedicine_BE.Utils;
 using System.Reflection;
 using System.IO;
+using Microsoft.OpenApi.Any;
 
 namespace TeleMedicine_BE
 {
@@ -86,9 +87,16 @@ namespace TeleMedicine_BE
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             });
 
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Telemedicine", Version = "v1" });
+                c.MapType<TimeSpan>(() => new OpenApiSchema
+                {
+                    Type = "string",
+                    Example = new OpenApiString("00:00:00")
+                });
+
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Name = "Authorization",
@@ -144,6 +152,6 @@ namespace TeleMedicine_BE
             {
                 endpoints.MapControllers();
             });
-        }
+        }   
     }
 }

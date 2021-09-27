@@ -36,8 +36,8 @@ namespace TeleMedicine_BE.Controllers
         [HttpGet]
         [Produces("application/json")]
         public ActionResult<IEnumerable<HospitalVM>> GetAllHospital(
-            [FromQuery(Name = "hospital-code")] String hospitalCode,
-            [FromQuery(Name = "name")] String name,
+            [FromQuery(Name = "hospital-code")] string hospitalCode,
+            [FromQuery(Name = "name")] string name,
             int limit = 20,
             int offset = 1
         )
