@@ -37,7 +37,7 @@ namespace TeleMedicine_BE.Controllers
         [HttpGet]
         [Produces("application/json")]
         public ActionResult<IEnumerable<MajorVM>> GetAllMajor(
-            [FromQuery(Name = "name")] String name,
+            [FromQuery(Name = "name")] string name,
             int offset = 1,
             int limit = 20
         )

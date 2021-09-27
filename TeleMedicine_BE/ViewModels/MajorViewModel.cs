@@ -9,19 +9,19 @@ namespace TeleMedicine_BE.ViewModels
     public class MajorVM
     {
         public int Id { get; set; }
-        public String Name { get; set; }
+        public string Name { get; set; }
         
-        public String Description { get; set; }
+        public string Description { get; set; }
     }
     
     public class MajorCM
     {
         [Required(AllowEmptyStrings = false)]
         [StringLength(128)]
-        public String Name { get; set; }
+        public string Name { get; set; }
 
         [StringLength(256)]
-        public String Description { get; set; }
+        public string Description { get; set; }
     }
 
     public class MajorUM
@@ -31,9 +31,9 @@ namespace TeleMedicine_BE.ViewModels
 
         [Required(AllowEmptyStrings = false)]
         [StringLength(128)]
-        public String Name { get; set; }
+        public string Name { get; set; }
 
         [StringLength(256)]
-        public String Description { get; set; }
+        public string Description { get; set; }
     }
 }

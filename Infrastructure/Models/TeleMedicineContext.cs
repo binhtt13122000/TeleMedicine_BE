@@ -398,9 +398,9 @@ namespace Infrastructure.Models
             {
                 entity.ToTable("TimeFrame");
 
-                entity.Property(e => e.EndTime).HasColumnType("time with time zone");
+                entity.Property(e => e.EndTime).HasColumnType("time without time zone");
 
-                entity.Property(e => e.StartTime).HasColumnType("time with time zone");
+                entity.Property(e => e.StartTime).HasColumnType("time without time zone");
             });
 
             OnModelCreatingPartial(modelBuilder);

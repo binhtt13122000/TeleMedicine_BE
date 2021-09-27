@@ -9,7 +9,7 @@ namespace TeleMedicine_BE.ViewModels
     public class RoleVM
     {
         public int Id { get; set; }
-        public String Name { get; set; }
+        public string Name { get; set; }
     }
 
     public class RoleUM
@@ -19,13 +19,13 @@ namespace TeleMedicine_BE.ViewModels
 
         [Required(AllowEmptyStrings = false)]
         [StringLength(128)]
-        public String Name { get; set; }
+        public string Name { get; set; }
     }
 
     public class RoleCM
     {
         [Required(AllowEmptyStrings = false)]
         [StringLength(128)]
-        public String Name { get; set; }
+        public string Name { get; set; }
     }
 }
