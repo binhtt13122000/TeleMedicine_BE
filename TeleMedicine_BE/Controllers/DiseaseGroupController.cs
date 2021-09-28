@@ -37,7 +37,7 @@ namespace TeleMedicine_BE.Controllers
         [HttpGet]
         [Produces("application/json")]
         public ActionResult<IEnumerable<DiseaseGroupVM>> GetAllDiseaseGroups(
-            [FromQuery(Name = "group-name")] String groupName,
+            [FromQuery(Name = "group-name")] string groupName,
             int offset = 1,
             int limit = 20
             )

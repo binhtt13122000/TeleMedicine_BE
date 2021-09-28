@@ -201,9 +201,14 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="400">Field is not matched</response>
         /// <response code="500">Failed to save request</response>
         [HttpPut]
+        [Route("{id}")]
         [Produces("application/json")]
-        public async Task<ActionResult<DrugTypeVM>> UpdateDrugType([FromBody] DrugTypeUM model)
+        public async Task<ActionResult<DrugTypeVM>> UpdateDrugType(int id, [FromBody] DrugTypeUM model)
         {
+            if(id != model.Id)
+            {
+                return BadRequest();
+            }
             DrugType currentDrugType = await _drugTypeService.GetByIdAsync(model.Id);
             if (currentDrugType == null)
             {

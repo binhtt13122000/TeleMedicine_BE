@@ -37,7 +37,7 @@ namespace TeleMedicine_BE.Controllers
         [HttpGet]
         [Produces("application/json")]
         public ActionResult<IEnumerable<CertificationVM>> GetAllCertifications(
-            [FromQuery(Name = "name")] String name,
+            [FromQuery(Name = "name")] string name,
             int offset = 1,
             int limit = 20
         )
@@ -119,10 +119,15 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="400">Field is not matched</response>
         /// <response code="500">Failed to save request</response>
         [HttpPut]
+        [Route("{id}")]
         [Produces("application/json")]
-        public async Task<ActionResult<CertificationVM>> PutCertification([FromBody] CertificationUM model)
+        public async Task<ActionResult<CertificationVM>> PutCertification(int id,[FromBody] CertificationUM model)
         {
             Certification currentCertification = await _certificationService.GetByIdAsync(model.Id);
+            if(id != model.Id)
+            {
+                return BadRequest();
+            }
             if (currentCertification == null)
             {
                 return NotFound();

@@ -10,28 +10,28 @@ namespace TeleMedicine_BE.ViewModels
     public class HospitalVM
     {
         public int Id { get; set; }
-        public String HospitalCode { get; set; }
-        public String Name { get; set; }
+        public string HospitalCode { get; set; }
+        public string Name { get; set; }
 
-        public String Address { get; set; }
-        public String Description { get; set; }
+        public string Address { get; set; }
+        public string Description { get; set; }
     }
 
     public class HospitalCM
     {
         [Required(AllowEmptyStrings = false)]
         [StringLength(128)]
-        public String HospitalCode { get; set; }
+        public string HospitalCode { get; set; }
 
         [Required(AllowEmptyStrings = false)]
         [StringLength(128)]
-        public String Name { get; set; }
+        public string Name { get; set; }
 
         [Required(AllowEmptyStrings = false)]
-        public String Address { get; set; }
+        public string Address { get; set; }
 
         [StringLength(256)]
-        public String Description { get; set; }
+        public string Description { get; set; }
     }
 
     public class HospitalUM
@@ -41,27 +41,27 @@ namespace TeleMedicine_BE.ViewModels
 
         [Required(AllowEmptyStrings = false)]
         [StringLength(128)]
-        public String HospitalCode { get; set; }
+        public string HospitalCode { get; set; }
 
         [Required(AllowEmptyStrings = false)]
         [StringLength(128)]
-        public String Name { get; set; }
+        public string Name { get; set; }
 
         [Required(AllowEmptyStrings = false)]
-        public String Address { get; set; }
+        public string Address { get; set; }
 
         [StringLength(256)]
-        public String Description { get; set; }
+        public string Description { get; set; }
     }
 
     public class HospitalWithDoctorVM
     {
         public int Id { get; set; }
-        public String HospitalCode { get; set; }
-        public String Name { get; set; }
+        public string HospitalCode { get; set; }
+        public string Name { get; set; }
 
-        public String Address { get; set; }
-        public String Description { get; set; }
+        public string Address { get; set; }
+        public string Description { get; set; }
 
         public virtual ICollection<HospitalDoctor> HospitalDoctors { get; set; }
     }

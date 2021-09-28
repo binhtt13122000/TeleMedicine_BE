@@ -39,9 +39,9 @@ namespace TeleMedicine_BE.Controllers
         [HttpGet]
         [Produces("application/json")]
         public ActionResult<IEnumerable<DiseaseVM>> GetDiseases(
-            [FromQuery(Name = "disease-code")] String diseaseCode,
-            [FromQuery(Name = "name")] String name,
-            [FromQuery(Name = "description")] String description,
+            [FromQuery(Name = "disease-code")] string diseaseCode,
+            [FromQuery(Name = "name")] string name,
+            [FromQuery(Name = "description")] string description,
             [FromQuery(Name = "disease-type")] int[] diseaseTypeIds,
             int offset = 1,
             int limit = 20
