@@ -3,6 +3,7 @@ using BusinessLogic.Services;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,6 +39,7 @@ namespace TeleMedicine_BE.Controllers
         public ActionResult<IEnumerable<HospitalVM>> GetAllHospital(
             [FromQuery(Name = "hospital-code")] string hospitalCode,
             [FromQuery(Name = "name")] string name,
+            [FromQuery(Name = "filtering")] string filters = null,
             int limit = 20,
             int offset = 1
         )
@@ -54,6 +56,25 @@ namespace TeleMedicine_BE.Controllers
                     hospitalList = hospitalList.Where(s => s.Name.ToUpper().Contains(name.Trim().ToUpper()));
                 }
                 Paged<HospitalVM> pageModel = _pagingSupport.From(hospitalList).GetRange(offset, limit, s => s.Id, 1).Paginate<HospitalVM>();
+                if (!String.IsNullOrEmpty(filters))
+                {
+                    bool checkHasProperty = false;
+
+                    String[] splitFilter = filters.Split(",");
+                    foreach (var prop in splitFilter)
+                    {
+                        if (typeof(HospitalVM).GetProperty(prop) != null)
+                        {
+                            checkHasProperty = true;
+                        }
+                    }
+                    if (checkHasProperty)
+                    {
+                        PropertyRenameAndIgnoreSerializerContractResolver jsonIgnore = new PropertyRenameAndIgnoreSerializerContractResolver();
+                        string json = jsonIgnore.JsonIgnore(typeof(HospitalVM), splitFilter, pageModel);
+                        return Ok(JsonConvert.DeserializeObject(json));
+                    }
+                }
                 return Ok(pageModel);
             }
             catch (Exception)

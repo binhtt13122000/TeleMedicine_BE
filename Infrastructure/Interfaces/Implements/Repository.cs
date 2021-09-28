@@ -125,5 +125,7 @@ namespace Infrastructure.Interfaces.Implements
                 throw new ArgumentNullException($"Couldn't retrieve entities: {nameof(GetAll)} because: {ex.Message}");
             }
         }
+
+        
     }
 }

@@ -3,9 +3,11 @@ using BusinessLogic.Services;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using TeleMedicine_BE.Utils;
 using TeleMedicine_BE.ViewModels;
@@ -55,7 +57,8 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "start-rating")] int startRating,
             [FromQuery(Name = "end-rating")] int endRating,
             [FromQuery(Name = "is-verify")] int isVerify = 0,
-            int limit = 20,
+            [FromQuery(Name = "filtering")] string filters = null,
+            int limit = 50,
             int offset = 1
         )
         {
@@ -141,6 +144,25 @@ namespace TeleMedicine_BE.Controllers
                 }
 
                 Paged<DoctorVM> paged = _pagingSupport.From(doctorList).GetRange(offset, limit, s => s.Id, 1).Paginate<DoctorVM>();
+                if (!String.IsNullOrEmpty(filters))
+                {
+                    bool checkHasProperty = false;
+
+                    String[] splitFilter = filters.Split(",");
+                    foreach (var prop in splitFilter)
+                    {
+                        if (typeof(DoctorVM).GetProperty(prop) != null)
+                        {
+                            checkHasProperty = true;
+                        }
+                    }
+                    if (checkHasProperty)
+                    {
+                        PropertyRenameAndIgnoreSerializerContractResolver jsonIgnore = new PropertyRenameAndIgnoreSerializerContractResolver();
+                        string json = jsonIgnore.JsonIgnore(typeof(DoctorVM), splitFilter, paged);
+                        return Ok(JsonConvert.DeserializeObject(json));
+                    }
+                }
                 return Ok(paged);
             }catch(Exception)
             {

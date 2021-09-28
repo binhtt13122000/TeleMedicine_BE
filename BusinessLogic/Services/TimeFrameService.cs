@@ -13,6 +13,7 @@ namespace BusinessLogic.Services
     {
         Task<bool> ChangeTimeFrame(int minutes, int rest);
         void DeleteListTimeFrame(List<int> timeFrameIds);
+
     }
     public class TimeFrameService : ITimeFrameService
     {
