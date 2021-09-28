@@ -29,10 +29,43 @@ namespace TeleMedicine_BE.Controllers
 
         [HttpGet]
         public ActionResult<Paged<AccountManageVM>> GetAll(
-            [FromQuery] AccountManageVM accountManageVM
+            [FromQuery] string firstName,
+            [FromQuery] string lastName,
+            [FromQuery] string phone,
+            [FromQuery] string email,
+            int offset = 1,
+            int limit = 20
         )
         {
-            return Ok();
+            try
+            {
+                IQueryable<Account> accountsQuery = _accountService.GetAll(_ => _.Role);
+                if (!string.IsNullOrWhiteSpace(firstName))
+                {
+                    accountsQuery = accountsQuery.Where(_ => _.FirstName.ToUpper().Contains(firstName.Trim().ToUpper()));
+                }
+
+                if (!string.IsNullOrWhiteSpace(lastName))
+                {
+                    accountsQuery = accountsQuery.Where(_ => _.LastName.ToUpper().Contains(lastName.Trim().ToUpper()));
+                }
+
+                if (!string.IsNullOrWhiteSpace(phone))
+                {
+                    accountsQuery = accountsQuery.Where(_ => _.Phone.ToUpper().Contains(phone.Trim().ToUpper()));
+                }
+
+                if (!string.IsNullOrWhiteSpace(email))
+                {
+                    accountsQuery = accountsQuery.Where(_ => _.Email.ToUpper().Contains(email.Trim().ToUpper()));
+                }
+                Paged<AccountManageVM> paged = _pagingSupport.From(accountsQuery).GetRange(offset, limit, s => s.RegisterTime, 1).Paginate<AccountManageVM>();
+                return Ok(paged);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
         }
 
         [HttpGet("{id}")]
