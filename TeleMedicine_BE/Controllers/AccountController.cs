@@ -29,10 +29,10 @@ namespace TeleMedicine_BE.Controllers
 
         [HttpGet]
         public ActionResult<Paged<AccountManageVM>> GetAll(
-            [FromQuery] string firstName,
-            [FromQuery] string lastName,
-            [FromQuery] string phone,
-            [FromQuery] string email,
+            [FromQuery(Name = "first-name")] string firstName,
+            [FromQuery(Name = "last-name")] string lastName,
+            [FromQuery(Name = "phone")] string phone,
+            [FromQuery(Name = "email")] string email,
             int offset = 1,
             int limit = 20
         )
