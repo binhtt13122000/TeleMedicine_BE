@@ -11,7 +11,6 @@ namespace Infrastructure.Repositories
 {
     public interface ISymptomRepository : IRepository<Symptom, int>
     {
-        bool IsDuplicatedSymptomCode(string symptomCode);
     }
     public class SymptomRepository : Repository<Symptom, int>, ISymptomRepository
     {
@@ -20,11 +19,5 @@ namespace Infrastructure.Repositories
 
         }
 
-        public bool IsDuplicatedSymptomCode(string symptomCode)
-        {
-            Symptom currentSymptom = GetAll().Where(x => symptomCode.ToUpper().Equals(x.SymptomCode.ToUpper())).FirstOrDefault();
-
-            return currentSymptom != null; 
-        }
     }
 }

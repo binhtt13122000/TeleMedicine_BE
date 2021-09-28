@@ -144,7 +144,8 @@ namespace TeleMedicine_BE.Controllers
             Disease disease = _mapper.Map<Disease>(model);
             try
             {
-                if (_diseaseService.IsDuplicatedDiseaseCode(disease.DiseaseCode))
+                Disease checkExistedDisease = _diseaseService.GetAll().Where(s => s.DiseaseCode == disease.DiseaseCode).FirstOrDefault();
+                if (checkExistedDisease != null)
                 {
                     return BadRequest(new
                     {

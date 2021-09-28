@@ -9,9 +9,6 @@ namespace BusinessLogic.Services
 {
     public interface ICertificationService : IService<Certification, int>
     {
-        bool IsExistedCertificationId(int Id);
-
-        void AddRangeCertification(CertificationDoctor[] certificationDoctor);
     }
     public class CertificationService : ICertificationService
     {
@@ -27,11 +24,6 @@ namespace BusinessLogic.Services
             return await _certificationRepository.AddAsync(entity);
         }
 
-        public async void AddRangeCertification(CertificationDoctor[] entity)
-        {
-            _certificationRepository.AddRangeCertification(entity);
-        }
-
         public async Task<bool> DeleteAsync(Certification entity)
         {
             return await _certificationRepository.Delete(entity);
@@ -45,11 +37,6 @@ namespace BusinessLogic.Services
         public async Task<Certification> GetByIdAsync(int id)
         {
             return await _certificationRepository.GetByIdAsync(id);
-        }
-
-        public bool IsExistedCertificationId(int Id)
-        {
-            return _certificationRepository.IsExistedCertificationId(Id);
         }
 
         public async Task<bool> UpdateAsync(Certification entity)

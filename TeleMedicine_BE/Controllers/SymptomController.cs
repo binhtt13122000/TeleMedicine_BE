@@ -151,7 +151,7 @@ namespace TeleMedicine_BE.Controllers
         public async Task<ActionResult<SymptomVM>> CreateSymptom([FromBody] SymptomCM model)
         {
             Symptom symptom = _mapper.Map<Symptom>(model);
-            if (_symptomService.IsDuplicated(model.SymptomCode))
+            if (_symptomService.GetAll().Where(s=> s.SymptomCode.Trim().ToUpper().Equals(model.SymptomCode.Trim().ToUpper())).FirstOrDefault() != null)
             {
                 return BadRequest(new
                 {

@@ -30,10 +30,19 @@ namespace TeleMedicine_BE.Controllers
 
         [HttpGet]
         public ActionResult<Paged<AccountManageVM>> GetAll(
+            [FromQuery(Name = "email")] string email,
             [FromQuery(Name = "first-name")] string firstName,
             [FromQuery(Name = "last-name")] string lastName,
+            [FromQuery(Name = "street-address")] string streetAddress,
+            [FromQuery(Name = "locality")] string locality,
+            [FromQuery(Name = "city")] string city,
+            [FromQuery(Name = "postal-code")] string postalCode,
             [FromQuery(Name = "phone")] string phone,
-            [FromQuery(Name = "email")] string email,
+            [FromQuery(Name = "start-dob")] DateTime? startDob,
+            [FromQuery(Name = "end-dob")] DateTime? endDob,
+            [FromQuery(Name = "is-male")] int isMale = 0,
+            [FromQuery(Name = "active")] int active = 0,
+            [FromQuery(Name = "role-name")] string roleName = null,
             [FromQuery(Name = "filtering")] string filters = null,
             int offset = 1,
             int limit = 20
@@ -61,8 +70,65 @@ namespace TeleMedicine_BE.Controllers
                 {
                     accountsQuery = accountsQuery.Where(_ => _.Email.ToUpper().Contains(email.Trim().ToUpper()));
                 }
+                if(!string.IsNullOrEmpty(streetAddress))
+                {
+                    accountsQuery = accountsQuery.Where(s => s.StreetAddress.ToUpper().Contains(streetAddress.Trim().ToUpper()));
+                }
+                if(!string.IsNullOrEmpty(locality))
+                {
+                    accountsQuery = accountsQuery.Where(s => s.Locality.ToUpper().Contains(locality.Trim().ToUpper()));
+                }
+                if(!string.IsNullOrEmpty(city))
+                {
+                    accountsQuery = accountsQuery.Where(s => s.City.ToUpper().Contains(city.Trim().ToUpper()));
+                }
+                if(!string.IsNullOrEmpty(postalCode))
+                {
+                    accountsQuery = accountsQuery.Where(s => s.PostalCode.ToUpper().Contains(postalCode.Trim().ToUpper()));
+                }
+                if(startDob.HasValue && endDob.HasValue)
+                {
+                    accountsQuery = accountsQuery.Where(s => s.Dob.CompareTo(startDob.Value) >= 0).Where(s => s.Dob.CompareTo(endDob.Value) <= 0);
+                }
+                else
+                {
+                    if (startDob.HasValue)
+                    {
+                        accountsQuery = accountsQuery.Where(s => s.Dob.CompareTo(startDob.Value) >= 0);
+                    }
+                    if(endDob.HasValue)
+                    {
+                        accountsQuery = accountsQuery.Where(s => s.Dob.CompareTo(endDob.Value) <= 0);
+                    }
+                }
+                if(isMale != 0)
+                {
+                    if(isMale == 1)
+                    {
+                        accountsQuery = accountsQuery.Where(s => s.IsMale == true);
+                    }
+                    if(isMale == -1)
+                    {
+                        accountsQuery = accountsQuery.Where(s => s.IsMale == false);
+                    }
+                }
+                if(active != 0)
+                {
+                    if(active == 1)
+                    {
+                        accountsQuery = accountsQuery.Where(s => s.Active == true);
+                    }
+                    if(active == -1)
+                    {
+                        accountsQuery = accountsQuery.Where(s => s.Active == false);
+                    }
+                }
+                if(!string.IsNullOrEmpty(roleName))
+                {
+                    accountsQuery = accountsQuery.Where(s => s.Role.Name.ToUpper().Contains(roleName.Trim().ToUpper()));
+                }
                 Paged<AccountManageVM> paged = _pagingSupport.From(accountsQuery).GetRange(offset, limit, s => s.RegisterTime, 1).Paginate<AccountManageVM>();
-                if (!String.IsNullOrEmpty(filters))
+                if (!string.IsNullOrEmpty(filters))
                 {
                     bool checkHasProperty = false;
 

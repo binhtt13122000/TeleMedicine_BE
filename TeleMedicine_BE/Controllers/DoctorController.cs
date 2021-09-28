@@ -224,7 +224,8 @@ namespace TeleMedicine_BE.Controllers
             {
                 return BadRequest();
             }
-            if (!currentDoctor.CertificateCode.Trim().ToUpper().Equals(model.CertificateCode.Trim().ToUpper()) && _doctorService.isDuplicatedCertificationCode(model.CertificateCode))
+            Doctor checkExistedCertification = _doctorService.GetAll().Where(s => s.CertificateCode.Trim().ToUpper().Equals(model.CertificateCode.Trim().ToUpper())).FirstOrDefault();
+            if (!currentDoctor.CertificateCode.Trim().ToUpper().Equals(model.CertificateCode.Trim().ToUpper()) && checkExistedCertification != null)
             {
                 return BadRequest(new
                 {
@@ -273,14 +274,16 @@ namespace TeleMedicine_BE.Controllers
             model.CertificationDoctors.CopyTo(arrCertification, 0);
             try
             {
-                if (_doctorService.isDuplicatedEmail(model.Email))
+                Doctor checkExistedDoctorWithEmail = _doctorService.GetAll().Where(s => s.Email.Trim().ToUpper().Equals(model.Email.Trim().ToUpper())).FirstOrDefault();
+                if (checkExistedDoctorWithEmail != null)
                 {
                     return BadRequest(new
                     {
                         message = "Email have been registered!"
                     });
                 }
-                if (_doctorService.isDuplicatedCertificationCode(model.CertificateCode))
+                Doctor checkExistedDoctorWithCertification = _doctorService.GetAll().Where(s => s.CertificateCode.Trim().ToUpper().Equals(model.CertificateCode.Trim().ToUpper())).FirstOrDefault();
+                if (checkExistedDoctorWithCertification != null)
                 {
                     return BadRequest(new
                         {
@@ -292,7 +295,7 @@ namespace TeleMedicine_BE.Controllers
                 {
                     for(int i = 0; i < arrHospital.Length; i++)
                     {
-                        if(!_hospitalService.IsExistedHospitalId(arrHospital[i].HospitalId))
+                        if(_hospitalService.GetAll().Where(s => s.Id == arrHospital[i].HospitalId).FirstOrDefault() == null)
                         {
                             return BadRequest(new
                             {
@@ -305,7 +308,7 @@ namespace TeleMedicine_BE.Controllers
                 {
                     for(int i = 0; i < arrMajor.Length; i++)
                     {
-                        if(!_majorService.IsExistedMajorId(arrMajor[i].MajorId))
+                        if(_majorService.GetAll().Where(s => s.Id == arrMajor[i].MajorId).FirstOrDefault() == null)
                         {
                             return BadRequest(new
                             {
@@ -318,7 +321,7 @@ namespace TeleMedicine_BE.Controllers
                 {
                     for (int i = 0; i < arrCertification.Length; i++)
                     {
-                        if (!_certificationService.IsExistedCertificationId(arrCertification[i].CertificationId))
+                        if (_certificationService.GetAll().Where(s => s.Id == arrCertification[i].CertificationId).FirstOrDefault() == null)
                         {
                             return BadRequest(new
                             {
