@@ -99,6 +99,39 @@ namespace TeleMedicine_BE.Utils
             CreateMap<Account, AccountProfileVM>();
             CreateMap<AccountProfileUM, Account>();
             #endregion
+
+            #region AutoMapper DoctorViewModel
+            CreateMap<Doctor, DoctorVM>();
+            CreateMap<DoctorVM, Doctor>();
+            CreateMap<DoctorCM, Doctor>();
+            CreateMap<DoctorUM, Doctor>();
+            CreateMap<DoctorSM, Doctor>();
+            CreateMap<Doctor, DoctorSM>();
+            #endregion
+
+            #region AutoMapper HospitalDoctorViewModel
+            CreateMap<HospitalDoctor, HospitalDoctorVM>();
+            CreateMap<HospitalDoctorVM, HospitalDoctor>();
+            CreateMap<HospitalDoctorCM, HospitalDoctor>();
+            CreateMap<HospitalDoctorWithRegisterCM, HospitalDoctor>();
+            CreateMap<HospitalDoctorUM, HospitalDoctor>();
+            #endregion
+
+            #region AutoMapper CertificationDoctorViewModel
+            CreateMap<CertificationDoctor, CertificationDoctorVM>();
+            CreateMap<CertificationDoctorVM, CertificationDoctor>();
+            CreateMap<CertificationDoctorWithRegisterCM, CertificationDoctor>();
+            CreateMap<CertificationDoctorCM, CertificationDoctor>();
+            CreateMap<CertificationDoctorUM, CertificationDoctor>();
+            #endregion
+
+            #region AutoMapper MajorDoctorViewModel
+            CreateMap<MajorDoctor, MajorDoctorVM>();
+            CreateMap<MajorDoctorVM, MajorDoctor>();
+            CreateMap<MajorDoctorCM, MajorDoctor>();
+            CreateMap<MajorDoctorWithRegisterCM, MajorDoctor>();
+            CreateMap<MajorDoctorUM, MajorDoctor>();
+            #endregion
         }
     }
 }

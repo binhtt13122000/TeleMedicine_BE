@@ -9,7 +9,9 @@ namespace BusinessLogic.Services
 {
     public interface IMajorService : IService<Major, int>
     {
+        bool IsExistedMajorId(int Id);
 
+        void AddRangeMajorDoctor(MajorDoctor[] majorDoctors);
     }
     public class MajorService : IMajorService
     {
@@ -25,6 +27,11 @@ namespace BusinessLogic.Services
             return await _majorRepository.AddAsync(entity);
         }
 
+        public void AddRangeMajorDoctor(MajorDoctor[] majorDoctors)
+        {
+            _majorRepository.AddRangeMajorDoctor(majorDoctors);
+        }
+
         public async Task<bool> DeleteAsync(Major entity)
         {
             return await _majorRepository.Delete(entity);
@@ -38,6 +45,11 @@ namespace BusinessLogic.Services
         public async Task<Major> GetByIdAsync(int id)
         {
             return await _majorRepository.GetByIdAsync(id);
+        }
+
+        public bool IsExistedMajorId(int Id)
+        {
+            return _majorRepository.IsExistedMajorId(Id);
         }
 
         public async Task<bool> UpdateAsync(Major entity)
