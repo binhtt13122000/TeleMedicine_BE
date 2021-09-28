@@ -10,6 +10,10 @@ namespace BusinessLogic.Services
     public interface IHospitalService : IService<Hospital, int>
     {
         bool IsDuplicated(string hospitalCode);
+
+        bool IsExistedHospitalId(int id);
+
+        void AddRangeHospitalDoctor(HospitalDoctor[] hospitalDoctors);
     }
     public class HospitalService : IHospitalService
     {
@@ -23,6 +27,11 @@ namespace BusinessLogic.Services
         public async Task<Hospital> AddAsync(Hospital entity)
         {
             return await _hospitalRepository.AddAsync(entity);
+        }
+
+        public void AddRangeHospitalDoctor(HospitalDoctor[] hospitalDoctors)
+        {
+            _hospitalRepository.AddRangeHospitalDoctor(hospitalDoctors);
         }
 
         public async Task<bool> DeleteAsync(Hospital entity)
@@ -43,6 +52,11 @@ namespace BusinessLogic.Services
         public bool IsDuplicated(string hospitalCode)
         {
             return _hospitalRepository.IsDuplicatedHospitalCode(hospitalCode);
+        }
+
+        public bool IsExistedHospitalId(int id)
+        {
+            return _hospitalRepository.IsExistedHospitalId(id);
         }
 
         public async Task<bool> UpdateAsync(Hospital entity)
