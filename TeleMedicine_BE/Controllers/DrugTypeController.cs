@@ -3,6 +3,7 @@ using BusinessLogic.Services;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,6 +46,7 @@ namespace TeleMedicine_BE.Controllers
         [Produces("application/json")]
         public ActionResult<Paged<DrugTypeVM>> GetAllDrugTypes(
             [FromQuery(Name = "name")] string name,
+            [FromQuery(Name = "filtering")] string filters = null,
             [FromQuery(Name = "limit")] int limit = 20,
             [FromQuery(Name = "offset")] int offset = 1
         )
@@ -60,7 +62,25 @@ namespace TeleMedicine_BE.Controllers
                 Paged<DrugTypeVM> result = _pagingSupport.From(drugTypesQuery)
                    .GetRange(offset, limit, s => s.Id, 1)
                    .Paginate<DrugTypeVM>();
+                if (!String.IsNullOrEmpty(filters))
+                {
+                    bool checkHasProperty = false;
 
+                    String[] splitFilter = filters.Split(",");
+                    foreach (var prop in splitFilter)
+                    {
+                        if (typeof(DrugTypeVM).GetProperty(prop) != null)
+                        {
+                            checkHasProperty = true;
+                        }
+                    }
+                    if (checkHasProperty)
+                    {
+                        PropertyRenameAndIgnoreSerializerContractResolver jsonIgnore = new PropertyRenameAndIgnoreSerializerContractResolver();
+                        string json = jsonIgnore.JsonIgnore(typeof(DrugTypeVM), splitFilter, result);
+                        return Ok(JsonConvert.DeserializeObject(json));
+                    }
+                }
                 return Ok(result);
             }
             catch (Exception)

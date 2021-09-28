@@ -3,6 +3,7 @@ using BusinessLogic.Services;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,6 +34,7 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "last-name")] string lastName,
             [FromQuery(Name = "phone")] string phone,
             [FromQuery(Name = "email")] string email,
+            [FromQuery(Name = "filtering")] string filters = null,
             int offset = 1,
             int limit = 20
         )
@@ -60,6 +62,25 @@ namespace TeleMedicine_BE.Controllers
                     accountsQuery = accountsQuery.Where(_ => _.Email.ToUpper().Contains(email.Trim().ToUpper()));
                 }
                 Paged<AccountManageVM> paged = _pagingSupport.From(accountsQuery).GetRange(offset, limit, s => s.RegisterTime, 1).Paginate<AccountManageVM>();
+                if (!String.IsNullOrEmpty(filters))
+                {
+                    bool checkHasProperty = false;
+
+                    String[] splitFilter = filters.Split(",");
+                    foreach (var prop in splitFilter)
+                    {
+                        if (typeof(AccountManageVM).GetProperty(prop) != null)
+                        {
+                            checkHasProperty = true;
+                        }
+                    }
+                    if (checkHasProperty)
+                    {
+                        PropertyRenameAndIgnoreSerializerContractResolver jsonIgnore = new PropertyRenameAndIgnoreSerializerContractResolver();
+                        string json = jsonIgnore.JsonIgnore(typeof(AccountManageVM), splitFilter, paged);
+                        return Ok(JsonConvert.DeserializeObject(json));
+                    }
+                }
                 return Ok(paged);
             }
             catch (Exception)

@@ -12,6 +12,7 @@ namespace Infrastructure.Interfaces
         IQueryable<T> GetAll(params Expression<Func<T, object>>[] predicate);
         Task<T> GetByIdAsync(TKey id);
         Task<T> AddAsync(T entity);
+
         Task<bool> UpdateAsync(T entity);
         Task<bool> Delete(T entity);
         void DeleteRange(Expression<Func<T, bool>> predicate);

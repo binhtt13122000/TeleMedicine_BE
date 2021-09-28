@@ -3,6 +3,7 @@ using BusinessLogic.Services;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,6 +39,7 @@ namespace TeleMedicine_BE.Controllers
         public ActionResult<Paged<TimeFrameVM>> GetAllTimeFrames(
             TimeSpan startTime,
             TimeSpan endTime,
+            [FromQuery(Name = "filtering")] string filters = null,
             int offset = 1,
             int limit = 20
         )
@@ -54,6 +56,25 @@ namespace TeleMedicine_BE.Controllers
                     timeFrames = timeFrames.Where(s => s.EndTime.CompareTo(endTime) <= 0);
                 }
                 Paged<TimeFrameVM> paged = _pagingSupport.From(timeFrames).GetRange(offset, limit, s => s.Id, 1).Paginate<TimeFrameVM>();
+                if (!String.IsNullOrEmpty(filters))
+                {
+                    bool checkHasProperty = false;
+
+                    String[] splitFilter = filters.Split(",");
+                    foreach (var prop in splitFilter)
+                    {
+                        if (typeof(TimeFrameVM).GetProperty(prop) != null)
+                        {
+                            checkHasProperty = true;
+                        }
+                    }
+                    if (checkHasProperty)
+                    {
+                        PropertyRenameAndIgnoreSerializerContractResolver jsonIgnore = new PropertyRenameAndIgnoreSerializerContractResolver();
+                        string json = jsonIgnore.JsonIgnore(typeof(TimeFrameVM), splitFilter, paged);
+                        return Ok(JsonConvert.DeserializeObject(json));
+                    }
+                }
                 return Ok(paged);
             }
             catch (Exception e)
