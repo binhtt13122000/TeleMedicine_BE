@@ -17,8 +17,8 @@ namespace TeleMedicine_BE.Controllers
     public class CertificationController : Controller
     {
         private readonly ICertificationService _certificationService;
-        private IMapper _mapper;
-        private IPagingSupport<Certification> _pagingSupport;
+        private readonly IMapper _mapper;
+        private readonly IPagingSupport<Certification> _pagingSupport;
 
         public CertificationController(ICertificationService certificationService, IMapper mapper, IPagingSupport<Certification> pagingSupport)
         {

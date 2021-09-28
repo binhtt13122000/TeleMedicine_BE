@@ -93,6 +93,13 @@ namespace TeleMedicine_BE.Utils
             CreateMap<CertificationUM, Certification>();
             #endregion
 
+            #region AutoMapper AccountViewModel
+            CreateMap<Account, AccountManageVM>();
+            CreateMap<AccountProfileVM, Account>();
+            CreateMap<Account, AccountProfileVM>();
+            CreateMap<AccountProfileUM, Account>();
+            #endregion
+
             #region AutoMapper DoctorViewModel
             CreateMap<Doctor, DoctorVM>();
             CreateMap<DoctorVM, Doctor>();

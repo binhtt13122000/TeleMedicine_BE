@@ -79,7 +79,7 @@ namespace TeleMedicine_BE.Controllers
                 Paged<NotificationVM> paged = _pagingSupport.From(notifications).GetRange(offset, limit, s => s.Id, 1).Paginate<NotificationVM>();
                 return Ok(paged);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return BadRequest(startDate.Value);
             }
