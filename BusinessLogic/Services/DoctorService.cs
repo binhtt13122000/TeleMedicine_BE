@@ -11,9 +11,6 @@ namespace BusinessLogic.Services
 {
     public interface IDoctorService: IService<Doctor, int>
     {
-        bool isDuplicatedCertificationCode(string certificationCode);
-
-        bool isDuplicatedEmail(string email);
     }
     public class DoctorService : IDoctorService
     {
@@ -41,16 +38,6 @@ namespace BusinessLogic.Services
         public async Task<Doctor> GetByIdAsync(int id)
         {
             return await _doctorRepository.GetByIdAsync(id);
-        }
-
-        public bool isDuplicatedCertificationCode(string certificationCode)
-        {
-            return _doctorRepository.isDuplicatedCertificationCode(certificationCode);
-        }
-
-        public bool isDuplicatedEmail(string email)
-        {
-            return _doctorRepository.isDuplicatedEmail(email);
         }
 
         public async Task<bool> UpdateAsync(Doctor entity)

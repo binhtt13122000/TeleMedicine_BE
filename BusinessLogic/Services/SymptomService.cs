@@ -11,7 +11,6 @@ namespace BusinessLogic.Services
 {
     public interface ISymptomService : IService<Symptom, int>
     {
-        bool IsDuplicated(string symptomCode);
     }
     public class SymptomService : ISymptomService
     {
@@ -39,11 +38,6 @@ namespace BusinessLogic.Services
         public async Task<Symptom> GetByIdAsync(int id)
         {
             return await _symptomRepository.GetByIdAsync(id);
-        }
-
-        public bool IsDuplicated(string symptomCode)
-        {
-            return _symptomRepository.IsDuplicatedSymptomCode(symptomCode);
         }
 
         public async Task<bool> UpdateAsync(Symptom entity)

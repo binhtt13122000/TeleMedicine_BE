@@ -126,7 +126,7 @@ namespace TeleMedicine_BE.Controllers
         {
             Hospital hospital = _mapper.Map<Hospital>(model);
 
-            if (_hospitalService.IsDuplicated(model.HospitalCode))
+            if (_hospitalService.GetAll().Where(s => s.HospitalCode.Trim().ToUpper().Equals(model.HospitalCode.Trim().ToUpper())).FirstOrDefault() != null)
             {
                 return BadRequest(new
                 {
@@ -170,7 +170,9 @@ namespace TeleMedicine_BE.Controllers
             {
                 return BadRequest();
             }
-            if(!model.HospitalCode.Trim().ToUpper().Equals(currentHospital.HospitalCode.ToUpper()) && _hospitalService.IsDuplicated(model.HospitalCode.Trim().ToUpper()))
+            if(!model.HospitalCode.Trim().ToUpper().Equals(currentHospital.HospitalCode.ToUpper()) && 
+                _hospitalService.GetAll().Where(s => s.HospitalCode.Trim().ToUpper().Equals(model.HospitalCode.Trim().ToUpper())).FirstOrDefault() != null
+                )
             {
                 return BadRequest(new
                 {

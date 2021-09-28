@@ -119,7 +119,7 @@ namespace TeleMedicine_BE.Controllers
             Role role = _mapper.Map<Role>(model);
             try
             {
-                bool isDuplicated = _roleService.IsDuplicated(model.Name);
+                bool isDuplicated = _roleService.GetAll().Where(s => s.Name.Trim().ToUpper().Equals(model.Name.Trim().ToUpper())).FirstOrDefault() != null;
                 if(isDuplicated)
                 {
                     return BadRequest(new
@@ -162,7 +162,7 @@ namespace TeleMedicine_BE.Controllers
             {
                 return BadRequest();
             }
-            if(!currentRole.Name.ToUpper().Equals(model.Name.ToUpper()) && _roleService.IsDuplicated(model.Name))
+            if(!currentRole.Name.ToUpper().Equals(model.Name.ToUpper()) && _roleService.GetAll().Where(s => s.Name.Trim().ToUpper().Equals(model.Name.Trim().ToUpper())).FirstOrDefault() != null)
             {
                 return BadRequest(new
                 {
