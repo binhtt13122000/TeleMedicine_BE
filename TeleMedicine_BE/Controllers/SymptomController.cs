@@ -251,7 +251,8 @@ namespace TeleMedicine_BE.Controllers
             {
                 return NotFound();
             }
-            if (!model.SymptomCode.ToUpper().Equals(currentSymptom.SymptomCode.ToUpper()) && _symptomService.IsDuplicated(model.SymptomCode))
+            if (!model.SymptomCode.ToUpper().Equals(currentSymptom.SymptomCode.ToUpper()) && _symptomService.GetAll().
+                Where(s => s.SymptomCode.Trim().ToUpper().Equals(model.SymptomCode.Trim().ToUpper())).FirstOrDefault() != null)
             {
                 return BadRequest(new
                 {
