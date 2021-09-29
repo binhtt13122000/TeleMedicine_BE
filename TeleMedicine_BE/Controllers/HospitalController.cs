@@ -28,10 +28,10 @@ namespace TeleMedicine_BE.Controllers
         }
 
         /// <summary>
-        /// Get all hospitals
+        /// Get list hospitals
         /// </summary>
-        /// <returns>All hospitals</returns>
-        /// <response code="200">Returns all hospitals</response>
+        /// <returns>List hospitals</returns>
+        /// <response code="200">Returns list hospitals</response>
         /// <response code="404">Not found hospitals</response>
         /// <response code="500">Internal server error</response>
         [HttpGet]

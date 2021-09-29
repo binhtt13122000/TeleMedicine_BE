@@ -28,7 +28,15 @@ namespace TeleMedicine_BE.Controllers
             _pagingSupport = pagingSupport;
         }
 
+        /// <summary>
+        /// Get list accounts
+        /// </summary>
+        /// <returns>List accounts</returns>
+        /// <response code="200">Returns all accounts</response>
+        /// <response code="404">Not found accounts</response>
+        /// <response code="500">Internal server error</response>
         [HttpGet]
+        [Produces("application/json")]
         public ActionResult<Paged<AccountManageVM>> GetAll(
             [FromQuery(Name = "email")] string email,
             [FromQuery(Name = "first-name")] string firstName,
@@ -155,7 +163,16 @@ namespace TeleMedicine_BE.Controllers
             }
         }
 
+
+        /// <summary>
+        /// Get a specific account by account id
+        /// </summary>
+        /// <returns>Return the account with the corresponding id</returns>
+        /// <response code="200">Returns the account with the specified id</response>
+        /// <response code="404">No account found with the specified id</response>
+        /// <response code="500">Internal server error</response>
         [HttpGet("{id}")]
+        [Produces("application/json")]
         public async Task<ActionResult<AccountProfileVM>> GetAccountById([FromRoute] int id)
         {
             try
@@ -173,7 +190,15 @@ namespace TeleMedicine_BE.Controllers
             }
         }
 
+        /// <summary>
+        /// Update a account
+        /// </summary>
+        /// <response code="200">Success</response>
+        /// <response code="404">Not Found</response>
+        /// <response code="400">Field is not matched</response>
+        /// <response code="500">Failed to save request</response>
         [HttpPut]
+        [Produces("application/json")]
         public async Task<ActionResult<AccountProfileVM>> UpdateAccount([FromBody] AccountProfileUM model)
         {
             try
@@ -208,6 +233,13 @@ namespace TeleMedicine_BE.Controllers
             }
         }
 
+        /// <summary>
+        /// Change status account
+        /// </summary>
+        /// <response code="200">Success</response>
+        /// <response code="404">Not Found</response>
+        /// <response code="400">Field is not matched</response>
+        /// <response code="500">Failed to save request</response>
         [HttpPut("{id}")]
         public async Task<ActionResult> ChangeStatus([FromRoute] int id)
         {
@@ -233,6 +265,12 @@ namespace TeleMedicine_BE.Controllers
             }
         }
 
+        /// <summary>
+        /// Delete account By Id
+        /// </summary>
+        /// <response code="200">Success</response>
+        /// <response code="400">Bad Request</response>
+        /// <response code="500">Internal server error</response>
         [HttpDelete("{id}")]
         [Produces("application/json")]
         public async Task<ActionResult> DeleteAccount([FromRoute] int id)

@@ -31,10 +31,10 @@ namespace TeleMedicine_BE.Controllers
         }
 
         /// <summary>
-        /// Get all notifications
+        /// Get list notifications
         /// </summary>
-        /// <returns>All roles</returns>
-        /// <response code="200">Returns all notifications</response>
+        /// <returns>All notifications</returns>
+        /// <response code="200">Returns list notifications</response>
         /// <response code="404">Not found notifications</response>
         /// <response code="500">Internal server error</response>
         [HttpGet]

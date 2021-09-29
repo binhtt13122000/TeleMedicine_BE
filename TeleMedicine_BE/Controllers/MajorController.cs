@@ -29,10 +29,10 @@ namespace TeleMedicine_BE.Controllers
         }
 
         /// <summary>
-        /// Get all majors
+        /// Get list majors
         /// </summary>
-        /// <returns>All majors</returns>
-        /// <response code="200">Returns all majors</response>
+        /// <returns>List majors</returns>
+        /// <response code="200">Returns list majors</response>
         /// <response code="404">Not found majors</response>
         /// <response code="500">Internal server error</response>
         [HttpGet]

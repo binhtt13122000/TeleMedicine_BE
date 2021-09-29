@@ -31,10 +31,10 @@ namespace TeleMedicine_BE.Controllers
         }
 
         /// <summary>
-        /// Get all diseases
+        /// Get list diseases
         /// </summary>
-        /// <returns>All diseases</returns>
-        /// <response code="200">Returns all diseases groups</response>
+        /// <returns>List diseases</returns>
+        /// <response code="200">Returns list diseases groups</response>
         /// <response code="404">Not found diseases</response>
         /// <response code="500">Internal server error</response>
         [HttpGet]

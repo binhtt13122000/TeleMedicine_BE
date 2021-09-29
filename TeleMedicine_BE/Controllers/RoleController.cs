@@ -29,10 +29,10 @@ namespace TeleMedicine_BE.Controllers
         }
 
         /// <summary>
-        /// Get all roles
+        /// Get list roles
         /// </summary>
-        /// <returns>All roles</returns>
-        /// <response code="200">Returns all roles</response>
+        /// <returns>List roles</returns>
+        /// <response code="200">Returns list roles</response>
         /// <response code="404">Not found roles</response>
         /// <response code="500">Internal server error</response>
         [HttpGet]

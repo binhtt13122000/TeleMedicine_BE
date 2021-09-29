@@ -30,7 +30,7 @@ namespace TeleMedicine_BE.Controllers
 
 
         /// <summary>
-        /// Get all symptoms
+        /// Get list symptoms
         /// </summary>
         /// <remarks>
         /// Sample request:
@@ -41,8 +41,8 @@ namespace TeleMedicine_BE.Controllers
         ///     }
         ///
         /// </remarks>
-        /// <returns>All symptoms</returns>
-        /// <response code="200">Returns all symptoms</response>
+        /// <returns>List symptoms</returns>
+        /// <response code="200">Returns list symptoms</response>
         /// <response code="500">Internal server error</response>
         [HttpGet]
         [Produces("application/json")]

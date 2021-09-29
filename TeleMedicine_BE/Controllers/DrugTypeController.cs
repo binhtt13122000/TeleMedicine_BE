@@ -28,7 +28,7 @@ namespace TeleMedicine_BE.Controllers
         }
 
         /// <summary>
-        /// Get all drug types
+        /// Get list drug types
         /// </summary>
         /// <remarks>
         /// Sample request:
@@ -39,8 +39,8 @@ namespace TeleMedicine_BE.Controllers
         ///     }
         ///
         /// </remarks>
-        /// <returns>All drug types</returns>
-        /// <response code="200">Returns all drug types</response>
+        /// <returns>List drug types</returns>
+        /// <response code="200">Returns list drug types</response>
         /// <response code="500">Internal server error</response>
         [HttpGet]
         [Produces("application/json")]

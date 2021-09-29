@@ -29,10 +29,10 @@ namespace TeleMedicine_BE.Controllers
         }
 
         /// <summary>
-        /// Get all time-frames
+        /// Get list time-frames
         /// </summary>
-        /// <returns>All time frames</returns>
-        /// <response code="200">Returns all time frames</response>
+        /// <returns>List time frames</returns>
+        /// <response code="200">Returns list time frames</response>
         /// <response code="500">Internal server error</response>
         [HttpGet]
         [Produces("application/json")]
@@ -121,6 +121,20 @@ namespace TeleMedicine_BE.Controllers
         {
             try
             {
+                List<TimeFrame> getTimeFrames = _timeFrameService.GetAll().ToList();
+                if (getTimeFrames.Count > 0)
+                {
+                    for (int i = 0; i < getTimeFrames.Count; i++)
+                    {
+                        if (model.StartTime.CompareTo(getTimeFrames[i].EndTime) < 0 && getTimeFrames[i].StartTime.CompareTo(model.EndTime) < 0)
+                        {
+                            return BadRequest(new
+                            {
+                                message = "Time ovelap!"
+                            });
+                        }
+                    }
+                }
                 TimeFrame timeFrame = _mapper.Map<TimeFrame>(model);
                 TimeFrame timeFrameCreated = await _timeFrameService.AddAsync(timeFrame);
                 if (timeFrameCreated != null)
@@ -156,6 +170,23 @@ namespace TeleMedicine_BE.Controllers
             }
 
             TimeFrame currentTimeFrame = await _timeFrameService.GetByIdAsync(model.Id);
+            if(currentTimeFrame.EndTime.CompareTo(model.EndTime) != 0 || currentTimeFrame.StartTime.CompareTo(model.StartTime) != 0)
+            {
+                List<TimeFrame> getTimeFrames = _timeFrameService.GetAll().Where(s => s.Id != model.Id).ToList();
+                if (getTimeFrames.Count > 0)
+                {
+                    for (int i = 0; i < getTimeFrames.Count; i++)
+                    {
+                        if (model.StartTime.CompareTo(getTimeFrames[i].EndTime) < 0 && getTimeFrames[i].StartTime.CompareTo(model.EndTime) < 0)
+                        {
+                            return BadRequest(new
+                            {
+                                message = "Time ovelap!"
+                            });
+                        }
+                    }
+                }
+            }
             try
             {
                 currentTimeFrame.StartTime = model.StartTime;

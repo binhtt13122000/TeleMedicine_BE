@@ -29,10 +29,10 @@ namespace TeleMedicine_BE.Controllers
         }
 
         /// <summary>
-        /// Get all certifications
+        /// Get lisst certifications
         /// </summary>
-        /// <returns>All certifications</returns>
-        /// <response code="200">Returns all certifications</response>
+        /// <returns>List certifications</returns>
+        /// <response code="200">Returns list certifications</response>
         /// <response code="404">Not found certifications</response>
         /// <response code="500">Internal server error</response>
         [HttpGet]
