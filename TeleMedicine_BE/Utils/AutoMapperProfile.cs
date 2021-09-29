@@ -132,6 +132,13 @@ namespace TeleMedicine_BE.Utils
             CreateMap<MajorDoctorWithRegisterCM, MajorDoctor>();
             CreateMap<MajorDoctorUM, MajorDoctor>();
             #endregion
+
+            #region AutoMapper SlotViewModel
+            CreateMap<SlotVM, Slot>();
+            CreateMap<Slot, SlotVM>();
+            CreateMap<SlotCM, Slot>();
+            CreateMap<SlotUM, Slot>();
+            #endregion
         }
     }
 }

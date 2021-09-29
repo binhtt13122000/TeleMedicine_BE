@@ -3,6 +3,7 @@ using BusinessLogic.Services;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -28,7 +29,7 @@ namespace TeleMedicine_BE.Controllers
         }
 
         /// <summary>
-        /// Get all drug types
+        /// Get list drug types
         /// </summary>
         /// <remarks>
         /// Sample request:
@@ -39,14 +40,16 @@ namespace TeleMedicine_BE.Controllers
         ///     }
         ///
         /// </remarks>
-        /// <returns>All drug types</returns>
-        /// <response code="200">Returns all drug types</response>
+        /// <returns>List drug types</returns>
+        /// <response code="200">Returns list drug types</response>
         /// <response code="500">Internal server error</response>
         [HttpGet]
         [Produces("application/json")]
         public ActionResult<Paged<DrugTypeVM>> GetAllDrugTypes(
             [FromQuery(Name = "name")] string name,
             [FromQuery(Name = "filtering")] string filters = null,
+            [FromQuery(Name = "asc-by")] string ascBy = null,
+            [FromQuery(Name = "desc-by")] string descBy = null,
             [FromQuery(Name = "limit")] int limit = 20,
             [FromQuery(Name = "offset")] int offset = 1
         )
@@ -58,10 +61,25 @@ namespace TeleMedicine_BE.Controllers
                 {
                     drugTypesQuery = drugTypesQuery.Where(_ => _.Name.ToUpper().Contains(name.Trim().ToUpper()));
                 }
-
-                Paged<DrugTypeVM> result = _pagingSupport.From(drugTypesQuery)
+                Paged<DrugTypeVM> paged = null;
+                if (!string.IsNullOrEmpty(ascBy) && typeof(DrugTypeVM).GetProperty(ascBy) != null)
+                {
+                    paged = _pagingSupport.From(drugTypesQuery)
+                   .GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 1)
+                   .Paginate<DrugTypeVM>();
+                }
+                else if (!string.IsNullOrEmpty(descBy) && typeof(DrugTypeVM).GetProperty(descBy) != null)
+                {
+                    paged = _pagingSupport.From(drugTypesQuery)
+                   .GetRange(offset, limit, p => EF.Property<object>(p, descBy), 1)
+                   .Paginate<DrugTypeVM>();
+                }
+                else
+                {
+                    paged = _pagingSupport.From(drugTypesQuery)
                    .GetRange(offset, limit, s => s.Id, 1)
                    .Paginate<DrugTypeVM>();
+                }
                 if (!String.IsNullOrEmpty(filters))
                 {
                     bool checkHasProperty = false;
@@ -77,11 +95,11 @@ namespace TeleMedicine_BE.Controllers
                     if (checkHasProperty)
                     {
                         PropertyRenameAndIgnoreSerializerContractResolver jsonIgnore = new PropertyRenameAndIgnoreSerializerContractResolver();
-                        string json = jsonIgnore.JsonIgnore(typeof(DrugTypeVM), splitFilter, result);
+                        string json = jsonIgnore.JsonIgnore(typeof(DrugTypeVM), splitFilter, paged);
                         return Ok(JsonConvert.DeserializeObject(json));
                     }
                 }
-                return Ok(result);
+                return Ok(paged);
             }
             catch (Exception)
             {

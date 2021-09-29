@@ -10,8 +10,8 @@ namespace Infrastructure.Models
         public int Id { get; set; }
         public DateTime AssignedDate { get; set; }
         public int DoctorId { get; set; }
-        public DateTime StartTime { get; set; }
-        public DateTime EndTime { get; set; }
+        public TimeSpan StartTime { get; set; }
+        public TimeSpan EndTime { get; set; }
         public int? HealthCheckId { get; set; }
 
         public virtual Doctor Doctor { get; set; }

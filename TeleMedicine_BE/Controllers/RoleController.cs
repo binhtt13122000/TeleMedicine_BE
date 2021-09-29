@@ -3,6 +3,7 @@ using BusinessLogic.Services;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -29,10 +30,10 @@ namespace TeleMedicine_BE.Controllers
         }
 
         /// <summary>
-        /// Get all roles
+        /// Get list roles
         /// </summary>
-        /// <returns>All roles</returns>
-        /// <response code="200">Returns all roles</response>
+        /// <returns>List roles</returns>
+        /// <response code="200">Returns list roles</response>
         /// <response code="404">Not found roles</response>
         /// <response code="500">Internal server error</response>
         [HttpGet]
@@ -40,6 +41,8 @@ namespace TeleMedicine_BE.Controllers
         public ActionResult<IEnumerable<RoleVM>> GetAllRole(
             [FromQuery(Name = "name")] string name,
             [FromQuery(Name = "filtering")] string filters = null,
+            [FromQuery(Name = "asc-by")] string ascBy = null,
+            [FromQuery(Name = "desc-by")] string descBy = null,
             int offset = 1,
             int limit = 20
         )
@@ -51,7 +54,19 @@ namespace TeleMedicine_BE.Controllers
                 {
                     roleList = roleList.Where(s => s.Name.ToUpper().Contains(name.Trim().ToUpper()));
                 }
-                Paged<RoleVM> paged = _pagingSupport.From(roleList).GetRange(offset, limit, s => s.Id, 1).Paginate<RoleVM>();
+                Paged<RoleVM> paged = null;
+                if (!string.IsNullOrEmpty(ascBy) && typeof(RoleVM).GetProperty(ascBy) != null)
+                {
+                    paged = _pagingSupport.From(roleList).GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 1).Paginate<RoleVM>();
+                }
+                else if (!string.IsNullOrEmpty(descBy) && typeof(RoleVM).GetProperty(descBy) != null)
+                {
+                    paged = _pagingSupport.From(roleList).GetRange(offset, limit, p => EF.Property<object>(p, descBy), 1).Paginate<RoleVM>();
+                }
+                else
+                {
+                    paged = _pagingSupport.From(roleList).GetRange(offset, limit, s => s.Id, 1).Paginate<RoleVM>();
+                }
                 if (!String.IsNullOrEmpty(filters))
                 {
                     bool checkHasProperty = false;

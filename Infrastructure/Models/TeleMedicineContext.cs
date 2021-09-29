@@ -347,9 +347,9 @@ namespace Infrastructure.Models
 
                 entity.Property(e => e.AssignedDate).HasColumnType("date");
 
-                entity.Property(e => e.EndTime).HasColumnType("timestamp with time zone");
+                entity.Property(e => e.EndTime).HasColumnType("time without time zone");
 
-                entity.Property(e => e.StartTime).HasColumnType("timestamp with time zone");
+                entity.Property(e => e.StartTime).HasColumnType("time without time zone");
 
                 entity.HasOne(d => d.Doctor)
                     .WithMany(p => p.Slots)
