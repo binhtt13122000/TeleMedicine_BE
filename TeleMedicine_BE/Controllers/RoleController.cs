@@ -57,7 +57,7 @@ namespace TeleMedicine_BE.Controllers
                 Paged<RoleVM> paged = null;
                 if (!string.IsNullOrEmpty(ascBy) && typeof(RoleVM).GetProperty(ascBy) != null)
                 {
-                    paged = _pagingSupport.From(roleList).GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 1).Paginate<RoleVM>();
+                    paged = _pagingSupport.From(roleList).GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 0).Paginate<RoleVM>();
                 }
                 else if (!string.IsNullOrEmpty(descBy) && typeof(RoleVM).GetProperty(descBy) != null)
                 {

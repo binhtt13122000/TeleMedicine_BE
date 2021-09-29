@@ -61,7 +61,7 @@ namespace TeleMedicine_BE.Controllers
                 Paged<HospitalVM> paged = null;
                 if (!string.IsNullOrEmpty(ascBy) && typeof(HospitalVM).GetProperty(ascBy) != null)
                 {
-                    paged = _pagingSupport.From(hospitalList).GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 1).Paginate<HospitalVM>();
+                    paged = _pagingSupport.From(hospitalList).GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 0).Paginate<HospitalVM>();
                 }
                 else if (!string.IsNullOrEmpty(descBy) && typeof(HospitalVM).GetProperty(descBy) != null)
                 {
