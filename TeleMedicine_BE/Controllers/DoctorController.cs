@@ -3,10 +3,12 @@ using BusinessLogic.Services;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
 using TeleMedicine_BE.Utils;
@@ -52,12 +54,15 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "date-start-certificate")] DateTime? dateStartCertificate,
             [FromQuery(Name = "date-end-certificate")] DateTime? dateEndCertificate,
             [FromQuery(Name = "scope-certificate")] string scopeCertificate,
-            [FromQuery(Name ="number-start-consultants")] int numberStartConsultants,
+            [FromQuery(Name = "number-start-consultants")] int numberStartConsultants,
             [FromQuery(Name = "number-end-consultants")] int numberEndConsultants,
+            [FromQuery(Name = "major")] int[] majorId,
             [FromQuery(Name = "start-rating")] int startRating,
             [FromQuery(Name = "end-rating")] int endRating,
             [FromQuery(Name = "is-verify")] int isVerify = 0,
             [FromQuery(Name = "filtering")] string filters = null,
+            [FromQuery(Name = "asc-by")] string ascBy = null,
+            [FromQuery(Name = "desc-by")] string descBy = null,
             int limit = 50,
             int offset = 1
         )
@@ -104,7 +109,8 @@ namespace TeleMedicine_BE.Controllers
                 if(numberStartConsultants != 0 && numberEndConsultants != 0)
                 {
                     doctorList = doctorList.Where(s => s.NumberOfConsultants >= numberStartConsultants).Where(s => s.NumberOfConsultants <= numberEndConsultants);
-                }else
+                }
+                else
                 {
                     if(numberStartConsultants != 0)
                     {
@@ -119,7 +125,8 @@ namespace TeleMedicine_BE.Controllers
                 if(startRating != 0 && endRating != 0)
                 {
                     doctorList = doctorList.Where(s => s.Rating >= startRating).Where(s => s.Rating <= endRating);
-                }else
+                }
+                else
                 {
                     if(startRating != 0)
                     {
@@ -142,8 +149,35 @@ namespace TeleMedicine_BE.Controllers
                         doctorList = doctorList.Where(s => s.IsVerify == false);
                     }
                 }
-
-                Paged<DoctorVM> paged = _pagingSupport.From(doctorList).GetRange(offset, limit, s => s.Id, 1).Paginate<DoctorVM>();
+                if (majorId != null && majorId.Length > 0)
+                {
+                    foreach (int major in majorId)
+                    {
+                        Major selectMajor = _majorService.GetAll(s => s.MajorDoctors).Where(s => s.Id == major).FirstOrDefault();
+                        if (selectMajor != null)
+                        {
+                            List<MajorDoctor> listMajorDoctor = selectMajor.MajorDoctors.ToList();
+                            foreach (MajorDoctor majorDoctor in listMajorDoctor)
+                            {
+                                doctorList = doctorList.Where(s => s.MajorDoctors.Count > 0 && s.MajorDoctors.Any(s => s.MajorId == majorDoctor.MajorId));
+                            }
+                        }
+                    }
+                }
+                
+                Paged<DoctorVM> paged = null;
+                if (!string.IsNullOrEmpty(ascBy) && typeof(DoctorVM).GetProperty(ascBy) != null)
+                {
+                    paged = _pagingSupport.From(doctorList).GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 0).Paginate<DoctorVM>();
+                }
+                else if (!string.IsNullOrEmpty(descBy) && typeof(DoctorVM).GetProperty(descBy) != null)
+                {
+                    paged = _pagingSupport.From(doctorList).GetRange(offset, limit, p => EF.Property<object>(p, descBy), 1).Paginate<DoctorVM>();
+                }else
+                {
+                    paged = _pagingSupport.From(doctorList).GetRange(offset, limit, s => s.Id, 1).Paginate<DoctorVM>();
+                }
+                
                 if (!String.IsNullOrEmpty(filters))
                 {
                     bool checkHasProperty = false;

@@ -3,6 +3,7 @@ using BusinessLogic.Services;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -40,6 +41,8 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "hospital-code")] string hospitalCode,
             [FromQuery(Name = "name")] string name,
             [FromQuery(Name = "filtering")] string filters = null,
+            [FromQuery(Name = "asc-by")] string ascBy = null,
+            [FromQuery(Name = "desc-by")] string descBy = null,
             int limit = 20,
             int offset = 1
         )
@@ -55,7 +58,19 @@ namespace TeleMedicine_BE.Controllers
                 {
                     hospitalList = hospitalList.Where(s => s.Name.ToUpper().Contains(name.Trim().ToUpper()));
                 }
-                Paged<HospitalVM> pageModel = _pagingSupport.From(hospitalList).GetRange(offset, limit, s => s.Id, 1).Paginate<HospitalVM>();
+                Paged<HospitalVM> paged = null;
+                if (!string.IsNullOrEmpty(ascBy) && typeof(HospitalVM).GetProperty(ascBy) != null)
+                {
+                    paged = _pagingSupport.From(hospitalList).GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 1).Paginate<HospitalVM>();
+                }
+                else if (!string.IsNullOrEmpty(descBy) && typeof(HospitalVM).GetProperty(descBy) != null)
+                {
+                    paged = _pagingSupport.From(hospitalList).GetRange(offset, limit, p => EF.Property<object>(p, descBy), 1).Paginate<HospitalVM>();
+                }
+                else
+                {
+                    paged = _pagingSupport.From(hospitalList).GetRange(offset, limit, s => s.Id, 1).Paginate<HospitalVM>();
+                }
                 if (!String.IsNullOrEmpty(filters))
                 {
                     bool checkHasProperty = false;
@@ -71,11 +86,11 @@ namespace TeleMedicine_BE.Controllers
                     if (checkHasProperty)
                     {
                         PropertyRenameAndIgnoreSerializerContractResolver jsonIgnore = new PropertyRenameAndIgnoreSerializerContractResolver();
-                        string json = jsonIgnore.JsonIgnore(typeof(HospitalVM), splitFilter, pageModel);
+                        string json = jsonIgnore.JsonIgnore(typeof(HospitalVM), splitFilter, paged);
                         return Ok(JsonConvert.DeserializeObject(json));
                     }
                 }
-                return Ok(pageModel);
+                return Ok(paged);
             }
             catch (Exception)
             {

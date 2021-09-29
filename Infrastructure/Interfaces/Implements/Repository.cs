@@ -126,6 +126,9 @@ namespace Infrastructure.Interfaces.Implements
             }
         }
 
-        
+        public async Task<int> Save()
+        {
+            return await _dbContext.SaveChangesAsync();
+        }
     }
 }

@@ -3,6 +3,7 @@ using BusinessLogic.Services;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -40,6 +41,8 @@ namespace TeleMedicine_BE.Controllers
         public ActionResult<IEnumerable<CertificationVM>> GetAllCertifications(
             [FromQuery(Name = "name")] string name,
             [FromQuery(Name = "filtering")] string filters = null,
+            [FromQuery(Name = "asc-by")] string ascBy = null,
+            [FromQuery(Name = "desc-by")] string descBy = null,
             int offset = 1,
             int limit = 20
         )
@@ -51,7 +54,19 @@ namespace TeleMedicine_BE.Controllers
                 {
                     certificationList = certificationList.Where(s => s.Name.ToUpper().Contains(name.Trim().ToUpper()));
                 }
-                Paged<CertificationVM> paged = _pagingSupport.From(certificationList).GetRange(offset, limit, s => s.Id, 1).Paginate<CertificationVM>();
+                Paged<CertificationVM> paged = null;
+                if (!string.IsNullOrEmpty(ascBy) && typeof(CertificationVM).GetProperty(ascBy) != null)
+                {
+                    paged = _pagingSupport.From(certificationList).GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 1).Paginate<CertificationVM>();
+                }
+                else if (!string.IsNullOrEmpty(descBy) && typeof(CertificationVM).GetProperty(descBy) != null)
+                {
+                    paged = _pagingSupport.From(certificationList).GetRange(offset, limit, p => EF.Property<object>(p, descBy), 1).Paginate<CertificationVM>();
+                }
+                else
+                {
+                    paged = _pagingSupport.From(certificationList).GetRange(offset, limit, s => s.Id, 1).Paginate<CertificationVM>();
+                }
                 if (!String.IsNullOrEmpty(filters))
                 {
                     bool checkHasProperty = false;

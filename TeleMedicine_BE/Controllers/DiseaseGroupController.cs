@@ -3,6 +3,7 @@ using BusinessLogic.Services;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -40,6 +41,8 @@ namespace TeleMedicine_BE.Controllers
         public ActionResult<IEnumerable<DiseaseGroupVM>> GetAllDiseaseGroups(
             [FromQuery(Name = "group-name")] string groupName,
             [FromQuery(Name = "filtering")] string filters = null,
+            [FromQuery(Name = "asc-by")] string ascBy = null,
+            [FromQuery(Name = "desc-by")] string descBy = null,
             int offset = 1,
             int limit = 20
             )
@@ -51,7 +54,20 @@ namespace TeleMedicine_BE.Controllers
                 {
                     diseaseGroups = diseaseGroups.Where(s => s.GroupName.ToUpper().Contains(groupName.Trim().ToUpper()));
                 }
-                Paged<DiseaseGroupVM> paged = _pagingSupport.From(diseaseGroups).GetRange(offset, limit, s => s.Id, 1).Paginate<DiseaseGroupVM>();
+                Paged<DiseaseGroupVM> paged = null;
+                if (!string.IsNullOrEmpty(ascBy) && typeof(DiseaseGroupVM).GetProperty(ascBy) != null)
+                {
+                    paged = _pagingSupport.From(diseaseGroups).GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 1).Paginate<DiseaseGroupVM>();
+                }
+                else if (!string.IsNullOrEmpty(descBy) && typeof(DiseaseGroupVM).GetProperty(descBy) != null)
+                {
+                    paged = _pagingSupport.From(diseaseGroups).GetRange(offset, limit, p => EF.Property<object>(p, descBy), 1).Paginate<DiseaseGroupVM>();
+                }
+                else
+                {
+                    paged = _pagingSupport.From(diseaseGroups).GetRange(offset, limit, s => s.Id, 1).Paginate<DiseaseGroupVM>();
+                }
+               
                 if (!String.IsNullOrEmpty(filters))
                 {
                     bool checkHasProperty = false;

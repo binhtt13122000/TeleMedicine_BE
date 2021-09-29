@@ -3,6 +3,7 @@ using BusinessLogic.Services;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -49,6 +50,8 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "start-time")] TimeSpan startTime,
             [FromQuery(Name = "end-time")] TimeSpan endTime,
             [FromQuery(Name = "filtering")] string filters = null,
+            [FromQuery(Name = "asc-by")] string ascBy = null,
+            [FromQuery(Name = "desc-by")] string descBy = null,
             [FromQuery] int offset = 1,
             [FromQuery] int limit = 50
         )
@@ -108,7 +111,19 @@ namespace TeleMedicine_BE.Controllers
                 {
                     slotList = slotList.Where(s => s.EndTime.CompareTo(endTime) <= 0);
                 }
-                Paged<SlotVM> paged = _pagingSupport.From(slotList).GetRange(offset, limit, s => s.Id, 1).Paginate<SlotVM>();
+                Paged<SlotVM> paged = null;
+                if (!string.IsNullOrEmpty(ascBy) && typeof(SlotVM).GetProperty(ascBy) != null)
+                {
+                    paged = _pagingSupport.From(slotList).GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 1).Paginate<SlotVM>();
+                }
+                else if (!string.IsNullOrEmpty(descBy) && typeof(SlotVM).GetProperty(descBy) != null)
+                {
+                    paged = _pagingSupport.From(slotList).GetRange(offset, limit, p => EF.Property<object>(p, descBy), 1).Paginate<SlotVM>();
+                }
+                else
+                {
+                    paged = _pagingSupport.From(slotList).GetRange(offset, limit, s => s.Id, 1).Paginate<SlotVM>();
+                }
                 if (!String.IsNullOrEmpty(filters))
                 {
                     bool checkHasProperty = false;
@@ -211,40 +226,48 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="500">Failed to save request</response>
         [HttpPost]
         [Produces("application/json")]
-        public async Task<ActionResult<SlotVM>> CreateSlot([FromBody] SlotCM model)
+        public async Task<ActionResult<SlotVM>> CreateSlot([FromBody] SlotCM[] model)
         {
             try
             {
-                DateTime date = DateTime.Parse(model.AssignedDate.ToShortDateString());
-                Doctor currentDoctor = await _doctorService.GetByIdAsync(model.DoctorId);
-                if(currentDoctor == null)
+                List<SlotCM> slotList = model.ToList();
+                List<Slot> newListConvert = new List<Slot>();
+                for(int i = 0; i <slotList.Count; i++)
                 {
-                    return BadRequest(new
+                    DateTime date = DateTime.Parse(slotList[i].AssignedDate.ToShortDateString());
+                    Doctor currentDoctor = await _doctorService.GetByIdAsync(slotList[i].DoctorId);
+                    if (currentDoctor == null)
                     {
-                        message = "Can not found doctor by id: " + model.DoctorId
-                    });
-                }
-                List<Slot> getSlotsInDay = _slotService.GetAll().Where(s => s.DoctorId == model.DoctorId).
-                                                                       Where(s => s.AssignedDate.CompareTo(date) >= 0).
-                                                                       Where(s => s.AssignedDate.CompareTo(date.AddDays(1).AddSeconds(-1)) <= 0).ToList();
-                if (getSlotsInDay.Count > 0)
-                {
-                    for (int i = 0; i < getSlotsInDay.Count; i++)
-                    {
-                        if (model.StartTime.CompareTo(getSlotsInDay[i].EndTime) < 0 && getSlotsInDay[i].StartTime.CompareTo(model.EndTime) < 0)
+                        return BadRequest(new
                         {
-                            return BadRequest(new
+                            message = "Can not found doctor by id: " + slotList[i].DoctorId
+                        });
+                    }
+                    List<Slot> getSlotsInDay = _slotService.GetAll().Where(s => s.DoctorId == slotList[i].DoctorId).
+                                                                           Where(s => s.AssignedDate.CompareTo(date) >= 0).
+                                                                           Where(s => s.AssignedDate.CompareTo(date.AddDays(1).AddSeconds(-1)) <= 0).ToList();
+                    if (getSlotsInDay.Count > 0)
+                    {
+                        for (int j = 0; j < getSlotsInDay.Count; j++)
+                        {
+                            if (slotList[i].StartTime.CompareTo(getSlotsInDay[j].EndTime) < 0 && getSlotsInDay[j].StartTime.CompareTo(slotList[i].EndTime) < 0)
                             {
-                                message = "Time ovelap!"
-                            });
+                                return BadRequest(new
+                                {
+                                    message = "Time ovelap!"
+                                });
+                            }
                         }
                     }
+                    slotList[i].AssignedDate = date;
+                    newListConvert.Add(_mapper.Map<Slot>(slotList[i]));
                 }
-                model.AssignedDate = date;
-                Slot slotCreated = await _slotService.AddAsync(_mapper.Map<Slot>(model));
-                if(slotCreated != null)
+                bool isCreated = await _slotService.AddSlotsAsync(newListConvert);
+                if(isCreated)
                 {
-                    return CreatedAtAction("GetSlotById", new { id = slotCreated.Id }, _mapper.Map<SlotVM>(slotCreated));
+                    return Ok(new {
+                        message = "Success"
+                    });
                 }
                 return BadRequest(new
                 {

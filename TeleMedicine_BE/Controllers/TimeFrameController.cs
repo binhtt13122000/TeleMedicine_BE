@@ -3,6 +3,7 @@ using BusinessLogic.Services;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -40,6 +41,8 @@ namespace TeleMedicine_BE.Controllers
             TimeSpan startTime,
             TimeSpan endTime,
             [FromQuery(Name = "filtering")] string filters = null,
+            [FromQuery(Name = "asc-by")] string ascBy = null,
+            [FromQuery(Name = "desc-by")] string descBy = null,
             int offset = 1,
             int limit = 20
         )
@@ -55,7 +58,19 @@ namespace TeleMedicine_BE.Controllers
                 {
                     timeFrames = timeFrames.Where(s => s.EndTime.CompareTo(endTime) <= 0);
                 }
-                Paged<TimeFrameVM> paged = _pagingSupport.From(timeFrames).GetRange(offset, limit, s => s.Id, 1).Paginate<TimeFrameVM>();
+                Paged<TimeFrameVM> paged = null;
+                if (!string.IsNullOrEmpty(ascBy) && typeof(TimeFrameVM).GetProperty(ascBy) != null)
+                {
+                    paged = _pagingSupport.From(timeFrames).GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 1).Paginate<TimeFrameVM>();
+                }
+                else if (!string.IsNullOrEmpty(descBy) && typeof(TimeFrameVM).GetProperty(descBy) != null)
+                {
+                    paged = _pagingSupport.From(timeFrames).GetRange(offset, limit, p => EF.Property<object>(p, descBy), 1).Paginate<TimeFrameVM>();
+                }
+                else
+                {
+                    paged = _pagingSupport.From(timeFrames).GetRange(offset, limit, s => s.Id, 1).Paginate<TimeFrameVM>();
+                }
                 if (!String.IsNullOrEmpty(filters))
                 {
                     bool checkHasProperty = false;
