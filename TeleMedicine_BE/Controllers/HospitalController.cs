@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BusinessLogic.Services;
 using Infrastructure.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +18,6 @@ namespace TeleMedicine_BE.Controllers
 {
     [Route("api/v1/hospitals")]
     [ApiController]
-    [Authorize]
     public class HospitalController : Controller
     {
         private readonly IHospitalService _hospitalService;
@@ -38,6 +38,7 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="404">Not found hospitals</response>
         /// <response code="500">Internal server error</response>
         [HttpGet]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Produces("application/json")]
         public ActionResult<IEnumerable<HospitalVM>> GetAllHospital(
             [FromQuery(Name = "hospital-code")] string hospitalCode,
@@ -110,6 +111,7 @@ namespace TeleMedicine_BE.Controllers
         [HttpGet]
         [Route("{id}")]
         [Produces("application/json")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<ActionResult<HospitalVM>> GetHospitalById(int id)
         {
             try
@@ -139,6 +141,7 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="500">Failed to save request</response>
         [HttpPost]
         [Produces("application/json")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Role = "2")]
         public async Task<ActionResult<HospitalCM>> CreateHospital([FromBody] HospitalCM model)
         {
             Hospital hospital = _mapper.Map<Hospital>(model);

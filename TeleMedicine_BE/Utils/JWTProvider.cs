@@ -36,30 +36,31 @@ namespace BeautyAtHome.Utils
                 //signing credentials
                 var signingCredentials = new SigningCredentials(symmectricSecurityKey, SecurityAlgorithms.HmacSha256);
 
-                var additionalClaims = new List<Claim>
+                var tokenDescriptor = new SecurityTokenDescriptor
                 {
-                    new Claim("role", accountCreated.Role.Id.ToString()),
-                    new Claim("uid", accountCreated.Id.ToString()),
-                    new Claim("email", accountCreated.Email.ToString())
+                    Subject = new ClaimsIdentity(new Claim[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier, accountCreated.Id + ""),
+                    new Claim(ClaimTypes.GivenName, accountCreated.FirstName + " " + accountCreated.LastName),
+                    new Claim(ClaimTypes.Role, accountCreated.Role.Id + "")
+                }),
+                    Audience = _configuration["Jwt:Audience"],
+                    Issuer = _configuration["Jwt:Issuer"],
+                    Expires = DateTime.Now.AddDays(60),
+                    SigningCredentials = signingCredentials,
                 };
-
-                var token = new JwtSecurityToken(
-                        issuer: _configuration["jwt:Issuer"],
-                        audience: _configuration["jwt:Audience"],
-                        expires: DateTime.Now.AddDays(1),
-                        claims: additionalClaims,
-                        signingCredentials: signingCredentials
-                    );
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var token = tokenHandler.CreateToken(tokenDescriptor);
 
                 //return token
                 return _jwtSecurityTokenHandler.WriteToken(token);
-            });
+        });
 
         }
 
-        public Task<string> GetPayloadFromToken(string tokenString, string key)
-        {
-            return Task.Run(() => (string)_jwtSecurityTokenHandler.ReadJwtToken(tokenString).Payload[key]);
-        }
+    public Task<string> GetPayloadFromToken(string tokenString, string key)
+    {
+        return Task.Run(() => (string)_jwtSecurityTokenHandler.ReadJwtToken(tokenString).Payload[key]);
     }
+}
 }

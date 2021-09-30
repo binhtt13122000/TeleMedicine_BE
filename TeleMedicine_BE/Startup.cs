@@ -119,6 +119,7 @@ namespace TeleMedicine_BE
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration["jwt:Key"])),
                     ValidAudience = Configuration["jwt:Audience"],
                     ValidIssuer = Configuration["jwt:Issuer"],
+                    ValidateLifetime = true,
                 };
             });
 
