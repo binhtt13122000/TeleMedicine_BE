@@ -57,7 +57,7 @@ namespace TeleMedicine_BE.Controllers
                 Paged<MajorVM> paged = null;
                 if (!string.IsNullOrEmpty(ascBy) && typeof(MajorVM).GetProperty(ascBy) != null)
                 {
-                    paged = _pagingSupport.From(majorList).GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 1).Paginate<MajorVM>();
+                    paged = _pagingSupport.From(majorList).GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 0).Paginate<MajorVM>();
                 }
                 else if (!string.IsNullOrEmpty(descBy) && typeof(MajorVM).GetProperty(descBy) != null)
                 {

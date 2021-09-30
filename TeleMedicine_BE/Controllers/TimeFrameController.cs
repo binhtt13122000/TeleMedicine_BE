@@ -61,7 +61,7 @@ namespace TeleMedicine_BE.Controllers
                 Paged<TimeFrameVM> paged = null;
                 if (!string.IsNullOrEmpty(ascBy) && typeof(TimeFrameVM).GetProperty(ascBy) != null)
                 {
-                    paged = _pagingSupport.From(timeFrames).GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 1).Paginate<TimeFrameVM>();
+                    paged = _pagingSupport.From(timeFrames).GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 0).Paginate<TimeFrameVM>();
                 }
                 else if (!string.IsNullOrEmpty(descBy) && typeof(TimeFrameVM).GetProperty(descBy) != null)
                 {

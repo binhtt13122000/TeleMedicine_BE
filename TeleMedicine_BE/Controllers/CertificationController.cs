@@ -57,7 +57,7 @@ namespace TeleMedicine_BE.Controllers
                 Paged<CertificationVM> paged = null;
                 if (!string.IsNullOrEmpty(ascBy) && typeof(CertificationVM).GetProperty(ascBy) != null)
                 {
-                    paged = _pagingSupport.From(certificationList).GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 1).Paginate<CertificationVM>();
+                    paged = _pagingSupport.From(certificationList).GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 0).Paginate<CertificationVM>();
                 }
                 else if (!string.IsNullOrEmpty(descBy) && typeof(CertificationVM).GetProperty(descBy) != null)
                 {

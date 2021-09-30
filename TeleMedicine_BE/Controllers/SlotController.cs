@@ -114,7 +114,7 @@ namespace TeleMedicine_BE.Controllers
                 Paged<SlotVM> paged = null;
                 if (!string.IsNullOrEmpty(ascBy) && typeof(SlotVM).GetProperty(ascBy) != null)
                 {
-                    paged = _pagingSupport.From(slotList).GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 1).Paginate<SlotVM>();
+                    paged = _pagingSupport.From(slotList).GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 0).Paginate<SlotVM>();
                 }
                 else if (!string.IsNullOrEmpty(descBy) && typeof(SlotVM).GetProperty(descBy) != null)
                 {

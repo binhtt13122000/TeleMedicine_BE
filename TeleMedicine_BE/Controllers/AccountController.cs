@@ -141,7 +141,7 @@ namespace TeleMedicine_BE.Controllers
                 Paged<AccountManageVM> paged = null;
                 if (!string.IsNullOrEmpty(ascBy) && typeof(AccountManageVM).GetProperty(ascBy) != null)
                 {
-                    paged = _pagingSupport.From(accountsQuery).GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 1).Paginate<AccountManageVM>();
+                    paged = _pagingSupport.From(accountsQuery).GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 0).Paginate<AccountManageVM>();
                 }
                 else if (!string.IsNullOrEmpty(descBy) && typeof(AccountManageVM).GetProperty(descBy) != null)
                 {

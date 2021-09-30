@@ -85,7 +85,7 @@ namespace TeleMedicine_BE.Controllers
                 Paged<NotificationVM> paged = null;
                 if (!string.IsNullOrEmpty(ascBy) && typeof(NotificationVM).GetProperty(ascBy) != null)
                 {
-                    paged = _pagingSupport.From(notifications).GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 1).Paginate<NotificationVM>();
+                    paged = _pagingSupport.From(notifications).GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 0).Paginate<NotificationVM>();
                 }
                 else if (!string.IsNullOrEmpty(descBy) && typeof(NotificationVM).GetProperty(descBy) != null)
                 {

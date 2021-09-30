@@ -65,7 +65,7 @@ namespace TeleMedicine_BE.Controllers
                 if (!string.IsNullOrEmpty(ascBy) && typeof(DrugTypeVM).GetProperty(ascBy) != null)
                 {
                     paged = _pagingSupport.From(drugTypesQuery)
-                   .GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 1)
+                   .GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 0)
                    .Paginate<DrugTypeVM>();
                 }
                 else if (!string.IsNullOrEmpty(descBy) && typeof(DrugTypeVM).GetProperty(descBy) != null)
