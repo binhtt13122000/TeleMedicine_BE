@@ -51,12 +51,12 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "phone")] string phone,
             [FromQuery(Name = "start-dob")] DateTime? startDob,
             [FromQuery(Name = "end-dob")] DateTime? endDob,
+            [FromQuery(Name = "field-by")] AccountFieldEnum fieldBy,
+            [FromQuery(Name = "sort-by")] SortTypeEnum sortBy,
             [FromQuery(Name = "is-male")] int isMale = 0,
             [FromQuery(Name = "active")] int active = 0,
             [FromQuery(Name = "role-name")] string roleName = null,
             [FromQuery(Name = "filtering")] string filters = null,
-            [FromQuery(Name = "asc-by")] string ascBy = null,
-            [FromQuery(Name = "desc-by")] string descBy = null,
             int offset = 1,
             int limit = 20
         )
@@ -141,13 +141,13 @@ namespace TeleMedicine_BE.Controllers
                     accountsQuery = accountsQuery.Where(s => s.Role.Name.ToUpper().Contains(roleName.Trim().ToUpper()));
                 }
                 Paged<AccountManageVM> paged = null;
-                if (!string.IsNullOrEmpty(ascBy) && typeof(AccountManageVM).GetProperty(ascBy) != null)
+                if (sortBy == SortTypeEnum.asc && typeof(AccountManageVM).GetProperty(fieldBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(accountsQuery).GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 0).Paginate<AccountManageVM>();
+                    paged = _pagingSupport.From(accountsQuery).GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0).Paginate<AccountManageVM>();
                 }
-                else if (!string.IsNullOrEmpty(descBy) && typeof(AccountManageVM).GetProperty(descBy) != null)
+                else if (sortBy == SortTypeEnum.desc && typeof(AccountManageVM).GetProperty(fieldBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(accountsQuery).GetRange(offset, limit, p => EF.Property<object>(p, descBy), 1).Paginate<AccountManageVM>();
+                    paged = _pagingSupport.From(accountsQuery).GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1).Paginate<AccountManageVM>();
                 }
                 else
                 {

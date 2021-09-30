@@ -6,6 +6,13 @@ using System.Threading.Tasks;
 
 namespace TeleMedicine_BE.ViewModels
 {
+
+    public enum CertificationFieldEnum
+    {
+        Id,
+        Name,
+    }
+
     public class CertificationVM
     {
         public int Id { get; set; }

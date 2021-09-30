@@ -7,6 +7,19 @@ using System.Threading.Tasks;
 
 namespace TeleMedicine_BE.ViewModels
 {
+
+    public enum DoctorFieldEnum
+    {
+        Id,
+        Email,
+        PractisingCertificate,
+        CertificateCode,
+        PlaceOfCertificate,
+        DateOfCertificate,
+        ScopeOfPractice,
+        NumberOfConsultants,
+        Rating,
+    }
     public class DoctorVM
     {
         public int Id { get; set; }

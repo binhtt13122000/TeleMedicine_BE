@@ -5,6 +5,18 @@ using System.Threading.Tasks;
 
 namespace TeleMedicine_BE.ViewModels
 {
+    public enum HealthCheckFieldEnum
+    {
+        Id,
+        Height,
+        Weight,
+        ReasonCancel,
+        Rating,
+        Advice,
+        PatientId,
+        CreatedTime,
+        CanceledTime
+    }
     public class HealthCheckVM
     {
         public int Id { get; set; }

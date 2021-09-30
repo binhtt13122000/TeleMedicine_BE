@@ -51,9 +51,9 @@ namespace TeleMedicine_BE.Controllers
         public ActionResult<Paged<SymptomVM>> GetAllSymptom(
             [FromQuery(Name = "code")] string symptomCode, 
             [FromQuery(Name = "name")] string name,
+            [FromQuery(Name = "field-by")] SymptomFieldEnum fieldBy,
+            [FromQuery(Name = "sort-by")] SortTypeEnum sortBy,
             [FromQuery(Name = "filtering")] string filters = null,
-            [FromQuery(Name = "asc-by")] string ascBy = null,
-            [FromQuery(Name = "desc-by")] string descBy = null,
             [FromQuery(Name = "limit")] int limit = 20, 
             [FromQuery(Name = "offset")] int offset = 1
         )
@@ -71,16 +71,16 @@ namespace TeleMedicine_BE.Controllers
                 }
 
                 Paged<SymptomVM> paged = null;
-                if (!string.IsNullOrEmpty(ascBy) && typeof(SymptomVM).GetProperty(ascBy) != null)
+                if (sortBy == SortTypeEnum.asc && typeof(SymptomVM).GetProperty(fieldBy.ToString()) != null)
                 {
                     paged = _pagingSupport.From(symptomsQuery)
-                   .GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 0)
+                   .GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0)
                    .Paginate<SymptomVM>();
                 }
-                else if (!string.IsNullOrEmpty(descBy) && typeof(SymptomVM).GetProperty(descBy) != null)
+                else if (sortBy == SortTypeEnum.desc && typeof(SymptomVM).GetProperty(fieldBy.ToString()) != null)
                 {
                     paged = _pagingSupport.From(symptomsQuery)
-                   .GetRange(offset, limit, p => EF.Property<object>(p, descBy), 1)
+                   .GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1)
                    .Paginate<SymptomVM>();
                 }
                 else

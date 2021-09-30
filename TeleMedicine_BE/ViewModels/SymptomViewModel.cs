@@ -6,6 +6,12 @@ using System.Threading.Tasks;
 
 namespace TeleMedicine_BE.ViewModels
 {
+    public enum SymptomFieldEnum
+    {
+        Id,
+        SymptomCode,
+        Name
+    }
     public class SymptomVM
     {
         public int Id { get; set; }

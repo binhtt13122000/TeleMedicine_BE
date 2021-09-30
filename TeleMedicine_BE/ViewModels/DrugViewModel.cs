@@ -2,6 +2,15 @@
 
 namespace TeleMedicine_BE.ViewModels
 {
+    public enum DrugFieldEnum
+    {
+        Id,
+        Name,
+        Producer,
+        DrugOrigin,
+        DrugForm,
+        DrugTypeId
+    }
     public class DrugVM
     {
         public int Id { get; set; }
