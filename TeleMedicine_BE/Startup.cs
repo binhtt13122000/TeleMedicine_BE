@@ -99,6 +99,9 @@ namespace TeleMedicine_BE
             services.AddTransient<IDoctorRepository, DoctorRepository>();
             services.AddTransient<IDoctorService, DoctorService>();
 
+            services.AddTransient<ISlotRepository, SlotRepository>();
+            services.AddTransient<ISlotService, SlotService>();
+
             services
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>

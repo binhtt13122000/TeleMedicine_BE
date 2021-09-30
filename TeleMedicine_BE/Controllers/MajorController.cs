@@ -3,6 +3,7 @@ using BusinessLogic.Services;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -29,10 +30,10 @@ namespace TeleMedicine_BE.Controllers
         }
 
         /// <summary>
-        /// Get all majors
+        /// Get list majors
         /// </summary>
-        /// <returns>All majors</returns>
-        /// <response code="200">Returns all majors</response>
+        /// <returns>List majors</returns>
+        /// <response code="200">Returns list majors</response>
         /// <response code="404">Not found majors</response>
         /// <response code="500">Internal server error</response>
         [HttpGet]
@@ -40,6 +41,8 @@ namespace TeleMedicine_BE.Controllers
         public ActionResult<IEnumerable<MajorVM>> GetAllMajor(
             [FromQuery(Name = "name")] string name,
             [FromQuery(Name = "filtering")] string filters = null,
+            [FromQuery(Name = "asc-by")] string ascBy = null,
+            [FromQuery(Name = "desc-by")] string descBy = null,
             int offset = 1,
             int limit = 20
         )
@@ -51,7 +54,19 @@ namespace TeleMedicine_BE.Controllers
                 {
                     majorList = majorList.Where(s => s.Name.ToUpper().Contains(name.Trim().ToUpper()));
                 }
-                Paged<MajorVM> paged = _pagingSupport.From(majorList).GetRange(offset, limit, s => s.Id, 1).Paginate<MajorVM>();
+                Paged<MajorVM> paged = null;
+                if (!string.IsNullOrEmpty(ascBy) && typeof(MajorVM).GetProperty(ascBy) != null)
+                {
+                    paged = _pagingSupport.From(majorList).GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 0).Paginate<MajorVM>();
+                }
+                else if (!string.IsNullOrEmpty(descBy) && typeof(MajorVM).GetProperty(descBy) != null)
+                {
+                    paged = _pagingSupport.From(majorList).GetRange(offset, limit, p => EF.Property<object>(p, descBy), 1).Paginate<MajorVM>();
+                }
+                else
+                {
+                    paged = _pagingSupport.From(majorList).GetRange(offset, limit, s => s.Id, 1).Paginate<MajorVM>();
+                }
                 if (!String.IsNullOrEmpty(filters))
                 {
                     bool checkHasProperty = false;

@@ -30,7 +30,7 @@ namespace TeleMedicine_BE.Controllers
 
 
         /// <summary>
-        /// Get all symptoms
+        /// Get list symptoms
         /// </summary>
         /// <remarks>
         /// Sample request:
@@ -41,8 +41,8 @@ namespace TeleMedicine_BE.Controllers
         ///     }
         ///
         /// </remarks>
-        /// <returns>All symptoms</returns>
-        /// <response code="200">Returns all symptoms</response>
+        /// <returns>List symptoms</returns>
+        /// <response code="200">Returns list symptoms</response>
         /// <response code="500">Internal server error</response>
         [HttpGet]
         [Produces("application/json")]
@@ -50,6 +50,8 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "code")] string symptomCode, 
             [FromQuery(Name = "name")] string name,
             [FromQuery(Name = "filtering")] string filters = null,
+            [FromQuery(Name = "asc-by")] string ascBy = null,
+            [FromQuery(Name = "desc-by")] string descBy = null,
             [FromQuery(Name = "limit")] int limit = 20, 
             [FromQuery(Name = "offset")] int offset = 1
         )
@@ -66,10 +68,25 @@ namespace TeleMedicine_BE.Controllers
                     symptomsQuery = symptomsQuery.Where(_ => _.Name.ToUpper().Contains(name.Trim().ToUpper()));
                 }
 
-
-                Paged<SymptomVM> result = _pagingSupport.From(symptomsQuery)
+                Paged<SymptomVM> paged = null;
+                if (!string.IsNullOrEmpty(ascBy) && typeof(SymptomVM).GetProperty(ascBy) != null)
+                {
+                    paged = _pagingSupport.From(symptomsQuery)
+                   .GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 0)
+                   .Paginate<SymptomVM>();
+                }
+                else if (!string.IsNullOrEmpty(descBy) && typeof(SymptomVM).GetProperty(descBy) != null)
+                {
+                    paged = _pagingSupport.From(symptomsQuery)
+                   .GetRange(offset, limit, p => EF.Property<object>(p, descBy), 1)
+                   .Paginate<SymptomVM>();
+                }
+                else
+                {
+                    paged = _pagingSupport.From(symptomsQuery)
                    .GetRange(offset, limit, s => s.Id, 1)
                    .Paginate<SymptomVM>();
+                }
                 if (!String.IsNullOrEmpty(filters))
                 {
                     bool checkHasProperty = false;
@@ -85,11 +102,11 @@ namespace TeleMedicine_BE.Controllers
                     if (checkHasProperty)
                     {
                         PropertyRenameAndIgnoreSerializerContractResolver jsonIgnore = new PropertyRenameAndIgnoreSerializerContractResolver();
-                        string json = jsonIgnore.JsonIgnore(typeof(SymptomVM), splitFilter, result);
+                        string json = jsonIgnore.JsonIgnore(typeof(SymptomVM), splitFilter, paged);
                         return Ok(JsonConvert.DeserializeObject(json));
                     }
                 }
-                return Ok(result);
+                return Ok(paged);
             } catch (Exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);

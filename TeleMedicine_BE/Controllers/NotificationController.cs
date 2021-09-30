@@ -3,6 +3,7 @@ using BusinessLogic.Services;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -31,10 +32,10 @@ namespace TeleMedicine_BE.Controllers
         }
 
         /// <summary>
-        /// Get all notifications
+        /// Get list notifications
         /// </summary>
-        /// <returns>All roles</returns>
-        /// <response code="200">Returns all notifications</response>
+        /// <returns>All notifications</returns>
+        /// <response code="200">Returns list notifications</response>
         /// <response code="404">Not found notifications</response>
         /// <response code="500">Internal server error</response>
         [HttpGet]
@@ -45,6 +46,8 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "start-date")] DateTime? startDate,
             [FromQuery(Name = "end-date")] DateTime? endDate,
             [FromQuery(Name = "filtering")] string filters = null,
+            [FromQuery(Name = "asc-by")] string ascBy = null,
+            [FromQuery(Name = "desc-by")] string descBy = null,
             int offset = 1,
             int limit = 20
         )
@@ -78,7 +81,20 @@ namespace TeleMedicine_BE.Controllers
                         notifications = notifications.Where(s => s.CreatedDate >= today).Where(s => s.CreatedDate <= mid);
                     }
                 }
-                Paged<NotificationVM> paged = _pagingSupport.From(notifications).GetRange(offset, limit, s => s.Id, 1).Paginate<NotificationVM>();
+
+                Paged<NotificationVM> paged = null;
+                if (!string.IsNullOrEmpty(ascBy) && typeof(NotificationVM).GetProperty(ascBy) != null)
+                {
+                    paged = _pagingSupport.From(notifications).GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 0).Paginate<NotificationVM>();
+                }
+                else if (!string.IsNullOrEmpty(descBy) && typeof(NotificationVM).GetProperty(descBy) != null)
+                {
+                    paged = _pagingSupport.From(notifications).GetRange(offset, limit, p => EF.Property<object>(p, descBy), 1).Paginate<NotificationVM>();
+                }
+                else
+                {
+                    paged = _pagingSupport.From(notifications).GetRange(offset, limit, s => s.Id, 1).Paginate<NotificationVM>();
+                }
                 if (!String.IsNullOrEmpty(filters))
                 {
                     bool checkHasProperty = false;
