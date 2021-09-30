@@ -141,7 +141,7 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="500">Failed to save request</response>
         [HttpPost]
         [Produces("application/json")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Role = "2")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "2")]
         public async Task<ActionResult<HospitalCM>> CreateHospital([FromBody] HospitalCM model)
         {
             Hospital hospital = _mapper.Map<Hospital>(model);
