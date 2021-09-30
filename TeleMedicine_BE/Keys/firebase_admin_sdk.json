@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "telemedicine-fc0ee",
+  "private_key_id": "9865a752ece774df94bd83ee5c9c19e178ce42db",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCqu47Tk076m+D+\naqXB9okTgbJTv77ApXpzR9ccx3QqjygWAUGkQ9RKZYVQ/EqBVmqHsr7hl88d6ksI\ngx0X9fI5ZNqZAEYzqcUNoK5mO0fCMHDPmD+uPkIP5w4/ihED4XkslYqTeI/7yqim\nbKynV64QrjKvWxgv0QexLOiP9Gt4SJqk/7Z+Mucy6zmUeH2G8gBpCXq/xrOBK4Mt\nAhUAgmc6zibHylbAWW/44s6uHMJNow6mNkcBWbEkUNuKE8ujOWB/5l2O/AmndolI\n2YkZ5cNcgTJQ9A+NeXGtAf/jdOqOIJBkyM2VoLUKgSLpKjBUcuGnblqkPSFBj9gQ\nxanibGi5AgMBAAECggEAAly5d2pumY+OD58Un4gkceFlwPxibIJtnQo1qveEfzE/\nXfyS9q2ckpHwhAQVmNAEBdAejXr++dw7wQilXqc/vHUNhDfpgL381LkwKIhx7/kh\nGnIyEVxZqCQrgYwMu7fDKC+CfRNaNKLjbfgLdH5FUYRDfcMeJM041MX5CsLYONAM\njHM50huXTf5l7Sdp5+U1FYJnvY3s4sjxEFAFItheCusJ04NVA73S9SsI0v6mPJrQ\nRxbp4DIP3Am+treVvBT+ZSQH68pFPjXvT2WOnHSCBC1YNNekptrAeCcATloyEJYY\noUE86iS9nkD6VRo4I98NtNeeva1tB38tb5DpOyKx4QKBgQDhgkJqZxqbt45NCjNC\nwSyafTy3FH7BGr3Bh3/mZVr6GtgToBM57W0zXik/ClpNL0/DRz5DNgu7AI0IyZK5\nMy1TqLOrxtIx15UjT+2k+CSbW742T1W6rImAmRi93YTPz1lBZxvjcSJoYmzHJ/n4\nZGDrQDZ8czdB+/B7/hHBy1XXkQKBgQDB0Uf8BuLRkDKrBooZuT8ELLz0PZ7roq8E\nRkUksSyuVRYe23E6lrEIclqzjrvT+qrZVpYOoggj/VbGIOe2I+U8liR9dfPEnn5d\nwwjT0vOhWfIYZeMUcCzDJ/b2ZqJq2LUJlJ3VNpbJup2LhAzJ4BBjRQj6aSiuYXGk\nR66rlqZ6qQKBgQDVPs05Ovhhaekplsy0gmGAUY9ZfQsD5hqsaEqc/xlRypKrtEKa\nE5eg7JjKYSrVNDkT60nIWtIq6rFzLtINSYTCSJRmiqN3uGnyM4IA7xoGw3GSf+EM\nnl2EesF3wYL21BeODkfEAtbLqM8+YOIzbhBsRZOAiZ8mSWy2g6IdBP/O0QKBgBkV\nnv1tXrnEseoUpJcDtLYznBj4SLMykPg6qARBsgi2FnDT8emlSzBOrJKErKaY0Lfk\nTvOB4Q/XX/2wkIywRKD8xag/NdeCs9Qqw9+2c7W0UHL77NHeWsy/RWVKj0bI2VVu\nGKdZs1ZUgsNlycnu5/ARJUJTjeJT1kNuy5qFmvJRAoGANeexNEExlAbJMdHF/tsH\nXA485MQYJBnT//l7bBEVjcE9hO5TZ7mFFcn7L4akmLnZYWrKPu/I/V/vw0U3pEk+\nR+Koj2VwT6y7QQ4ihmivr0+RmtIXFojOSYG+Zej06jOd/o315ZTepyBP1GBLevKE\no2X1D9rtAIQ9PGU8g9+MGTs=\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-byyem@telemedicine-fc0ee.iam.gserviceaccount.com",
+  "client_id": "111437887789281714212",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-byyem%40telemedicine-fc0ee.iam.gserviceaccount.com"
+}

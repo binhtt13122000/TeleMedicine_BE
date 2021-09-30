@@ -21,6 +21,12 @@ using TeleMedicine_BE.Utils;
 using System.Reflection;
 using System.IO;
 using Microsoft.OpenApi.Any;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
+using BeautyAtHome.Utils;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace TeleMedicine_BE
 {
@@ -40,11 +46,19 @@ namespace TeleMedicine_BE
 
             services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
 
+            var pathToKey = Path.Combine(Directory.GetCurrentDirectory(), "Keys", "firebase_admin_sdk.json");
+            FirebaseApp.Create(new AppOptions
+            {
+                Credential = GoogleCredential.FromFile(pathToKey)
+            });
+
             services.AddDbContext<TeleMedicineContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("DBConnection")));
 
             services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
             services.AddScoped(typeof(IPagingSupport<>), typeof(PagingSupport<>));
+            services.AddScoped(typeof(IPagingSupport<>), typeof(PagingSupport<>));
+            services.AddSingleton<IJwtTokenProvider, JwtTokenProvider>();
 
             services.AddTransient<ISymptomRepository, SymptomRepository>();
             services.AddTransient<ISymptomService, SymptomService>();
@@ -87,6 +101,21 @@ namespace TeleMedicine_BE
 
             services.AddTransient<ISlotRepository, SlotRepository>();
             services.AddTransient<ISlotService, SlotService>();
+
+            services
+            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration["jwt:Key"])),
+                    ValidAudience = Configuration["jwt:Audience"],
+                    ValidIssuer = Configuration["jwt:Issuer"],
+                };
+            });
 
             services.AddControllers().AddNewtonsoftJson(options =>
             {
@@ -154,6 +183,7 @@ namespace TeleMedicine_BE
                 .SetIsOriginAllowed(origin => true) // allow any origin
                 .AllowCredentials());
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
