@@ -11,6 +11,7 @@ namespace BusinessLogic.Services
 {
     public interface IAccountService : IService<Account, int>
     {
+        Account GetAccountByEmail(string email);
     }
     public class AccountService : IAccountService
     {
@@ -28,6 +29,11 @@ namespace BusinessLogic.Services
         public async Task<bool> DeleteAsync(Account entity)
         {
             return await _accountRepository.Delete(entity);
+        }
+
+        public Account GetAccountByEmail(string email)
+        {
+            return _accountRepository.GetAccountByEmail(email);
         }
 
         public IQueryable<Account> GetAll(params Expression<Func<Account, object>>[] includes)

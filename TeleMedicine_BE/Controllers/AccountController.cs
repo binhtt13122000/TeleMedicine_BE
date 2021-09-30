@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BusinessLogic.Services;
 using Infrastructure.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -15,6 +16,7 @@ namespace TeleMedicine_BE.Controllers
 {
     [Route("api/v1/accounts")]
     [ApiController]
+    [Authorize]
     public class AccountController : ControllerBase
     {
         private readonly IAccountService _accountService;

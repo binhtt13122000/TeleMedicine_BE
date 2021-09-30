@@ -41,6 +41,7 @@ namespace TeleMedicine_BE.ViewModels
         public string Avatar { get; set; }
         public DateTime Dob { get; set; }
         public bool? IsMale { get; set; }
+        public virtual RoleVM Role { get; set; }
     }
 
     public class AccountProfileUM
