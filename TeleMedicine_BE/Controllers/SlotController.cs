@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using BusinessLogic.Services;
 using Infrastructure.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +16,6 @@ namespace TeleMedicine_BE.Controllers
 {
     [Route("api/v1/slots")]
     [ApiController]
-    [Authorize]
     public class SlotController : Controller
     {
         private readonly ISlotService _slotService;
