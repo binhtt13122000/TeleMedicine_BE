@@ -99,6 +99,9 @@ namespace TeleMedicine_BE
             services.AddTransient<IDoctorRepository, DoctorRepository>();
             services.AddTransient<IDoctorService, DoctorService>();
 
+            services.AddTransient<IPatientRepository, PatientRepository>();
+            services.AddTransient<IPatientService, PatientService>();
+
             services.AddTransient<ISlotRepository, SlotRepository>();
             services.AddTransient<ISlotService, SlotService>();
 

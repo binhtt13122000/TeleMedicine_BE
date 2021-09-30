@@ -139,6 +139,13 @@ namespace TeleMedicine_BE.Utils
             CreateMap<SlotCM, Slot>();
             CreateMap<SlotUM, Slot>();
             #endregion
+
+            #region AutoMapper PatientViewModel
+            CreateMap<PatientVM, Patient>();
+            CreateMap<Patient, PatientVM>();
+            CreateMap<PatientCM, Patient>();
+            CreateMap<PatientUM, Patient>();
+            #endregion
         }
     }
 }
