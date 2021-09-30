@@ -17,7 +17,7 @@ namespace TeleMedicine_BE.Controllers
 {
     [Route("api/v1/accounts")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class AccountController : ControllerBase
     {
         private readonly IAccountService _accountService;
