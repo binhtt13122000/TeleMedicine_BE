@@ -6,6 +6,11 @@ using System.Threading.Tasks;
 
 namespace TeleMedicine_BE.ViewModels
 {
+    public enum MajorFieldEnum
+    {
+        Id,
+        Name
+    }
     public class MajorVM
     {
         public int Id { get; set; }

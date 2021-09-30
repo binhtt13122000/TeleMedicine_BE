@@ -7,6 +7,12 @@ using System.Threading.Tasks;
 
 namespace TeleMedicine_BE.ViewModels
 {
+    public enum NotificationFieldEnum
+    {
+        Id,
+        UserId,
+        CreatedDate
+    }
     public class NotificationVM
     {
         public int Id { get; set; }

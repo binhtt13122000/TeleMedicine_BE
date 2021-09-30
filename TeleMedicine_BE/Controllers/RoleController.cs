@@ -42,9 +42,9 @@ namespace TeleMedicine_BE.Controllers
         [Produces("application/json")]
         public ActionResult<IEnumerable<RoleVM>> GetAllRole(
             [FromQuery(Name = "name")] string name,
+            [FromQuery(Name = "field-by")] RoleFieldEnum fieldBy,
+            [FromQuery(Name = "sort-by")] SortTypeEnum sortBy,
             [FromQuery(Name = "filtering")] string filters = null,
-            [FromQuery(Name = "asc-by")] string ascBy = null,
-            [FromQuery(Name = "desc-by")] string descBy = null,
             int offset = 1,
             int limit = 20
         )
@@ -57,13 +57,13 @@ namespace TeleMedicine_BE.Controllers
                     roleList = roleList.Where(s => s.Name.ToUpper().Contains(name.Trim().ToUpper()));
                 }
                 Paged<RoleVM> paged = null;
-                if (!string.IsNullOrEmpty(ascBy) && typeof(RoleVM).GetProperty(ascBy) != null)
+                if (sortBy == SortTypeEnum.asc && typeof(RoleVM).GetProperty(fieldBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(roleList).GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 0).Paginate<RoleVM>();
+                    paged = _pagingSupport.From(roleList).GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0).Paginate<RoleVM>();
                 }
-                else if (!string.IsNullOrEmpty(descBy) && typeof(RoleVM).GetProperty(descBy) != null)
+                else if (sortBy == SortTypeEnum.desc && typeof(RoleVM).GetProperty(fieldBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(roleList).GetRange(offset, limit, p => EF.Property<object>(p, descBy), 1).Paginate<RoleVM>();
+                    paged = _pagingSupport.From(roleList).GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1).Paginate<RoleVM>();
                 }
                 else
                 {

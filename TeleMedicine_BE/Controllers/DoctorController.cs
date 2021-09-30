@@ -61,10 +61,10 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "major")] int[] majorId,
             [FromQuery(Name = "start-rating")] int startRating,
             [FromQuery(Name = "end-rating")] int endRating,
+            [FromQuery(Name = "field-by")] DoctorFieldEnum fieldBy,
+            [FromQuery(Name = "sort-by")] SortTypeEnum sortBy,
             [FromQuery(Name = "is-verify")] int isVerify = 0,
             [FromQuery(Name = "filtering")] string filters = null,
-            [FromQuery(Name = "asc-by")] string ascBy = null,
-            [FromQuery(Name = "desc-by")] string descBy = null,
             int limit = 50,
             int offset = 1
         )
@@ -168,13 +168,13 @@ namespace TeleMedicine_BE.Controllers
                 }
                 
                 Paged<DoctorVM> paged = null;
-                if (!string.IsNullOrEmpty(ascBy) && typeof(DoctorVM).GetProperty(ascBy) != null)
+                if (sortBy == SortTypeEnum.asc && typeof(DoctorVM).GetProperty(fieldBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(doctorList).GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 0).Paginate<DoctorVM>();
+                    paged = _pagingSupport.From(doctorList).GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0).Paginate<DoctorVM>();
                 }
-                else if (!string.IsNullOrEmpty(descBy) && typeof(DoctorVM).GetProperty(descBy) != null)
+                else if (sortBy == SortTypeEnum.desc && typeof(DoctorVM).GetProperty(fieldBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(doctorList).GetRange(offset, limit, p => EF.Property<object>(p, descBy), 1).Paginate<DoctorVM>();
+                    paged = _pagingSupport.From(doctorList).GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1).Paginate<DoctorVM>();
                 }else
                 {
                     paged = _pagingSupport.From(doctorList).GetRange(offset, limit, s => s.Id, 1).Paginate<DoctorVM>();

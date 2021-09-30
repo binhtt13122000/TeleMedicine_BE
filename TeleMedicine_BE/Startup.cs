@@ -27,6 +27,8 @@ using BeautyAtHome.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Newtonsoft.Json.Converters;
+using System.Text.Json.Serialization;
 
 namespace TeleMedicine_BE
 {
@@ -122,14 +124,17 @@ namespace TeleMedicine_BE
 
             services.AddControllers().AddNewtonsoftJson(options =>
             {
+                options.SerializerSettings.Converters.Add(new StringEnumConverter());
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             }).AddJsonOptions(options => {
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
                 options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
             });
 
 
             services.AddSwaggerGen(c =>
             {
+                c.DescribeAllEnumsAsStrings();
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Telemedicine", Version = "v1" });
                 c.MapType<TimeSpan>(() => new OpenApiSchema
                 {

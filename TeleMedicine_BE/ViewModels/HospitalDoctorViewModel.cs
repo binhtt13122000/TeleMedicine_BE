@@ -6,6 +6,12 @@ using System.Threading.Tasks;
 
 namespace TeleMedicine_BE.ViewModels
 {
+    public enum HospitalDoctorFieldEnum
+    {
+        Id,
+        DoctorId,
+        HospitalId,
+    }
     public class HospitalDoctorVM
     {
         public int Id { get; set; }

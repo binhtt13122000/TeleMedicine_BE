@@ -6,6 +6,12 @@ using System.Threading.Tasks;
 
 namespace TeleMedicine_BE.ViewModels
 {
+
+    public enum DrugTypeFieldEnum
+    {
+        Id,
+        Name,
+    }
     public class DrugTypeVM
     {
         public int Id { get; set; }

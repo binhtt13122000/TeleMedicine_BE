@@ -8,6 +8,25 @@ using System.Threading.Tasks;
 
 namespace TeleMedicine_BE.ViewModels
 {
+    public enum AccountFieldEnum
+    {
+        Id,
+        Email,
+        FirstName,
+        LastName,
+        StreetAddress,
+        Locality,
+        City,
+        PostalCode,
+        Phone,
+        Dob,
+        RegisterTime,
+    }
+
+    public class AccountSort
+    {
+        public AccountFieldEnum sort;
+    }
     public class AccountManageVM
     {
         public int Id { get; set; }

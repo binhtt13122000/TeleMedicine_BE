@@ -55,9 +55,9 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "producer")] string producer,
             [FromQuery(Name = "drug-form")] string drugForm,
             [FromQuery(Name = "drug-type")] int[] drugTypeIds,
+            [FromQuery(Name = "field-by")] DrugFieldEnum fieldBy,
+            [FromQuery(Name = "sort-by")] SortTypeEnum sortBy,
             [FromQuery(Name = "filtering")] string filters = null,
-            [FromQuery(Name = "asc-by")] string ascBy = null,
-            [FromQuery(Name = "desc-by")] string descBy = null,
             [FromQuery(Name = "limit")] int limit = 20,
             [FromQuery(Name = "offset")] int offset = 1
         )
@@ -86,16 +86,16 @@ namespace TeleMedicine_BE.Controllers
                     drugsQuery = drugsQuery.Where(_ => drugTypeIds.Contains(_.DrugTypeId));
                 }
                 Paged<DrugVM> paged = null;
-                if (!string.IsNullOrEmpty(ascBy) && typeof(DrugVM).GetProperty(ascBy) != null)
+                if (sortBy == SortTypeEnum.asc && typeof(DrugVM).GetProperty(fieldBy.ToString()) != null)
                 {
                     paged = _pagingSupport.From(drugsQuery)
-                   .GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 0)
+                   .GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0)
                    .Paginate<DrugVM>();
                 }
-                else if (!string.IsNullOrEmpty(descBy) && typeof(DrugVM).GetProperty(descBy) != null)
+                else if (sortBy == SortTypeEnum.desc && typeof(DrugVM).GetProperty(fieldBy.ToString()) != null)
                 {
                     paged = _pagingSupport.From(drugsQuery)
-                   .GetRange(offset, limit, p => EF.Property<object>(p, descBy), 1)
+                   .GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1)
                    .Paginate<DrugVM>();
                 }
                 else

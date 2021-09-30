@@ -43,9 +43,9 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "background-disease")] string backgroundDisease,
             [FromQuery(Name = "allergy")] string allergy,
             [FromQuery(Name = "blood-group")] string bloodGroup,
+            [FromQuery(Name = "field-by")] PatientFieldEnum fieldBy,
+            [FromQuery(Name = "sort-by")] SortTypeEnum sortBy,
             [FromQuery(Name = "filtering")] string filters = null,
-            [FromQuery(Name = "asc-by")] string ascBy = null,
-            [FromQuery(Name = "desc-by")] string descBy = null,
             int limit = 50,
             int offset = 1
         )
@@ -70,13 +70,13 @@ namespace TeleMedicine_BE.Controllers
                     patientList = patientList.Where(s => s.BloodGroup.Trim().ToUpper().Contains(bloodGroup.Trim().ToUpper()));
                 }
                 Paged<PatientVM> paged = null;
-                if (!string.IsNullOrEmpty(ascBy) && typeof(PatientVM).GetProperty(ascBy) != null)
+                if (sortBy == SortTypeEnum.asc && typeof(PatientVM).GetProperty(fieldBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(patientList).GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 0).Paginate<PatientVM>();
+                    paged = _pagingSupport.From(patientList).GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0).Paginate<PatientVM>();
                 }
-                else if (!string.IsNullOrEmpty(descBy) && typeof(PatientVM).GetProperty(descBy) != null)
+                else if (sortBy == SortTypeEnum.desc && typeof(PatientVM).GetProperty(fieldBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(patientList).GetRange(offset, limit, p => EF.Property<object>(p, descBy), 1).Paginate<PatientVM>();
+                    paged = _pagingSupport.From(patientList).GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1).Paginate<PatientVM>();
                 }
                 else
                 {

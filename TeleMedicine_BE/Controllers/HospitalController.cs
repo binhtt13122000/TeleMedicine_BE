@@ -42,9 +42,9 @@ namespace TeleMedicine_BE.Controllers
         public ActionResult<IEnumerable<HospitalVM>> GetAllHospital(
             [FromQuery(Name = "hospital-code")] string hospitalCode,
             [FromQuery(Name = "name")] string name,
+            [FromQuery(Name = "field-by")] HospitalFieldEnum fieldBy,
+            [FromQuery(Name = "sort-by")] SortTypeEnum sortBy,
             [FromQuery(Name = "filtering")] string filters = null,
-            [FromQuery(Name = "asc-by")] string ascBy = null,
-            [FromQuery(Name = "desc-by")] string descBy = null,
             int limit = 20,
             int offset = 1
         )
@@ -61,13 +61,13 @@ namespace TeleMedicine_BE.Controllers
                     hospitalList = hospitalList.Where(s => s.Name.ToUpper().Contains(name.Trim().ToUpper()));
                 }
                 Paged<HospitalVM> paged = null;
-                if (!string.IsNullOrEmpty(ascBy) && typeof(HospitalVM).GetProperty(ascBy) != null)
+                if (sortBy == SortTypeEnum.asc && typeof(HospitalVM).GetProperty(fieldBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(hospitalList).GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 0).Paginate<HospitalVM>();
+                    paged = _pagingSupport.From(hospitalList).GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0).Paginate<HospitalVM>();
                 }
-                else if (!string.IsNullOrEmpty(descBy) && typeof(HospitalVM).GetProperty(descBy) != null)
+                else if (sortBy == SortTypeEnum.desc && typeof(HospitalVM).GetProperty(fieldBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(hospitalList).GetRange(offset, limit, p => EF.Property<object>(p, descBy), 1).Paginate<HospitalVM>();
+                    paged = _pagingSupport.From(hospitalList).GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1).Paginate<HospitalVM>();
                 }
                 else
                 {

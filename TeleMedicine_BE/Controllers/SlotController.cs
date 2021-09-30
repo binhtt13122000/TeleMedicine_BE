@@ -51,9 +51,9 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "doctor-last-name")] string doctorLastName,
             [FromQuery(Name = "start-time")] TimeSpan startTime,
             [FromQuery(Name = "end-time")] TimeSpan endTime,
+            [FromQuery(Name = "field-by")] SlotFieldEnum fieldBy,
+            [FromQuery(Name = "sort-by")] SortTypeEnum sortBy,
             [FromQuery(Name = "filtering")] string filters = null,
-            [FromQuery(Name = "asc-by")] string ascBy = null,
-            [FromQuery(Name = "desc-by")] string descBy = null,
             [FromQuery] int offset = 1,
             [FromQuery] int limit = 50
         )
@@ -114,13 +114,13 @@ namespace TeleMedicine_BE.Controllers
                     slotList = slotList.Where(s => s.EndTime.CompareTo(endTime) <= 0);
                 }
                 Paged<SlotVM> paged = null;
-                if (!string.IsNullOrEmpty(ascBy) && typeof(SlotVM).GetProperty(ascBy) != null)
+                if (sortBy == SortTypeEnum.asc && typeof(SlotVM).GetProperty(fieldBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(slotList).GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 0).Paginate<SlotVM>();
+                    paged = _pagingSupport.From(slotList).GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0).Paginate<SlotVM>();
                 }
-                else if (!string.IsNullOrEmpty(descBy) && typeof(SlotVM).GetProperty(descBy) != null)
+                else if (sortBy == SortTypeEnum.desc && typeof(SlotVM).GetProperty(fieldBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(slotList).GetRange(offset, limit, p => EF.Property<object>(p, descBy), 1).Paginate<SlotVM>();
+                    paged = _pagingSupport.From(slotList).GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1).Paginate<SlotVM>();
                 }
                 else
                 {

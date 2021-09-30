@@ -6,6 +6,12 @@ using System.Threading.Tasks;
 
 namespace TeleMedicine_BE.ViewModels
 {
+    public enum TimeFrameFieldEnum
+    {
+        Id,
+        StartTime,
+        EndTime
+    }
     public class TimeFrameVM
     {
         public int Id { get; set; }

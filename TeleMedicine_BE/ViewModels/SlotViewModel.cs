@@ -7,6 +7,15 @@ using System.Threading.Tasks;
 
 namespace TeleMedicine_BE.ViewModels
 {
+    public enum SlotFieldEnum
+    {
+        Id,
+        AssignedDate,
+        DoctorId,
+        StartTime,
+        EndTime,
+        HealthCheckId
+    }
     public class SlotVM
     {
         public int Id { get; set; }

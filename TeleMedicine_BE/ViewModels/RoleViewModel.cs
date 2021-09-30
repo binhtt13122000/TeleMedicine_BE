@@ -6,6 +6,11 @@ using System.Threading.Tasks;
 
 namespace TeleMedicine_BE.ViewModels
 {
+    public enum RoleFieldEnum
+    {
+        Id,
+        Name
+    }
     public class RoleVM
     {
         public int Id { get; set; }

@@ -42,9 +42,9 @@ namespace TeleMedicine_BE.Controllers
         [Produces("application/json")]
         public ActionResult<IEnumerable<CertificationVM>> GetAllCertifications(
             [FromQuery(Name = "name")] string name,
+            [FromQuery(Name = "field-by")] CertificationFieldEnum fieldBy,
+            [FromQuery(Name = "sort-by")] SortTypeEnum sortBy,
             [FromQuery(Name = "filtering")] string filters = null,
-            [FromQuery(Name = "asc-by")] string ascBy = null,
-            [FromQuery(Name = "desc-by")] string descBy = null,
             int offset = 1,
             int limit = 20
         )
@@ -57,13 +57,13 @@ namespace TeleMedicine_BE.Controllers
                     certificationList = certificationList.Where(s => s.Name.ToUpper().Contains(name.Trim().ToUpper()));
                 }
                 Paged<CertificationVM> paged = null;
-                if (!string.IsNullOrEmpty(ascBy) && typeof(CertificationVM).GetProperty(ascBy) != null)
+                if (sortBy == SortTypeEnum.asc && typeof(CertificationVM).GetProperty(fieldBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(certificationList).GetRange(offset, limit, p => EF.Property<object>(p, ascBy), 0).Paginate<CertificationVM>();
+                    paged = _pagingSupport.From(certificationList).GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0).Paginate<CertificationVM>();
                 }
-                else if (!string.IsNullOrEmpty(descBy) && typeof(CertificationVM).GetProperty(descBy) != null)
+                else if (sortBy == SortTypeEnum.desc && typeof(CertificationVM).GetProperty(fieldBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(certificationList).GetRange(offset, limit, p => EF.Property<object>(p, descBy), 1).Paginate<CertificationVM>();
+                    paged = _pagingSupport.From(certificationList).GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1).Paginate<CertificationVM>();
                 }
                 else
                 {
