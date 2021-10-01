@@ -16,6 +16,16 @@ namespace TeleMedicine_BE.ViewModels
         EndTime,
         HealthCheckId
     }
+
+    public class SlotHealthCheckVM
+    {
+        public int Id { get; set; }
+        public DateTime AssignedDate { get; set; }
+        public int DoctorId { get; set; }
+        public TimeSpan StartTime { get; set; }
+        public TimeSpan EndTime { get; set; }
+    }
+
     public class SlotVM
     {
         public int Id { get; set; }
@@ -46,6 +56,14 @@ namespace TeleMedicine_BE.ViewModels
         public TimeSpan EndTime { get; set; }
 
     }
+
+    public class SlotHeakthCheckCM
+    {
+        [Required]
+        public int Id;
+
+    }
+
 
     public class SlotUM
     {

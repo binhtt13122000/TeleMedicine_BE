@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using BusinessLogic.Services;
 using Infrastructure.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,8 +16,9 @@ using TeleMedicine_BE.ViewModels;
 
 namespace TeleMedicine_BE.Controllers
 {
-    [Route("api/v1")]
+    [Route("api/v1/patients")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class PatientController : Controller
     {
         private readonly IPatientService _patientService;
@@ -47,7 +50,7 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "sort-by")] SortTypeEnum sortBy,
             [FromQuery(Name = "filtering")] string filters = null,
             int limit = 50,
-            int offset = 1
+            int pageOffset = 1
         )
         {
             try
@@ -72,15 +75,15 @@ namespace TeleMedicine_BE.Controllers
                 Paged<PatientVM> paged = null;
                 if (sortBy == SortTypeEnum.asc && typeof(PatientVM).GetProperty(fieldBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(patientList).GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0).Paginate<PatientVM>();
+                    paged = _pagingSupport.From(patientList).GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0).Paginate<PatientVM>();
                 }
                 else if (sortBy == SortTypeEnum.desc && typeof(PatientVM).GetProperty(fieldBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(patientList).GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1).Paginate<PatientVM>();
+                    paged = _pagingSupport.From(patientList).GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1).Paginate<PatientVM>();
                 }
                 else
                 {
-                    paged = _pagingSupport.From(patientList).GetRange(offset, limit, s => s.Id, 1).Paginate<PatientVM>();
+                    paged = _pagingSupport.From(patientList).GetRange(pageOffset, limit, s => s.Id, 1).Paginate<PatientVM>();
                 }
                 if (!String.IsNullOrEmpty(filters))
                 {

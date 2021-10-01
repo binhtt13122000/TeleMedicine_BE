@@ -119,5 +119,9 @@ namespace TeleMedicine_BE.ViewModels
         public string ScopeOfPractice { get; set; }
 
         public string Description { get; set; }
+
+        public virtual ICollection<CertificationDoctorWithRegisterCM> CertificationDoctors { get; set; }
+        public virtual ICollection<HospitalDoctorWithRegisterCM> HospitalDoctors { get; set; }
+        public virtual ICollection<MajorDoctorWithRegisterCM> MajorDoctors { get; set; }
     }
 }

@@ -31,6 +31,21 @@ namespace TeleMedicine_BE.ViewModels
 
     }
 
+    public class PatientHealthCheckVM
+    {
+        public int Id { get; set; }
+
+        public string Email { get; set; }
+
+        public string BackgroundDisease { get; set; }
+
+        public string Allergy { get; set; }
+
+        public string BloodGroup { get; set; }
+
+
+    }
+
     public class PatientCM
     {
         [Required(AllowEmptyStrings = false)]

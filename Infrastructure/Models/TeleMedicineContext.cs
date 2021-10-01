@@ -50,8 +50,6 @@ namespace Infrastructure.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.HasPostgresEnum(null, "health_check_status", new[] { "BOOKED", "CANCELED", "COMPLETED" })
-                .HasAnnotation("Relational:Collation", "English_United States.1252");
 
             modelBuilder.Entity<Account>(entity =>
             {
@@ -59,6 +57,8 @@ namespace Infrastructure.Models
 
                 entity.HasIndex(e => e.Email, "Account_Email_key")
                     .IsUnique();
+
+                entity.Property(e => e.FacebookId);
 
                 entity.Property(e => e.Active).HasDefaultValueSql("true");
 
@@ -203,6 +203,8 @@ namespace Infrastructure.Models
             {
                 entity.ToTable("HealthCheck");
 
+                entity.Property(e => e.Status).IsRequired();
+
                 entity.Property(e => e.CanceledTime).HasColumnType("timestamp with time zone");
 
                 entity.Property(e => e.CreatedTime).HasColumnType("timestamp with time zone");
@@ -242,7 +244,9 @@ namespace Infrastructure.Models
 
                 entity.Property(e => e.HospitalCode).IsRequired();
 
-                entity.Property(e => e.Name).IsRequired();
+                entity.Property(e => e.Lat).IsRequired();
+
+                entity.Property(e => e.Long).IsRequired();
             });
 
             modelBuilder.Entity<HospitalDoctor>(entity =>

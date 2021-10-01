@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BusinessLogic.Services;
 using Infrastructure.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +18,7 @@ namespace TeleMedicine_BE.Controllers
 {
     [Route("api/v1/drug-types")]
     [ApiController]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "1,2")]
     public class DrugTypeController : ControllerBase
     {
         private readonly IDrugTypeService _drugTypeService;
@@ -53,7 +54,7 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "sort-by")] SortTypeEnum sortBy,
             [FromQuery(Name = "filtering")] string filters = null,
             [FromQuery(Name = "limit")] int limit = 20,
-            [FromQuery(Name = "offset")] int offset = 1
+            [FromQuery(Name = "pageOffset")] int pageOffset = 1
         )
         {
             try
@@ -67,19 +68,19 @@ namespace TeleMedicine_BE.Controllers
                 if (sortBy == SortTypeEnum.asc && typeof(DrugTypeVM).GetProperty(fieldBy.ToString()) != null)
                 {
                     paged = _pagingSupport.From(drugTypesQuery)
-                   .GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0)
+                   .GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0)
                    .Paginate<DrugTypeVM>();
                 }
                 else if (sortBy == SortTypeEnum.desc && typeof(DrugTypeVM).GetProperty(fieldBy.ToString()) != null)
                 {
                     paged = _pagingSupport.From(drugTypesQuery)
-                   .GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1)
+                   .GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1)
                    .Paginate<DrugTypeVM>();
                 }
                 else
                 {
                     paged = _pagingSupport.From(drugTypesQuery)
-                   .GetRange(offset, limit, s => s.Id, 1)
+                   .GetRange(pageOffset, limit, s => s.Id, 1)
                    .Paginate<DrugTypeVM>();
                 }
                 if (!String.IsNullOrEmpty(filters))

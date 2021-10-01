@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BusinessLogic.Services;
 using Infrastructure.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +18,7 @@ namespace TeleMedicine_BE.Controllers
 {
     [Route("api/v1/disease-groups")]
     [ApiController]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class DiseaseGroupController : Controller
     {
         private readonly IDiseaseGroupService _diseaseGroupService;
@@ -45,7 +46,7 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "field-by")] DiseaseGroupFieldEnum fieldBy,
             [FromQuery(Name = "sort-by")] SortTypeEnum sortBy,
             [FromQuery(Name = "filtering")] string filters = null,
-            int offset = 1,
+            int pageOffset = 1,
             int limit = 20
             )
         {
@@ -59,15 +60,15 @@ namespace TeleMedicine_BE.Controllers
                 Paged<DiseaseGroupVM> paged = null;
                 if (sortBy == SortTypeEnum.asc && typeof(DiseaseGroupVM).GetProperty(fieldBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(diseaseGroups).GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0).Paginate<DiseaseGroupVM>();
+                    paged = _pagingSupport.From(diseaseGroups).GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0).Paginate<DiseaseGroupVM>();
                 }
                 else if (sortBy == SortTypeEnum.desc && typeof(DiseaseGroupVM).GetProperty(fieldBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(diseaseGroups).GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1).Paginate<DiseaseGroupVM>();
+                    paged = _pagingSupport.From(diseaseGroups).GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1).Paginate<DiseaseGroupVM>();
                 }
                 else
                 {
-                    paged = _pagingSupport.From(diseaseGroups).GetRange(offset, limit, s => s.Id, 1).Paginate<DiseaseGroupVM>();
+                    paged = _pagingSupport.From(diseaseGroups).GetRange(pageOffset, limit, s => s.Id, 1).Paginate<DiseaseGroupVM>();
                 }
                
                 if (!String.IsNullOrEmpty(filters))
