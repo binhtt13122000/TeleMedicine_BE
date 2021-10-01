@@ -62,8 +62,8 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "major")] int[] majorId,
             [FromQuery(Name = "start-rating")] int startRating,
             [FromQuery(Name = "end-rating")] int endRating,
-            [FromQuery(Name = "field-by")] DoctorFieldEnum fieldBy,
-            [FromQuery(Name = "sort-by")] SortTypeEnum sortBy,
+            [FromQuery(Name = "order-by")] DoctorFieldEnum orderBy,
+            [FromQuery(Name = "order-type")] SortTypeEnum orderType,
             [FromQuery(Name = "is-verify")] int isVerify = 0,
             [FromQuery(Name = "filtering")] string filters = null,
             int limit = 50,
@@ -169,13 +169,13 @@ namespace TeleMedicine_BE.Controllers
                 }
                 
                 Paged<DoctorVM> paged = null;
-                if (sortBy == SortTypeEnum.asc && typeof(DoctorVM).GetProperty(fieldBy.ToString()) != null)
+                if (orderType == SortTypeEnum.asc && typeof(DoctorVM).GetProperty(orderBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(doctorList).GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0).Paginate<DoctorVM>();
+                    paged = _pagingSupport.From(doctorList).GetRange(pageOffset, limit, p => EF.Property<object>(p, orderBy.ToString()), 0).Paginate<DoctorVM>();
                 }
-                else if (sortBy == SortTypeEnum.desc && typeof(DoctorVM).GetProperty(fieldBy.ToString()) != null)
+                else if (orderType == SortTypeEnum.desc && typeof(DoctorVM).GetProperty(orderBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(doctorList).GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1).Paginate<DoctorVM>();
+                    paged = _pagingSupport.From(doctorList).GetRange(pageOffset, limit, p => EF.Property<object>(p, orderBy.ToString()), 1).Paginate<DoctorVM>();
                 }else
                 {
                     paged = _pagingSupport.From(doctorList).GetRange(pageOffset, limit, s => s.Id, 1).Paginate<DoctorVM>();

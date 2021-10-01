@@ -50,8 +50,8 @@ namespace TeleMedicine_BE.Controllers
         [Produces("application/json")]
         public ActionResult<Paged<DrugTypeVM>> GetAllDrugTypes(
             [FromQuery(Name = "name")] string name,
-            [FromQuery(Name = "field-by")] DrugTypeFieldEnum fieldBy,
-            [FromQuery(Name = "sort-by")] SortTypeEnum sortBy,
+            [FromQuery(Name = "order-by")] DrugTypeFieldEnum orderBy,
+            [FromQuery(Name = "order-type")] SortTypeEnum orderType,
             [FromQuery(Name = "filtering")] string filters = null,
             [FromQuery(Name = "limit")] int limit = 20,
             [FromQuery(Name = "pageOffset")] int pageOffset = 1
@@ -65,16 +65,16 @@ namespace TeleMedicine_BE.Controllers
                     drugTypesQuery = drugTypesQuery.Where(_ => _.Name.ToUpper().Contains(name.Trim().ToUpper()));
                 }
                 Paged<DrugTypeVM> paged = null;
-                if (sortBy == SortTypeEnum.asc && typeof(DrugTypeVM).GetProperty(fieldBy.ToString()) != null)
+                if (orderType == SortTypeEnum.asc && typeof(DrugTypeVM).GetProperty(orderBy.ToString()) != null)
                 {
                     paged = _pagingSupport.From(drugTypesQuery)
-                   .GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0)
+                   .GetRange(pageOffset, limit, p => EF.Property<object>(p, orderBy.ToString()), 0)
                    .Paginate<DrugTypeVM>();
                 }
-                else if (sortBy == SortTypeEnum.desc && typeof(DrugTypeVM).GetProperty(fieldBy.ToString()) != null)
+                else if (orderType == SortTypeEnum.desc && typeof(DrugTypeVM).GetProperty(orderBy.ToString()) != null)
                 {
                     paged = _pagingSupport.From(drugTypesQuery)
-                   .GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1)
+                   .GetRange(pageOffset, limit, p => EF.Property<object>(p, orderBy.ToString()), 1)
                    .Paginate<DrugTypeVM>();
                 }
                 else

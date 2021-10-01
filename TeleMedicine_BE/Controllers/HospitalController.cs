@@ -44,8 +44,8 @@ namespace TeleMedicine_BE.Controllers
         public ActionResult<IEnumerable<HospitalVM>> GetAllHospital(
             [FromQuery(Name = "hospital-code")] string hospitalCode,
             [FromQuery(Name = "name")] string name,
-            [FromQuery(Name = "field-by")] HospitalFieldEnum fieldBy,
-            [FromQuery(Name = "sort-by")] SortTypeEnum sortBy,
+            [FromQuery(Name = "order-by")] HospitalFieldEnum orderBy,
+            [FromQuery(Name = "order-type")] SortTypeEnum orderType,
             [FromQuery(Name = "filtering")] string filters = null,
             int limit = 20,
             int pageOffset = 1
@@ -63,13 +63,13 @@ namespace TeleMedicine_BE.Controllers
                     hospitalList = hospitalList.Where(s => s.Name.ToUpper().Contains(name.Trim().ToUpper()));
                 }
                 Paged<HospitalVM> paged = null;
-                if (sortBy == SortTypeEnum.asc && typeof(HospitalVM).GetProperty(fieldBy.ToString()) != null)
+                if (orderType == SortTypeEnum.asc && typeof(HospitalVM).GetProperty(orderBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(hospitalList).GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0).Paginate<HospitalVM>();
+                    paged = _pagingSupport.From(hospitalList).GetRange(pageOffset, limit, p => EF.Property<object>(p, orderBy.ToString()), 0).Paginate<HospitalVM>();
                 }
-                else if (sortBy == SortTypeEnum.desc && typeof(HospitalVM).GetProperty(fieldBy.ToString()) != null)
+                else if (orderType == SortTypeEnum.desc && typeof(HospitalVM).GetProperty(orderBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(hospitalList).GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1).Paginate<HospitalVM>();
+                    paged = _pagingSupport.From(hospitalList).GetRange(pageOffset, limit, p => EF.Property<object>(p, orderBy.ToString()), 1).Paginate<HospitalVM>();
                 }
                 else
                 {

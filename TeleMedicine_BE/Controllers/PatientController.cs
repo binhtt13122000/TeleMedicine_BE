@@ -46,8 +46,8 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "background-disease")] string backgroundDisease,
             [FromQuery(Name = "allergy")] string allergy,
             [FromQuery(Name = "blood-group")] string bloodGroup,
-            [FromQuery(Name = "field-by")] PatientFieldEnum fieldBy,
-            [FromQuery(Name = "sort-by")] SortTypeEnum sortBy,
+            [FromQuery(Name = "order-by")] PatientFieldEnum orderBy,
+            [FromQuery(Name = "order-type")] SortTypeEnum orderType,
             [FromQuery(Name = "filtering")] string filters = null,
             int limit = 50,
             int pageOffset = 1
@@ -73,13 +73,13 @@ namespace TeleMedicine_BE.Controllers
                     patientList = patientList.Where(s => s.BloodGroup.Trim().ToUpper().Contains(bloodGroup.Trim().ToUpper()));
                 }
                 Paged<PatientVM> paged = null;
-                if (sortBy == SortTypeEnum.asc && typeof(PatientVM).GetProperty(fieldBy.ToString()) != null)
+                if (orderType == SortTypeEnum.asc && typeof(PatientVM).GetProperty(orderBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(patientList).GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0).Paginate<PatientVM>();
+                    paged = _pagingSupport.From(patientList).GetRange(pageOffset, limit, p => EF.Property<object>(p, orderBy.ToString()), 0).Paginate<PatientVM>();
                 }
-                else if (sortBy == SortTypeEnum.desc && typeof(PatientVM).GetProperty(fieldBy.ToString()) != null)
+                else if (orderType == SortTypeEnum.desc && typeof(PatientVM).GetProperty(orderBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(patientList).GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1).Paginate<PatientVM>();
+                    paged = _pagingSupport.From(patientList).GetRange(pageOffset, limit, p => EF.Property<object>(p, orderBy.ToString()), 1).Paginate<PatientVM>();
                 }
                 else
                 {
