@@ -95,5 +95,50 @@ namespace TeleMedicine_BE.Controllers
                 return new JsonResult(e.Message);
             }
         }
+
+        [HttpPost("fake-login")]
+        [Produces("application/json")]
+        public async Task<ActionResult> FakeLogin([FromQuery] string email)
+        {
+         
+            try
+            {
+                System.Diagnostics.Debug.WriteLine(email);
+                Account account = _accountService.GetAccountByEmail(email);
+                System.Diagnostics.Debug.WriteLine(email);
+
+                if (account != null)
+                {
+                    if (account.Role.Id == 1)
+                    {
+                        Doctor doctor = _doctorService.GetDoctorByEmail(email);
+                        if (!doctor.IsVerify.HasValue)
+                        {
+                            return Ok(new { message = "The account is not verify!" });
+                        }
+                    }
+
+                    string accessToken = await _jwtTokenProvider.GenerateToken(account);
+                    AccountProfileVM accountProfileVM = _mapper.Map<AccountProfileVM>(account);
+                    return Ok(new
+                    {
+                        Account = accountProfileVM,
+                        AccessToken = accessToken,
+                    });
+                }
+                else
+                {
+                    return Ok(new
+                    {
+                        Email = email
+                    });
+                }
+            }
+            catch (Exception e)
+            {
+                Response.StatusCode = StatusCodes.Status500InternalServerError;
+                return new JsonResult(e.Message);
+            }
+        }
     }
 }

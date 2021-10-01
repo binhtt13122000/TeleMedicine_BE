@@ -107,6 +107,9 @@ namespace TeleMedicine_BE
             services.AddTransient<ISlotRepository, SlotRepository>();
             services.AddTransient<ISlotService, SlotService>();
 
+            services.AddTransient<IHealthCheckRepository, HealthCheckRepository>();
+            services.AddTransient<IHealthCheckService, HealthCheckService>();
+
             services
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>

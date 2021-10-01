@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BusinessLogic.Services;
 using Infrastructure.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +18,7 @@ namespace TeleMedicine_BE.Controllers
 {
     [Route("api/v1/accounts")]
     [ApiController]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class AccountController : ControllerBase
     {
         private readonly IAccountService _accountService;
@@ -57,7 +58,7 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "active")] int active = 0,
             [FromQuery(Name = "role-name")] string roleName = null,
             [FromQuery(Name = "filtering")] string filters = null,
-            int offset = 1,
+            int pageOffset = 1,
             int limit = 20
         )
         {
@@ -143,15 +144,15 @@ namespace TeleMedicine_BE.Controllers
                 Paged<AccountManageVM> paged = null;
                 if (sortBy == SortTypeEnum.asc && typeof(AccountManageVM).GetProperty(fieldBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(accountsQuery).GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0).Paginate<AccountManageVM>();
+                    paged = _pagingSupport.From(accountsQuery).GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0).Paginate<AccountManageVM>();
                 }
                 else if (sortBy == SortTypeEnum.desc && typeof(AccountManageVM).GetProperty(fieldBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(accountsQuery).GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1).Paginate<AccountManageVM>();
+                    paged = _pagingSupport.From(accountsQuery).GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1).Paginate<AccountManageVM>();
                 }
                 else
                 {
-                    paged = _pagingSupport.From(accountsQuery).GetRange(offset, limit, s => s.RegisterTime, 1).Paginate<AccountManageVM>();
+                    paged = _pagingSupport.From(accountsQuery).GetRange(pageOffset, limit, s => s.RegisterTime, 1).Paginate<AccountManageVM>();
                 }
                 if (!string.IsNullOrEmpty(filters))
                 {

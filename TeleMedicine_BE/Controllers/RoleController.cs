@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BusinessLogic.Services;
 using Infrastructure.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +18,7 @@ namespace TeleMedicine_BE.Controllers
 {
     [Route("api/v1/roles")]
     [ApiController]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "2")]
     public class RoleController : Controller
     {
         private readonly IRoleService _roleService;
@@ -45,7 +46,7 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "field-by")] RoleFieldEnum fieldBy,
             [FromQuery(Name = "sort-by")] SortTypeEnum sortBy,
             [FromQuery(Name = "filtering")] string filters = null,
-            int offset = 1,
+            int pageOffset = 1,
             int limit = 20
         )
         {
@@ -59,15 +60,15 @@ namespace TeleMedicine_BE.Controllers
                 Paged<RoleVM> paged = null;
                 if (sortBy == SortTypeEnum.asc && typeof(RoleVM).GetProperty(fieldBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(roleList).GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0).Paginate<RoleVM>();
+                    paged = _pagingSupport.From(roleList).GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0).Paginate<RoleVM>();
                 }
                 else if (sortBy == SortTypeEnum.desc && typeof(RoleVM).GetProperty(fieldBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(roleList).GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1).Paginate<RoleVM>();
+                    paged = _pagingSupport.From(roleList).GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1).Paginate<RoleVM>();
                 }
                 else
                 {
-                    paged = _pagingSupport.From(roleList).GetRange(offset, limit, s => s.Id, 1).Paginate<RoleVM>();
+                    paged = _pagingSupport.From(roleList).GetRange(pageOffset, limit, s => s.Id, 1).Paginate<RoleVM>();
                 }
                 if (!String.IsNullOrEmpty(filters))
                 {

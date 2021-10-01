@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BusinessLogic.Services;
 using Infrastructure.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +18,7 @@ namespace TeleMedicine_BE.Controllers
 {
     [Route("api/v1/slots")]
     [ApiController]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class SlotController : Controller
     {
         private readonly ISlotService _slotService;
@@ -54,7 +55,7 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "field-by")] SlotFieldEnum fieldBy,
             [FromQuery(Name = "sort-by")] SortTypeEnum sortBy,
             [FromQuery(Name = "filtering")] string filters = null,
-            [FromQuery] int offset = 1,
+            [FromQuery] int pageOffset = 1,
             [FromQuery] int limit = 50
         )
         {
@@ -116,15 +117,15 @@ namespace TeleMedicine_BE.Controllers
                 Paged<SlotVM> paged = null;
                 if (sortBy == SortTypeEnum.asc && typeof(SlotVM).GetProperty(fieldBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(slotList).GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0).Paginate<SlotVM>();
+                    paged = _pagingSupport.From(slotList).GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0).Paginate<SlotVM>();
                 }
                 else if (sortBy == SortTypeEnum.desc && typeof(SlotVM).GetProperty(fieldBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(slotList).GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1).Paginate<SlotVM>();
+                    paged = _pagingSupport.From(slotList).GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1).Paginate<SlotVM>();
                 }
                 else
                 {
-                    paged = _pagingSupport.From(slotList).GetRange(offset, limit, s => s.Id, 1).Paginate<SlotVM>();
+                    paged = _pagingSupport.From(slotList).GetRange(pageOffset, limit, s => s.Id, 1).Paginate<SlotVM>();
                 }
                 if (!String.IsNullOrEmpty(filters))
                 {

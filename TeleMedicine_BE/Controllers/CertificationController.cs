@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BusinessLogic.Services;
 using Infrastructure.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +18,7 @@ namespace TeleMedicine_BE.Controllers
 {
     [Route("api/v1/certifications")]
     [ApiController]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class CertificationController : Controller
     {
         private readonly ICertificationService _certificationService;
@@ -45,7 +46,7 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "field-by")] CertificationFieldEnum fieldBy,
             [FromQuery(Name = "sort-by")] SortTypeEnum sortBy,
             [FromQuery(Name = "filtering")] string filters = null,
-            int offset = 1,
+            int pageOffset = 1,
             int limit = 20
         )
         {
@@ -59,15 +60,15 @@ namespace TeleMedicine_BE.Controllers
                 Paged<CertificationVM> paged = null;
                 if (sortBy == SortTypeEnum.asc && typeof(CertificationVM).GetProperty(fieldBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(certificationList).GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0).Paginate<CertificationVM>();
+                    paged = _pagingSupport.From(certificationList).GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0).Paginate<CertificationVM>();
                 }
                 else if (sortBy == SortTypeEnum.desc && typeof(CertificationVM).GetProperty(fieldBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(certificationList).GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1).Paginate<CertificationVM>();
+                    paged = _pagingSupport.From(certificationList).GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1).Paginate<CertificationVM>();
                 }
                 else
                 {
-                    paged = _pagingSupport.From(certificationList).GetRange(offset, limit, s => s.Id, 1).Paginate<CertificationVM>();
+                    paged = _pagingSupport.From(certificationList).GetRange(pageOffset, limit, s => s.Id, 1).Paginate<CertificationVM>();
                 }
                 if (!String.IsNullOrEmpty(filters))
                 {

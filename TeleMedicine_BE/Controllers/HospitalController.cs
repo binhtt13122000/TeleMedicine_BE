@@ -18,6 +18,7 @@ namespace TeleMedicine_BE.Controllers
 {
     [Route("api/v1/hospitals")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class HospitalController : Controller
     {
         private readonly IHospitalService _hospitalService;
@@ -47,7 +48,7 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "sort-by")] SortTypeEnum sortBy,
             [FromQuery(Name = "filtering")] string filters = null,
             int limit = 20,
-            int offset = 1
+            int pageOffset = 1
         )
         {
             try
@@ -64,15 +65,15 @@ namespace TeleMedicine_BE.Controllers
                 Paged<HospitalVM> paged = null;
                 if (sortBy == SortTypeEnum.asc && typeof(HospitalVM).GetProperty(fieldBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(hospitalList).GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0).Paginate<HospitalVM>();
+                    paged = _pagingSupport.From(hospitalList).GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0).Paginate<HospitalVM>();
                 }
                 else if (sortBy == SortTypeEnum.desc && typeof(HospitalVM).GetProperty(fieldBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(hospitalList).GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1).Paginate<HospitalVM>();
+                    paged = _pagingSupport.From(hospitalList).GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1).Paginate<HospitalVM>();
                 }
                 else
                 {
-                    paged = _pagingSupport.From(hospitalList).GetRange(offset, limit, s => s.Id, 1).Paginate<HospitalVM>();
+                    paged = _pagingSupport.From(hospitalList).GetRange(pageOffset, limit, s => s.Id, 1).Paginate<HospitalVM>();
                 }
                 if (!String.IsNullOrEmpty(filters))
                 {

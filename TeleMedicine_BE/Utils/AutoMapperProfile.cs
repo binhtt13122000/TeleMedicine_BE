@@ -135,16 +135,47 @@ namespace TeleMedicine_BE.Utils
 
             #region AutoMapper SlotViewModel
             CreateMap<SlotVM, Slot>();
+            CreateMap<SlotHealthCheckVM, Slot>();
+            CreateMap<Slot, SlotHealthCheckVM>();
             CreateMap<Slot, SlotVM>();
             CreateMap<SlotCM, Slot>();
             CreateMap<SlotUM, Slot>();
+            CreateMap<SlotHeakthCheckCM, Slot>();
             #endregion
 
             #region AutoMapper PatientViewModel
             CreateMap<PatientVM, Patient>();
             CreateMap<Patient, PatientVM>();
+            CreateMap<PatientHealthCheckVM, Patient>();
+            CreateMap<Patient, PatientHealthCheckVM>();
             CreateMap<PatientCM, Patient>();
             CreateMap<PatientUM, Patient>();
+            #endregion
+
+            #region AutoMapper HealthCheckViewModel
+            CreateMap<HealthCheckVM, HealthCheck>();
+            CreateMap<HealthCheck, HealthCheckVM>();
+            CreateMap<HealthCheckCM, HealthCheck>();
+            CreateMap<HealthCheckUM, HealthCheck>();
+            CreateMap<HealthCheckStatusUM, HealthCheck>();
+            #endregion
+
+            #region AutoMapper SymptomHealthCheckViewModel
+            CreateMap<SymptomHealthCheckVM, SymptomHealthCheck>();
+            CreateMap<SymptomHealthCheck, SymptomHealthCheckVM>();
+            CreateMap<SymptomHealthCheckCM, SymptomHealthCheck>();
+            #endregion
+
+            #region AutoMapper PrescriptionViewModel;
+            CreateMap<PrescriptionHealthCheckVM, Prescription>();
+            CreateMap<Prescription, PrescriptionHealthCheckVM>();
+            CreateMap<PrescriptionCM, Prescription>();
+            #endregion
+
+            #region AutoMapper HealthCheckDiseaseViewModel;
+            CreateMap<HealthCheckDiseaseVM, HealthCheckDisease>();
+            CreateMap<HealthCheckDisease, HealthCheckDiseaseVM>();
+            CreateMap<HealthCheckDiseaseCM, HealthCheckDisease>();
             #endregion
         }
     }

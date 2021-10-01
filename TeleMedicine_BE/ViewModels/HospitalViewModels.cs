@@ -22,6 +22,9 @@ namespace TeleMedicine_BE.ViewModels
 
         public string Address { get; set; }
         public string Description { get; set; }
+        public double Lat { get; set; }
+
+        public double Long { get; set; }
     }
 
     public class HospitalCM
@@ -39,6 +42,12 @@ namespace TeleMedicine_BE.ViewModels
 
         [StringLength(256)]
         public string Description { get; set; }
+
+        [Required]
+        public double Lat { get; set; }
+
+        [Required]
+        public double Long { get; set; }
     }
 
     public class HospitalUM
@@ -59,6 +68,12 @@ namespace TeleMedicine_BE.ViewModels
 
         [StringLength(256)]
         public string Description { get; set; }
+
+        [Required]
+        public double Lat { get; set; }
+
+        [Required]
+        public double Long { get; set; }
     }
 
     public class HospitalWithDoctorVM

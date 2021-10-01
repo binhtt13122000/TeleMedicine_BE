@@ -5,8 +5,15 @@ using System.Collections.Generic;
 
 namespace Infrastructure.Models
 {
+    public enum HealthCheckSta
+    {
+        BOOKED,
+        CANCELED,
+        COMPLETED,
+    }
     public partial class HealthCheck
     {
+
         public HealthCheck()
         {
             HealthCheckDiseases = new HashSet<HealthCheckDisease>();
@@ -24,8 +31,10 @@ namespace Infrastructure.Models
         public string Advice { get; set; }
         public string Token { get; set; }
         public int PatientId { get; set; }
-        public DateTime CreatedTime { get; set; }
+        public DateTime? CreatedTime { get; set; }
         public DateTime? CanceledTime { get; set; }
+
+        public string Status { get; set; }
 
         public virtual Patient Patient { get; set; }
         public virtual ICollection<HealthCheckDisease> HealthCheckDiseases { get; set; }

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BusinessLogic.Services;
 using Infrastructure.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -19,7 +20,7 @@ namespace TeleMedicine_BE.Controllers
 {
     [Route("api/v1/doctors")]
     [ApiController]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class DoctorController : Controller
     {
         private readonly IDoctorService _doctorService;
@@ -66,7 +67,7 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "is-verify")] int isVerify = 0,
             [FromQuery(Name = "filtering")] string filters = null,
             int limit = 50,
-            int offset = 1
+            int pageOffset = 1
         )
         {
             try
@@ -170,14 +171,14 @@ namespace TeleMedicine_BE.Controllers
                 Paged<DoctorVM> paged = null;
                 if (sortBy == SortTypeEnum.asc && typeof(DoctorVM).GetProperty(fieldBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(doctorList).GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0).Paginate<DoctorVM>();
+                    paged = _pagingSupport.From(doctorList).GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0).Paginate<DoctorVM>();
                 }
                 else if (sortBy == SortTypeEnum.desc && typeof(DoctorVM).GetProperty(fieldBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(doctorList).GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1).Paginate<DoctorVM>();
+                    paged = _pagingSupport.From(doctorList).GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1).Paginate<DoctorVM>();
                 }else
                 {
-                    paged = _pagingSupport.From(doctorList).GetRange(offset, limit, s => s.Id, 1).Paginate<DoctorVM>();
+                    paged = _pagingSupport.From(doctorList).GetRange(pageOffset, limit, s => s.Id, 1).Paginate<DoctorVM>();
                 }
                 
                 if (!String.IsNullOrEmpty(filters))
@@ -245,7 +246,7 @@ namespace TeleMedicine_BE.Controllers
         [HttpPut]
         [Route("{id}")]
         [Produces("application/json")]
-        public async Task<ActionResult<CertificationVM>> PutDoctor(int id, [FromBody] DoctorUM model)
+        public async Task<ActionResult<DoctorVM>> PutDoctor(int id, [FromBody] DoctorUM model)
         {
             Doctor currentDoctor = await _doctorService.GetByIdAsync(model.Id);
             if (id != model.Id)
@@ -269,8 +270,49 @@ namespace TeleMedicine_BE.Controllers
                 }
                     );
             }
+            List<CertificationDoctor> convertCetification = new List<CertificationDoctor>();
+            List<CertificationDoctorWithRegisterCM> certificationDoctors = model.CertificationDoctors.ToList();
+            if(certificationDoctors != null && certificationDoctors.Count > 0)
+            {
+                foreach(CertificationDoctorWithRegisterCM item in certificationDoctors)
+                {
+                    convertCetification.Add(_mapper.Map<CertificationDoctor>(item));
+                }
+            }
+
+            List<MajorDoctor> convertMajor = new List<MajorDoctor>();
+            List<MajorDoctorWithRegisterCM> majorDoctors = model.MajorDoctors.ToList();
+            if (majorDoctors != null && majorDoctors.Count > 0)
+            {
+                foreach (MajorDoctorWithRegisterCM item in majorDoctors)
+                {
+                    convertMajor.Add(_mapper.Map<MajorDoctor>(item));
+                }
+            }
+
+            List<HospitalDoctor> convertHospital = new List<HospitalDoctor>();
+            List<HospitalDoctorWithRegisterCM> hospitalDoctors = model.HospitalDoctors.ToList();
+            if (hospitalDoctors != null && hospitalDoctors.Count > 0)
+            {
+                foreach (HospitalDoctorWithRegisterCM item in hospitalDoctors)
+                {
+                    convertHospital.Add(_mapper.Map<HospitalDoctor>(item));
+                }
+            }
             try
             {
+                if(convertCetification != null && convertCetification.Count > 0)
+                {
+                    currentDoctor.CertificationDoctors = convertCetification;
+                }
+                if (convertMajor != null && convertMajor.Count > 0)
+                {
+                    currentDoctor.MajorDoctors = convertMajor;
+                }
+                if (convertHospital != null && convertHospital.Count > 0)
+                {
+                    currentDoctor.HospitalDoctors = convertHospital;
+                }
                 currentDoctor.PractisingCertificate = model.PractisingCertificate.Trim();
                 currentDoctor.CertificateCode = model.CertificateCode.Trim().ToUpper();
                 currentDoctor.PlaceOfCertificate = model.PlaceOfCertificate.Trim();

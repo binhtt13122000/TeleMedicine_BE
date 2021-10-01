@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BusinessLogic.Services;
 using Infrastructure.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +18,7 @@ namespace TeleMedicine_BE.Controllers
 {
     [Route("api/v1/time-frames")]
     [ApiController]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "1,2")]
     public class TimeFrameController : Controller
     {
         private readonly ITimeFrameService _timeFrameService;
@@ -45,7 +46,7 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "field-by")] TimeFrameFieldEnum fieldBy,
             [FromQuery(Name = "sort-by")] SortTypeEnum sortBy,
             [FromQuery(Name = "filtering")] string filters = null,
-            int offset = 1,
+            int pageOffset = 1,
             int limit = 20
         )
         {
@@ -63,15 +64,15 @@ namespace TeleMedicine_BE.Controllers
                 Paged<TimeFrameVM> paged = null;
                 if (sortBy == SortTypeEnum.asc && typeof(TimeFrameVM).GetProperty(fieldBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(timeFrames).GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0).Paginate<TimeFrameVM>();
+                    paged = _pagingSupport.From(timeFrames).GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0).Paginate<TimeFrameVM>();
                 }
                 else if (sortBy == SortTypeEnum.desc && typeof(TimeFrameVM).GetProperty(fieldBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(timeFrames).GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1).Paginate<TimeFrameVM>();
+                    paged = _pagingSupport.From(timeFrames).GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1).Paginate<TimeFrameVM>();
                 }
                 else
                 {
-                    paged = _pagingSupport.From(timeFrames).GetRange(offset, limit, s => s.Id, 1).Paginate<TimeFrameVM>();
+                    paged = _pagingSupport.From(timeFrames).GetRange(pageOffset, limit, s => s.Id, 1).Paginate<TimeFrameVM>();
                 }
                 if (!String.IsNullOrEmpty(filters))
                 {

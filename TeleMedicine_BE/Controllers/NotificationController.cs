@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BusinessLogic.Services;
 using Infrastructure.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +18,7 @@ namespace TeleMedicine_BE.Controllers
 {
     [Route("api/v1/notifications")]
     [ApiController]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class NotificationController : Controller
     {
         private readonly INotificationService _notificationService;
@@ -50,7 +51,7 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "field-by")] NotificationFieldEnum fieldBy,
             [FromQuery(Name = "sort-by")] SortTypeEnum sortBy,
             [FromQuery(Name = "filtering")] string filters = null,
-            int offset = 1,
+            int pageOffset = 1,
             int limit = 20
         )
         {
@@ -87,15 +88,15 @@ namespace TeleMedicine_BE.Controllers
                 Paged<NotificationVM> paged = null;
                 if (sortBy == SortTypeEnum.asc && typeof(NotificationVM).GetProperty(fieldBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(notifications).GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0).Paginate<NotificationVM>();
+                    paged = _pagingSupport.From(notifications).GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0).Paginate<NotificationVM>();
                 }
                 else if (sortBy == SortTypeEnum.desc && typeof(NotificationVM).GetProperty(fieldBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(notifications).GetRange(offset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1).Paginate<NotificationVM>();
+                    paged = _pagingSupport.From(notifications).GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1).Paginate<NotificationVM>();
                 }
                 else
                 {
-                    paged = _pagingSupport.From(notifications).GetRange(offset, limit, s => s.Id, 1).Paginate<NotificationVM>();
+                    paged = _pagingSupport.From(notifications).GetRange(pageOffset, limit, s => s.Id, 1).Paginate<NotificationVM>();
                 }
                 if (!String.IsNullOrEmpty(filters))
                 {
