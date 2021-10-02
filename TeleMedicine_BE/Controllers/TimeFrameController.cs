@@ -141,25 +141,20 @@ namespace TeleMedicine_BE.Controllers
             {
                 List<TimeFrame> convertTimeFrames = new List<TimeFrame>();
                 List<int> getTimeFramesId = _timeFrameService.GetAll().Select(s => s.Id).ToList();
-                foreach (TimeFrameCM item in model.ToList())
-                {
-                    convertTimeFrames.Add(_mapper.Map<TimeFrame>(item));
-                }
                 if (getTimeFramesId.Count > 0)
                 {
-                    
+
                     _timeFrameService.DeleteListTimeFrame(getTimeFramesId);
                 }
-                bool isCreated = await _timeFrameService.AddTimeFramesAsync(convertTimeFrames);
-                if (isCreated)
+
+                foreach (TimeFrameCM item in model.ToList())
                 {
-                    return Ok(new { 
-                        message = "Create time frames success"
-                    });
+                    await _timeFrameService.AddAsync(_mapper.Map<TimeFrame>(item));
+
                 }
-                return BadRequest(new
+                return Ok(new
                 {
-                    message = "Create time frame failed!"
+                    message = "Create time frames success"
                 });
             }
             catch (Exception e)
