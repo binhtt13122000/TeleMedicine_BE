@@ -1,5 +1,6 @@
 ﻿using Infrastructure.Models;
 using Infrastructure.Repositories;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,7 @@ namespace BusinessLogic.Services
     public interface IDoctorService: IService<Doctor, int>
     {
         Doctor GetDoctorByEmail(string email);
+        DbSet<Doctor> access();
     }
     public class DoctorService : IDoctorService
     {
@@ -21,6 +23,12 @@ namespace BusinessLogic.Services
         {
             _doctorRepository = doctorRepository;
         }
+
+        public DbSet<Doctor> access()
+        {
+            return _doctorRepository.access();
+        }
+
         public async Task<Doctor> AddAsync(Doctor entity)
         {
             return await _doctorRepository.AddAsync(entity);

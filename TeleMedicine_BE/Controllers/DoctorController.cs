@@ -72,7 +72,9 @@ namespace TeleMedicine_BE.Controllers
         {
             try
             {
-                IQueryable<Doctor> doctorList = _doctorService.GetAll(s => s.HospitalDoctors, s => s.MajorDoctors, s => s.CertificationDoctors);
+                IQueryable<Doctor> doctorList = _doctorService.access().Include(s => s.CertificationDoctors).ThenInclude(s => s.Certification)
+                                                                       .Include(s => s.HospitalDoctors).ThenInclude(s => s.Hospital)
+                                                                       .Include(s => s.MajorDoctors).ThenInclude(s => s.Major);
                 if (!String.IsNullOrEmpty(email))
                 {
                     doctorList = doctorList.Where(s => s.Email.ToUpper().Contains(email.Trim().ToUpper()));
@@ -221,7 +223,10 @@ namespace TeleMedicine_BE.Controllers
         {
             try
             {
-                Doctor currentDoctor = _doctorService.GetDoctorByEmail(email);
+                IQueryable<Doctor> doctorList = _doctorService.access().Include(s => s.CertificationDoctors).ThenInclude(s => s.Certification)
+                                                                       .Include(s => s.HospitalDoctors).ThenInclude(s => s.Hospital)
+                                                                       .Include(s => s.MajorDoctors).ThenInclude(s => s.Major);
+                Doctor currentDoctor = doctorList.Where(s => s.Email.Trim().ToUpper().Equals(email.Trim().ToUpper())).FirstOrDefault();
                 if (currentDoctor == null)
                 {
                     return NotFound(new
@@ -251,7 +256,9 @@ namespace TeleMedicine_BE.Controllers
         {
             try
             {
-                IQueryable<Doctor> doctorList = _doctorService.GetAll(s => s.HospitalDoctors, s => s.CertificationDoctors, s => s.MajorDoctors);
+                IQueryable<Doctor> doctorList = _doctorService.access().Include(s => s.CertificationDoctors).ThenInclude(s => s.Certification)
+                                                                       .Include(s => s.HospitalDoctors).ThenInclude(s => s.Hospital)
+                                                                       .Include(s => s.MajorDoctors).ThenInclude(s => s.Major);
                 Doctor doctor = doctorList.Where(s => s.Id == id).FirstOrDefault();
 
                 if (doctor == null)
