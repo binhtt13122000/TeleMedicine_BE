@@ -7,7 +7,7 @@ namespace TeleMedicine_BE.Utils
 {
     public enum SortTypeEnum
     {
-        asc,
-        desc
+        desc,
+        asc
     }
 }

@@ -53,8 +53,8 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "end-created-time")] DateTime? endCreatedTime,
             [FromQuery(Name = "start-canceled-time")] DateTime? startCanceledTime,
             [FromQuery(Name = "end-canceled-time")] DateTime? endCanceledTime,
-            [FromQuery(Name = "field-by")] HealthCheckFieldEnum fieldBy,
-            [FromQuery(Name = "sort-by")] SortTypeEnum sortBy,
+            [FromQuery(Name = "order-by")] HealthCheckFieldEnum orderBy,
+            [FromQuery(Name = "order-type")] SortTypeEnum orderType,
             [FromQuery(Name = "patient-id")] int patientId = 0,
             [FromQuery(Name = "filtering")] string filters = null,
             [FromQuery(Name = "start-rating")] int startRating = 0,
@@ -115,16 +115,16 @@ namespace TeleMedicine_BE.Controllers
                     healthChecks = healthChecks.Where(s => s.PatientId == patientId);
                 }
                 Paged<HealthCheckVM> paged = null;
-                if (sortBy == SortTypeEnum.asc && typeof(HealthCheckVM).GetProperty(fieldBy.ToString()) != null)
+                if (orderType == SortTypeEnum.asc && typeof(HealthCheckVM).GetProperty(orderBy.ToString()) != null)
                 {
                     paged = _pagingSupport.From(healthChecks)
-                   .GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0)
+                   .GetRange(pageOffset, limit, p => EF.Property<object>(p, orderBy.ToString()), 0)
                    .Paginate<HealthCheckVM>();
                 }
-                else if (sortBy == SortTypeEnum.desc && typeof(HealthCheckVM).GetProperty(fieldBy.ToString()) != null)
+                else if (orderType == SortTypeEnum.desc && typeof(HealthCheckVM).GetProperty(orderBy.ToString()) != null)
                 {
                     paged = _pagingSupport.From(healthChecks)
-                   .GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1)
+                   .GetRange(pageOffset, limit, p => EF.Property<object>(p, orderBy.ToString()), 1)
                    .Paginate<HealthCheckVM>();
                 }
                 else

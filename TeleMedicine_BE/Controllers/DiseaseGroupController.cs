@@ -43,8 +43,8 @@ namespace TeleMedicine_BE.Controllers
         [Produces("application/json")]
         public ActionResult<IEnumerable<DiseaseGroupVM>> GetAllDiseaseGroups(
             [FromQuery(Name = "group-name")] string groupName,
-            [FromQuery(Name = "field-by")] DiseaseGroupFieldEnum fieldBy,
-            [FromQuery(Name = "sort-by")] SortTypeEnum sortBy,
+            [FromQuery(Name = "order-by")] DiseaseGroupFieldEnum orderBy,
+            [FromQuery(Name = "order-type")] SortTypeEnum orderType,
             [FromQuery(Name = "filtering")] string filters = null,
             int pageOffset = 1,
             int limit = 20
@@ -58,13 +58,13 @@ namespace TeleMedicine_BE.Controllers
                     diseaseGroups = diseaseGroups.Where(s => s.GroupName.ToUpper().Contains(groupName.Trim().ToUpper()));
                 }
                 Paged<DiseaseGroupVM> paged = null;
-                if (sortBy == SortTypeEnum.asc && typeof(DiseaseGroupVM).GetProperty(fieldBy.ToString()) != null)
+                if (orderType == SortTypeEnum.asc && typeof(DiseaseGroupVM).GetProperty(orderBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(diseaseGroups).GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0).Paginate<DiseaseGroupVM>();
+                    paged = _pagingSupport.From(diseaseGroups).GetRange(pageOffset, limit, p => EF.Property<object>(p, orderBy.ToString()), 0).Paginate<DiseaseGroupVM>();
                 }
-                else if (sortBy == SortTypeEnum.desc && typeof(DiseaseGroupVM).GetProperty(fieldBy.ToString()) != null)
+                else if (orderType == SortTypeEnum.desc && typeof(DiseaseGroupVM).GetProperty(orderBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(diseaseGroups).GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1).Paginate<DiseaseGroupVM>();
+                    paged = _pagingSupport.From(diseaseGroups).GetRange(pageOffset, limit, p => EF.Property<object>(p, orderBy.ToString()), 1).Paginate<DiseaseGroupVM>();
                 }
                 else
                 {

@@ -56,8 +56,8 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "producer")] string producer,
             [FromQuery(Name = "drug-form")] string drugForm,
             [FromQuery(Name = "drug-type")] int[] drugTypeIds,
-            [FromQuery(Name = "field-by")] DrugFieldEnum fieldBy,
-            [FromQuery(Name = "sort-by")] SortTypeEnum sortBy,
+            [FromQuery(Name = "order-by")] DrugFieldEnum orderBy,
+            [FromQuery(Name = "order-type")] SortTypeEnum orderType,
             [FromQuery(Name = "filtering")] string filters = null,
             [FromQuery(Name = "limit")] int limit = 20,
             [FromQuery(Name = "pageOffset")] int pageOffset = 1
@@ -87,16 +87,16 @@ namespace TeleMedicine_BE.Controllers
                     drugsQuery = drugsQuery.Where(_ => drugTypeIds.Contains(_.DrugTypeId));
                 }
                 Paged<DrugVM> paged = null;
-                if (sortBy == SortTypeEnum.asc && typeof(DrugVM).GetProperty(fieldBy.ToString()) != null)
+                if (orderType == SortTypeEnum.asc && typeof(DrugVM).GetProperty(orderBy.ToString()) != null)
                 {
                     paged = _pagingSupport.From(drugsQuery)
-                   .GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0)
+                   .GetRange(pageOffset, limit, p => EF.Property<object>(p, orderBy.ToString()), 0)
                    .Paginate<DrugVM>();
                 }
-                else if (sortBy == SortTypeEnum.desc && typeof(DrugVM).GetProperty(fieldBy.ToString()) != null)
+                else if (orderType == SortTypeEnum.desc && typeof(DrugVM).GetProperty(orderBy.ToString()) != null)
                 {
                     paged = _pagingSupport.From(drugsQuery)
-                   .GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1)
+                   .GetRange(pageOffset, limit, p => EF.Property<object>(p, orderBy.ToString()), 1)
                    .Paginate<DrugVM>();
                 }
                 else

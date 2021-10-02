@@ -48,8 +48,8 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "user-id")] int[] userId,
             [FromQuery(Name = "start-date")] DateTime? startDate,
             [FromQuery(Name = "end-date")] DateTime? endDate,
-            [FromQuery(Name = "field-by")] NotificationFieldEnum fieldBy,
-            [FromQuery(Name = "sort-by")] SortTypeEnum sortBy,
+            [FromQuery(Name = "order-by")] NotificationFieldEnum orderBy,
+            [FromQuery(Name = "order-type")] SortTypeEnum orderType,
             [FromQuery(Name = "filtering")] string filters = null,
             int pageOffset = 1,
             int limit = 20
@@ -86,13 +86,13 @@ namespace TeleMedicine_BE.Controllers
                 }
 
                 Paged<NotificationVM> paged = null;
-                if (sortBy == SortTypeEnum.asc && typeof(NotificationVM).GetProperty(fieldBy.ToString()) != null)
+                if (orderType == SortTypeEnum.asc && typeof(NotificationVM).GetProperty(orderBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(notifications).GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 0).Paginate<NotificationVM>();
+                    paged = _pagingSupport.From(notifications).GetRange(pageOffset, limit, p => EF.Property<object>(p, orderBy.ToString()), 0).Paginate<NotificationVM>();
                 }
-                else if (sortBy == SortTypeEnum.desc && typeof(NotificationVM).GetProperty(fieldBy.ToString()) != null)
+                else if (orderType == SortTypeEnum.desc && typeof(NotificationVM).GetProperty(orderBy.ToString()) != null)
                 {
-                    paged = _pagingSupport.From(notifications).GetRange(pageOffset, limit, p => EF.Property<object>(p, fieldBy.ToString()), 1).Paginate<NotificationVM>();
+                    paged = _pagingSupport.From(notifications).GetRange(pageOffset, limit, p => EF.Property<object>(p, orderBy.ToString()), 1).Paginate<NotificationVM>();
                 }
                 else
                 {
