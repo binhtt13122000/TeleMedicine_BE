@@ -245,10 +245,14 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="404">Not Found</response>
         /// <response code="400">Field is not matched</response>
         /// <response code="500">Failed to save request</response>
-        [HttpPut]
+        [HttpPut("{id}")]
         [Produces("application/json")]
-        public async Task<ActionResult<AccountProfileVM>> UpdateAccount([FromBody] AccountProfileUM model)
+        public async Task<ActionResult<AccountProfileVM>> UpdateAccount([FromRoute] int id, [FromBody] AccountProfileUM model)
         {
+            if(id != model.Id)
+            {
+                return BadRequest();
+            }
             try
             {
                 Account account = await _accountService.GetByIdAsync(model.Id);
@@ -288,7 +292,7 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="404">Not Found</response>
         /// <response code="400">Field is not matched</response>
         /// <response code="500">Failed to save request</response>
-        [HttpPut("{id}")]
+        [HttpPut("change-status/{id}")]
         public async Task<ActionResult> ChangeStatus([FromRoute] int id)
         {
             try {
