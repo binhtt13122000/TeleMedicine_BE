@@ -113,6 +113,37 @@ namespace TeleMedicine_BE.Controllers
         }
 
         /// <summary>
+        /// Get a specific patient by email
+        /// </summary>
+        /// <returns>Return the patient with the corresponding email</returns>
+        /// <response code="200">Returns the patient with the specified email</response>
+        /// <response code="404">No patient found with the specified email</response>
+        /// <response code="500">Internal server error</response>
+        [HttpGet]
+        [Route("email/{email}")]
+        [Produces("application/json")]
+        public ActionResult<PatientVM> GetPatientByEmail([FromRoute] string email)
+        {
+            try
+            {
+                Patient currentPatient = _patientService.GetPatientByEmail(email);
+                if (currentPatient == null)
+                {
+                    return NotFound(new
+                    {
+                        message = "Can not found patient by email"
+                    });
+                }
+                return Ok(_mapper.Map<PatientVM>(currentPatient));
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+
+        }
+
+        /// <summary>
         /// Get a specific patient by patient id
         /// </summary>
         /// <returns>Return the patient with the corresponding id</returns>
