@@ -135,29 +135,27 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="500">Failed to save request</response>
         [HttpPost]
         [Produces("application/json")]
-        public async Task<ActionResult<TimeFrameVM>> CreateTimeFrame([FromBody] TimeFrameCM model)
+        public async Task<ActionResult<TimeFrameVM>> CreateTimeFrame([FromBody] TimeFrameCM[] model)
         {
             try
             {
-                List<TimeFrame> getTimeFrames = _timeFrameService.GetAll().ToList();
-                if (getTimeFrames.Count > 0)
+                List<TimeFrame> convertTimeFrames = new List<TimeFrame>();
+                List<int> getTimeFramesId = _timeFrameService.GetAll().Select(s => s.Id).ToList();
+                foreach (TimeFrameCM item in model.ToList())
                 {
-                    for (int i = 0; i < getTimeFrames.Count; i++)
-                    {
-                        if (model.StartTime.CompareTo(getTimeFrames[i].EndTime) < 0 && getTimeFrames[i].StartTime.CompareTo(model.EndTime) < 0)
-                        {
-                            return BadRequest(new
-                            {
-                                message = "Time ovelap!"
-                            });
-                        }
-                    }
+                    convertTimeFrames.Add(_mapper.Map<TimeFrame>(item));
                 }
-                TimeFrame timeFrame = _mapper.Map<TimeFrame>(model);
-                TimeFrame timeFrameCreated = await _timeFrameService.AddAsync(timeFrame);
-                if (timeFrameCreated != null)
+                if (getTimeFramesId.Count > 0)
                 {
-                    return CreatedAtAction("GetTimeFrameById", new { id = timeFrameCreated.Id }, _mapper.Map<TimeFrameVM>(timeFrameCreated));
+                    
+                    _timeFrameService.DeleteListTimeFrame(getTimeFramesId);
+                }
+                bool isCreated = await _timeFrameService.AddTimeFramesAsync(convertTimeFrames);
+                if (isCreated)
+                {
+                    return Ok(new { 
+                        message = "Create time frames success"
+                    });
                 }
                 return BadRequest(new
                 {

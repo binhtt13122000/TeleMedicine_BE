@@ -181,6 +181,36 @@ namespace TeleMedicine_BE.Controllers
             }
         }
 
+        /// <summary>
+        /// Get a specific account by email
+        /// </summary>
+        /// <returns>Return the account with the corresponding email</returns>
+        /// <response code="200">Returns the account with the specified email</response>
+        /// <response code="404">No account found with the specified email</response>
+        /// <response code="500">Internal server error</response>
+        [HttpGet]
+        [Route("email/{email}")]
+        [Produces("application/json")]
+        public ActionResult<AccountProfileVM> GetAccountByEmail([FromRoute] string email)
+        {
+            try
+            {
+                Account currentAccount =  _accountService.GetAccountByEmail(email);
+                if(currentAccount == null)
+                {
+                    return NotFound(new
+                    {
+                        message = "Can not found account by email"
+                    });
+                }
+                return Ok(_mapper.Map<AccountProfileVM>(currentAccount));
+            }catch(Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+
+        }
+
 
         /// <summary>
         /// Get a specific account by account id

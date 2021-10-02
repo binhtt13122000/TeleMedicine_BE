@@ -11,6 +11,7 @@ namespace BusinessLogic.Services
 {
     public interface IPatientService : IService<Patient, int>
     {
+        Patient GetPatientByEmail(string email);
     }
     public class PatientService : IPatientService
     {
@@ -38,6 +39,11 @@ namespace BusinessLogic.Services
         public async Task<Patient> GetByIdAsync(int id)
         {
             return await _patientRepository.GetByIdAsync(id);
+        }
+
+        public Patient GetPatientByEmail(string email)
+        {
+            return _patientRepository.GetAll().Where(x => x.Email.ToUpper().Equals(email.ToUpper())).FirstOrDefault();
         }
 
         public async Task<bool> UpdateAsync(Patient entity)

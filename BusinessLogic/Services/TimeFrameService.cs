@@ -11,6 +11,7 @@ namespace BusinessLogic.Services
 {
     public interface ITimeFrameService : IService<TimeFrame, int>
     {
+        Task<bool> AddTimeFramesAsync(List<TimeFrame> timeFrames);
         Task<bool> ChangeTimeFrame(int minutes, int rest);
         void DeleteListTimeFrame(List<int> timeFrameIds);
 
@@ -27,6 +28,11 @@ namespace BusinessLogic.Services
         public async Task<TimeFrame> AddAsync(TimeFrame entity)
         {
             return await _timeFrameRepository.AddAsync(entity);
+        }
+
+        public async Task<bool> AddTimeFramesAsync(List<TimeFrame> timeFrames)
+        {
+            return await _timeFrameRepository.AddTimeFramesAsync(timeFrames);
         }
 
         public Task<bool> ChangeTimeFrame(int minutes, int rest)
