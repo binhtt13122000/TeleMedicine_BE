@@ -59,7 +59,7 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "filtering")] string filters = null,
             [FromQuery(Name = "start-rating")] int startRating = 0,
             [FromQuery(Name = "end-rating")] int endRating = 0,
-            int pageOffset = 1,
+            [FromQuery(Name = "page-offset")] int pageOffset = 1,
             int limit = 50
         )
         {

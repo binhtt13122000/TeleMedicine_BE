@@ -67,7 +67,7 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "is-verify")] int isVerify = 0,
             [FromQuery(Name = "filtering")] string filters = null,
             int limit = 50,
-            int pageOffset = 1
+            [FromQuery(Name = "page-offset")]  int pageOffset = 1
         )
         {
             try

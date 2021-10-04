@@ -55,8 +55,8 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "order-by")] SlotFieldEnum orderBy,
             [FromQuery(Name = "order-type")] SortTypeEnum orderType,
             [FromQuery(Name = "filtering")] string filters = null,
-            [FromQuery] int pageOffset = 1,
-            [FromQuery] int limit = 50
+            [FromQuery(Name = "page-offset")] int pageOffset = 1,
+            int limit = 50
         )
         {
             try

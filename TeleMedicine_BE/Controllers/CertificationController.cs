@@ -33,7 +33,7 @@ namespace TeleMedicine_BE.Controllers
         }
 
         /// <summary>
-        /// Get lisst certifications
+        /// Get list certifications
         /// </summary>
         /// <returns>List certifications</returns>
         /// <response code="200">Returns list certifications</response>
@@ -46,7 +46,7 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "order-by")] CertificationFieldEnum orderBy,
             [FromQuery(Name = "order-type")] SortTypeEnum orderType,
             [FromQuery(Name = "filtering")] string filters = null,
-            int pageOffset = 1,
+            [FromQuery(Name = "page-offset")]  int pageOffset = 1,
             int limit = 20
         )
         {
