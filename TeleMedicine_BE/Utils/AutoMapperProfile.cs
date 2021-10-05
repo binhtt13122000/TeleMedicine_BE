@@ -95,6 +95,7 @@ namespace TeleMedicine_BE.Utils
 
             #region AutoMapper AccountViewModel
             CreateMap<Account, AccountManageVM>();
+            CreateMap<AccountProfileCM, Account>();
             CreateMap<AccountProfileVM, Account>();
             CreateMap<Account, AccountProfileVM>();
             CreateMap<AccountProfileUM, Account>();

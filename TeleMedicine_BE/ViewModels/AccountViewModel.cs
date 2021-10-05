@@ -65,6 +65,42 @@ namespace TeleMedicine_BE.ViewModels
         public virtual RoleVM Role { get; set; }
     }
 
+    public class AccountProfileCM
+    {
+        [Required(AllowEmptyStrings = false)]
+        [StringLength(128)]
+        public string Email { get; set; }
+
+        [Required(AllowEmptyStrings = false)]
+        [StringLength(128)]
+        public string FirstName { get; set; }
+        [Required(AllowEmptyStrings = false)]
+        [StringLength(128)]
+        public string LastName { get; set; }
+        [Required(AllowEmptyStrings = false)]
+        [StringLength(128)]
+        public string StreetAddress { get; set; }
+        [Required(AllowEmptyStrings = false)]
+        [StringLength(128)]
+        public string Locality { get; set; }
+        [Required(AllowEmptyStrings = false)]
+        [StringLength(128)]
+        public string City { get; set; }
+        [Required(AllowEmptyStrings = false)]
+        [StringLength(128)]
+        public string PostalCode { get; set; }
+        [Required(AllowEmptyStrings = false)]
+        [StringLength(128)]
+        public string Phone { get; set; }
+        public string Avatar { get; set; }
+        [Required]
+        public DateTime Dob { get; set; }
+        public bool? IsMale { get; set; }
+
+        [Required]
+        public int RoleId { get; set; }
+    }
+
     public class AccountProfileUM
     {
         [Required]
