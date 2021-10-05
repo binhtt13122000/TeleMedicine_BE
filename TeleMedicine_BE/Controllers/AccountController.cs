@@ -58,7 +58,7 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "active")] int active = 0,
             [FromQuery(Name = "role-name")] string roleName = null,
             [FromQuery(Name = "filtering")] string filters = null,
-            int pageOffset = 1,
+            [FromQuery(Name = "page-offset")]  int pageOffset = 1,
             int limit = 20
         )
         {

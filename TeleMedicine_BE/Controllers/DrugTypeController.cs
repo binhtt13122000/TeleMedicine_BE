@@ -54,7 +54,7 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "order-type")] SortTypeEnum orderType,
             [FromQuery(Name = "filtering")] string filters = null,
             [FromQuery(Name = "limit")] int limit = 20,
-            [FromQuery(Name = "pageOffset")] int pageOffset = 1
+            [FromQuery(Name = "page-offset")] int pageOffset = 1
         )
         {
             try

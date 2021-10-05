@@ -46,7 +46,7 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "order-by")] DiseaseGroupFieldEnum orderBy,
             [FromQuery(Name = "order-type")] SortTypeEnum orderType,
             [FromQuery(Name = "filtering")] string filters = null,
-            int pageOffset = 1,
+            [FromQuery(Name = "page-offset")]  int pageOffset = 1,
             int limit = 20
             )
         {
