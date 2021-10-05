@@ -22,12 +22,16 @@ namespace TeleMedicine_BE.Controllers
     public class AccountController : ControllerBase
     {
         private readonly IAccountService _accountService;
+        private readonly IRoleService _roleService;
+        private readonly IDoctorService _doctorService;
         private readonly IMapper _mapper;
         private readonly IPagingSupport<Account> _pagingSupport;
 
-        public AccountController(IAccountService accountService, IMapper mapper, IPagingSupport<Account> pagingSupport)
+        public AccountController(IAccountService accountService, IDoctorService doctorService, IRoleService roleService, IMapper mapper, IPagingSupport<Account> pagingSupport)
         {
             _accountService = accountService;
+            _doctorService = doctorService;
+            _roleService = roleService;
             _mapper = mapper;
             _pagingSupport = pagingSupport;
         }
@@ -64,7 +68,8 @@ namespace TeleMedicine_BE.Controllers
         {
             try
             {
-                IQueryable<Account> accountsQuery = _accountService.GetAll(_ => _.Role);
+                IQueryable<Account> accountsQuery = _accountService.GetAll(_ => _.Role).Where(s => !s.Role.Name.Trim().ToUpper().Equals("ADMIN"));
+                List<String> doctorQuery = _doctorService.GetAll().Where(s => s.IsVerify == true).Select(s => s.Email.Trim().ToUpper()).ToList();
                 if (!string.IsNullOrWhiteSpace(firstName))
                 {
                     accountsQuery = accountsQuery.Where(_ => _.FirstName.ToUpper().Contains(firstName.Trim().ToUpper()));
@@ -140,6 +145,10 @@ namespace TeleMedicine_BE.Controllers
                 if(!string.IsNullOrEmpty(roleName))
                 {
                     accountsQuery = accountsQuery.Where(s => s.Role.Name.ToUpper().Contains(roleName.Trim().ToUpper()));
+                }
+                if(doctorQuery != null && doctorQuery.Count > 0)
+                {
+                        accountsQuery = accountsQuery.Where(s => s.Role.Name.Equals("PATIENT") || (s.Role.Name.Equals("DOCTOR") && doctorQuery.Contains(s.Email.Trim().ToUpper())));
                 }
                 Paged<AccountManageVM> paged = null;
                 if (orderType == SortTypeEnum.asc && typeof(AccountManageVM).GetProperty(orderBy.ToString()) != null)
@@ -344,6 +353,59 @@ namespace TeleMedicine_BE.Controllers
                     });
                 }
                 return BadRequest();
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+
+        /// <summary>
+        /// Create a new account
+        /// </summary>
+        /// <response code="200">Created new account successfull</response>
+        /// <response code="400">Field is not matched or duplicated</response>
+        /// <response code="500">Failed to save request</response>
+        [HttpPost]
+        [Produces("application/json")]
+        public async Task<ActionResult<AccountProfileVM>> CreateNewAccount([FromBody] AccountProfileCM model)
+        {
+            try
+            {
+                Account currentAccount = _accountService.GetAll().Where(s => s.Email.Trim().ToUpper().Equals(model.Email.Trim().ToUpper())).FirstOrDefault();
+                if (currentAccount != null)
+                {
+                    return BadRequest(new
+                    {
+                        message = "Email have been registered!"
+                    });
+                }
+                Role currenRole = await _roleService.GetByIdAsync(model.RoleId);
+                if(currenRole == null)
+                {
+                    return BadRequest(new
+                    {
+                        message = "Can not found role by id!"
+                    });
+                }
+                
+                Account convertAccount = _mapper.Map<Account>(model);
+                convertAccount.Email = model.Email.Trim().ToLower();
+                convertAccount.FirstName = model.FirstName.Trim();
+                convertAccount.LastName = model.LastName.Trim();
+                convertAccount.StreetAddress = model.StreetAddress.Trim();
+                convertAccount.RoleId = model.RoleId;
+                convertAccount.Role = currenRole;
+                Account accountCreated = await _accountService.AddAsync(convertAccount);
+                if (accountCreated != null)
+                {
+                    return CreatedAtAction("GetAccountById", new { id = accountCreated.Id }, _mapper.Map<AccountProfileVM>(accountCreated));
+                }
+                return BadRequest(new
+                {
+                    message = "Create doctor failed!"
+                });
             }
             catch (Exception)
             {
