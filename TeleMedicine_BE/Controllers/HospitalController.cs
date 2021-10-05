@@ -178,11 +178,10 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="400">Field is not matched</response>
         /// <response code="500">Failed to save request</response>
         [HttpPut]
-        [Route("{id}")]
         [Produces("application/json")]
-        public async Task<ActionResult<HospitalVM>> PutHospital(int id, [FromBody] HospitalUM model)
+        public async Task<ActionResult<HospitalVM>> PutHospital([FromBody] HospitalUM model)
         {
-            Hospital currentHospital = await _hospitalService.GetByIdAsync(id);
+            Hospital currentHospital = await _hospitalService.GetByIdAsync(model.Id);
             if (currentHospital == null)
             {
                 return NotFound();

@@ -62,6 +62,9 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "major")] int[] majorId,
             [FromQuery(Name = "start-rating")] int startRating,
             [FromQuery(Name = "end-rating")] int endRating,
+            [FromQuery(Name = "majors")] List<int> majors,
+            [FromQuery(Name = "certifications")] List<int> certifications,
+            [FromQuery(Name = "hospitals")] List<int> hospitals,
             [FromQuery(Name = "order-by")] DoctorFieldEnum orderBy,
             [FromQuery(Name = "order-type")] SortTypeEnum orderType,
             [FromQuery(Name = "is-verify")] int isVerify = 0,
@@ -170,6 +173,65 @@ namespace TeleMedicine_BE.Controllers
                     }
                 }
                 
+                if(majors != null && majors.Count > 0)
+                {
+                    foreach(int item in majors)
+                    {
+                        Major currentMajor = _majorService.GetAll(s => s.MajorDoctors).Where(s => s.Id == item).FirstOrDefault();
+                        if (currentMajor == null)
+                        {
+                            return BadRequest(new {
+                                message = "Major id must be existed!"
+                            });
+                        }
+                    }
+                        foreach(int item in majors)
+                        {
+                            
+                            doctorList = doctorList.Where(s => s.MajorDoctors.Any(s => s.MajorId == item));
+                        }
+                }
+
+                if (hospitals != null && hospitals.Count > 0)
+                {
+                    foreach (int item in hospitals)
+                    {
+                        Hospital currentHospital = _hospitalService.GetAll(s => s.HospitalDoctors).Where(s => s.Id == item).FirstOrDefault();
+                        if (currentHospital == null)
+                        {
+                            return BadRequest(new
+                            {
+                                message = "Hospital id must be existed!"
+                            });
+                        }
+                    }
+                    foreach (int item in hospitals)
+                    {
+
+                        doctorList = doctorList.Where(s => s.HospitalDoctors.Any(s => s.HospitalId == item));
+                    }
+                }
+
+                if (certifications != null && certifications.Count > 0)
+                {
+                    foreach (int item in certifications)
+                    {
+                        Certification currentCertification = _certificationService.GetAll(s => s.CertificationDoctors).Where(s => s.Id == item).FirstOrDefault();
+                        if (currentCertification == null)
+                        {
+                            return BadRequest(new
+                            {
+                                message = "Certification id must be existed!"
+                            });
+                        }
+                    }
+                    foreach (int item in certifications)
+                    {
+
+                        doctorList = doctorList.Where(s => s.CertificationDoctors.Any(s => s.CertificationId == item));
+                    }
+                }
+
                 Paged<DoctorVM> paged = null;
                 if (orderType == SortTypeEnum.asc && typeof(DoctorVM).GetProperty(orderBy.ToString()) != null)
                 {
@@ -210,69 +272,52 @@ namespace TeleMedicine_BE.Controllers
         }
 
         /// <summary>
-        /// Get a specific doctor by email
+        /// Get a specific doctor by type
         /// </summary>
-        /// <returns>Return the doctor with the corresponding email</returns>
-        /// <response code="200">Returns the doctor with the specified email</response>
-        /// <response code="404">No doctor found with the specified email</response>
+        /// <returns>Return the doctor with the type</returns>
+        /// <response code="200">Returns the doctor with the type</response>
+        /// <response code="404">No doctor found with the type</response>
         /// <response code="500">Internal server error</response>
-        [HttpGet]
-        [Route("email/{email}")]
+        [HttpGet("{search}")]
         [Produces("application/json")]
-        public ActionResult<DoctorVM> GetDoctorByEmail([FromRoute] string email)
+        public ActionResult<DoctorVM> GetDoctorByType([FromRoute] string search, [FromQuery(Name = "search-type")] SearchType searchType)
         {
             try
             {
-                IQueryable<Doctor> doctorList = _doctorService.access().Include(s => s.CertificationDoctors).ThenInclude(s => s.Certification)
-                                                                       .Include(s => s.HospitalDoctors).ThenInclude(s => s.Hospital)
-                                                                       .Include(s => s.MajorDoctors).ThenInclude(s => s.Major);
-                Doctor currentDoctor = doctorList.Where(s => s.Email.Trim().ToUpper().Equals(email.Trim().ToUpper())).FirstOrDefault();
-                if (currentDoctor == null)
+                Doctor currentDoctor = null;
+                if (searchType == SearchType.Id)
                 {
-                    return NotFound(new
+                    try
                     {
-                        message = "Can not found doctor by email"
-                    });
-                }
-                return Ok(_mapper.Map<DoctorVM>(currentDoctor));
-            }
-            catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
-
-        }
-
-        /// <summary>
-        /// Get a specific doctor by doctor id
-        /// </summary>
-        /// <returns>Return the doctor with the corresponding id</returns>
-        /// <response code="200">Returns doctor with the specified id</response>
-        /// <response code="404">No doctor found with the specified id</response>
-        /// <response code="500">Internal server error</response>
-        [HttpGet("{id}")]
-        [Produces("application/json")]
-        public  ActionResult GetDoctorById(int id)
-        {
-            try
-            {
-                IQueryable<Doctor> doctorList = _doctorService.access().Include(s => s.CertificationDoctors).ThenInclude(s => s.Certification)
+                        int result = Int32.Parse(search);
+                         IQueryable<Doctor> doctorList = _doctorService.access().Include(s => s.CertificationDoctors).ThenInclude(s => s.Certification)
                                                                        .Include(s => s.HospitalDoctors).ThenInclude(s => s.Hospital)
                                                                        .Include(s => s.MajorDoctors).ThenInclude(s => s.Major);
-                Doctor doctor = doctorList.Where(s => s.Id == id).FirstOrDefault();
-
-                if (doctor == null)
-                {
-                    return NotFound("Can not found doctor by id: " + id);
+                        currentDoctor = doctorList.Where(s => s.Id == result).FirstOrDefault();
+                    }
+                    catch (FormatException)
+                    {
+                        return BadRequest();
+                    }
                 }
-                return Ok(_mapper.Map<DoctorVM>(doctor));
+                else if (searchType == SearchType.Email && !string.IsNullOrEmpty(search))
+                {
+                    IQueryable<Doctor> doctorList = _doctorService.access().Include(s => s.CertificationDoctors).ThenInclude(s => s.Certification)
+                                                                       .Include(s => s.HospitalDoctors).ThenInclude(s => s.Hospital)
+                                                                       .Include(s => s.MajorDoctors).ThenInclude(s => s.Major);
+                    currentDoctor = doctorList.Where(s => s.Email.Trim().ToUpper().Equals(search.Trim().ToUpper())).FirstOrDefault();
+                }
+                if (currentDoctor != null)
+                {
+                    return Ok(_mapper.Map<DoctorVM>(currentDoctor));
+                }
+                return NotFound();
             }
             catch (Exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
-
 
         /// <summary>
         /// Update a doctor
@@ -282,15 +327,10 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="400">Field is not matched</response>
         /// <response code="500">Failed to save request</response>
         [HttpPut]
-        [Route("{id}")]
         [Produces("application/json")]
-        public async Task<ActionResult<DoctorVM>> PutDoctor(int id, [FromBody] DoctorUM model)
+        public async Task<ActionResult<DoctorVM>> PutDoctor([FromBody] DoctorUM model)
         {
             Doctor currentDoctor = await _doctorService.GetByIdAsync(model.Id);
-            if (id != model.Id)
-            {
-                return BadRequest();
-            }
             if (currentDoctor == null)
             {
                 return NotFound();

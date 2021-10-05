@@ -230,9 +230,8 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="400">Field is not matched</response>
         /// <response code="500">Failed to save request</response>
         [HttpPut]
-        [Route("{id}")]
         [Produces("application/json")]
-        public async Task<ActionResult<NotificationVM>> UpdateNotification(int id, [FromBody] NotificationUM model)
+        public async Task<ActionResult<NotificationVM>> UpdateNotification([FromBody] NotificationUM model)
         {
             Account currentUser = await _accountService.GetByIdAsync(model.UserId);
             if (currentUser == null)
@@ -250,10 +249,6 @@ namespace TeleMedicine_BE.Controllers
                 {
                     message = "Notification is not exist."
                 });
-            }
-            if(id != notification.Id)
-            {
-                return BadRequest();
             }
             try
             {

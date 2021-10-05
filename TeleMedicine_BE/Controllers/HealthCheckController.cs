@@ -331,7 +331,6 @@ namespace TeleMedicine_BE.Controllers
 
             try
             {
-                return Ok(slotList);
                 for (int i = 0; i < slotList.Count; i++)
                 {
                     slotList[i].HealthCheck = null;
@@ -363,14 +362,9 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="400">Field is not matched</response>
         /// <response code="500">Failed to save request</response>
         [HttpPut]
-        [Route("{id}")]
         [Produces("application/json")]
-        public async Task<ActionResult<HealthCheckVM>> UpdateHealthCheck(int id, [FromBody] HealthCheckUM model)
+        public async Task<ActionResult<HealthCheckVM>> UpdateHealthCheck([FromBody] HealthCheckUM model)
         {
-            if (id != model.Id)
-            {
-                return BadRequest();
-            }
             HealthCheck currentHealthCheck = await _healthCheckService.GetByIdAsync(model.Id);
             if (currentHealthCheck == null){
                 return NotFound();

@@ -14,6 +14,7 @@ namespace TeleMedicine_BE.ViewModels
         Email,
         FirstName,
         LastName,
+        Ward,
         StreetAddress,
         Locality,
         City,
@@ -21,6 +22,12 @@ namespace TeleMedicine_BE.ViewModels
         Phone,
         Dob,
         RegisterTime,
+    }
+
+    public enum SearchType
+    {
+        Id,
+        Email,
     }
 
     public class AccountSort
@@ -33,6 +40,7 @@ namespace TeleMedicine_BE.ViewModels
         public string Email { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public string Ward { get; set; }
         public string StreetAddress { get; set; }
         public string Locality { get; set; }
         public string City { get; set; }
@@ -52,6 +60,8 @@ namespace TeleMedicine_BE.ViewModels
         public string Email { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
+
+        public string Ward { get; set; }
         public string StreetAddress { get; set; }
         public string Locality { get; set; }
         public string City { get; set; }
@@ -77,8 +87,10 @@ namespace TeleMedicine_BE.ViewModels
         [Required(AllowEmptyStrings = false)]
         [StringLength(128)]
         public string LastName { get; set; }
+
         [Required(AllowEmptyStrings = false)]
         [StringLength(128)]
+        public string Ward { get; set; }
         public string StreetAddress { get; set; }
         [Required(AllowEmptyStrings = false)]
         [StringLength(128)]
@@ -111,6 +123,9 @@ namespace TeleMedicine_BE.ViewModels
         [Required(AllowEmptyStrings = false)]
         [StringLength(128)]
         public string LastName { get; set; }
+        [Required(AllowEmptyStrings = false)]
+        [StringLength(128)]
+        public string Ward { get; set; }
         [Required(AllowEmptyStrings = false)]
         [StringLength(128)]
         public string StreetAddress { get; set; }

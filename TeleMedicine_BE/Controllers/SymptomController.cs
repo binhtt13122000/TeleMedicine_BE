@@ -258,14 +258,9 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="400">Field is not matched</response>
         /// <response code="500">Failed to save request</response>
         [HttpPut]
-        [Route("{id}")]
         [Produces("application/json")]
-        public async Task<ActionResult<SymptomVM>> UpdateSymptom(int id, [FromBody] SymptomUM model)
+        public async Task<ActionResult<SymptomVM>> UpdateSymptom([FromBody] SymptomUM model)
         {
-            if(id != model.Id)
-            {
-                return BadRequest();
-            }
             Symptom currentSymptom = await _symptomService.GetByIdAsync(model.Id);
             if(currentSymptom == null)
             {

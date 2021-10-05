@@ -167,11 +167,10 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="400">Field is not matched</response>
         /// <response code="500">Failed to save request</response>
         [HttpPut]
-        [Route("{id}")]
         [Produces("application/json")]
-        public async Task<ActionResult<RoleVM>> PutRole(int id, [FromBody] RoleUM model)
+        public async Task<ActionResult<RoleVM>> PutRole([FromBody] RoleUM model)
         {
-            Role currentRole = await _roleService.GetByIdAsync(id);
+            Role currentRole = await _roleService.GetByIdAsync(model.Id);
             if (currentRole == null)
             {
                 return NotFound();

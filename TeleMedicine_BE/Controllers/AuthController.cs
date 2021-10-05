@@ -19,13 +19,15 @@ namespace TeleMedicine_BE.Controllers
         private readonly IAccountService _accountService;
         private readonly IJwtTokenProvider _jwtTokenProvider;
         private readonly IDoctorService _doctorService;
+        private readonly IRoleService _roleService;
         private readonly IMapper _mapper;
 
-        public AuthController(IAccountService accountService, IJwtTokenProvider jwtTokenProvider, IDoctorService doctorService, IMapper mapper)
+        public AuthController(IAccountService accountService, IJwtTokenProvider jwtTokenProvider, IDoctorService doctorService, IRoleService roleService, IMapper mapper)
         {
             _accountService = accountService;
             _jwtTokenProvider = jwtTokenProvider;
             _doctorService = doctorService;
+            _roleService = roleService;
             _mapper = mapper;
         }
 
@@ -83,6 +85,11 @@ namespace TeleMedicine_BE.Controllers
                 }
                 else
                 {
+                    Role currentRole = _roleService.GetAll().Where(s => s.Id == model.LoginType).FirstOrDefault();
+                    if(currentRole.Name.Equals("ADMIN"))
+                    {
+                        return StatusCode(StatusCodes.Status401Unauthorized);
+                    }
                     return Ok(new
                     {
                         Email = email

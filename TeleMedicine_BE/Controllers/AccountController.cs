@@ -49,6 +49,7 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "email")] string email,
             [FromQuery(Name = "first-name")] string firstName,
             [FromQuery(Name = "last-name")] string lastName,
+            [FromQuery(Name = "ward")] string ward,
             [FromQuery(Name = "street-address")] string streetAddress,
             [FromQuery(Name = "locality")] string locality,
             [FromQuery(Name = "city")] string city,
@@ -89,7 +90,11 @@ namespace TeleMedicine_BE.Controllers
                 {
                     accountsQuery = accountsQuery.Where(_ => _.Email.ToUpper().Contains(email.Trim().ToUpper()));
                 }
-                if(!string.IsNullOrEmpty(streetAddress))
+                if (!string.IsNullOrEmpty(ward))
+                {
+                    accountsQuery = accountsQuery.Where(s => s.Ward.ToUpper().Contains(ward.Trim().ToUpper()));
+                }
+                if (!string.IsNullOrEmpty(streetAddress))
                 {
                     accountsQuery = accountsQuery.Where(s => s.StreetAddress.ToUpper().Contains(streetAddress.Trim().ToUpper()));
                 }
@@ -191,50 +196,35 @@ namespace TeleMedicine_BE.Controllers
         }
 
         /// <summary>
-        /// Get a specific account by email
+        /// Get a specific account by type
         /// </summary>
-        /// <returns>Return the account with the corresponding email</returns>
-        /// <response code="200">Returns the account with the specified email</response>
-        /// <response code="404">No account found with the specified email</response>
+        /// <returns>Return the account with the type</returns>
+        /// <response code="200">Returns the account with the type</response>
+        /// <response code="404">No account found with the type</response>
         /// <response code="500">Internal server error</response>
-        [HttpGet]
-        [Route("email/{email}")]
+        [HttpGet("{search}")]
         [Produces("application/json")]
-        public ActionResult<AccountProfileVM> GetAccountByEmail([FromRoute] string email)
+        public async Task<ActionResult<AccountProfileVM>> GetAccountByType([FromRoute] string search, [FromQuery(Name = "search-type")] SearchType searchType)
         {
             try
             {
-                Account currentAccount =  _accountService.GetAccountByEmail(email);
-                if(currentAccount == null)
+                Account account = null;
+                if (searchType == SearchType.Id)
                 {
-                    return NotFound(new
+                    try
                     {
-                        message = "Can not found account by email"
-                    });
+                        int result = Int32.Parse(search);
+                        account = await _accountService.GetByIdAsync(result);
+                    }
+                    catch (FormatException)
+                    {
+                        return BadRequest();
+                    }
                 }
-                return Ok(_mapper.Map<AccountProfileVM>(currentAccount));
-            }catch(Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
-
-        }
-
-
-        /// <summary>
-        /// Get a specific account by account id
-        /// </summary>
-        /// <returns>Return the account with the corresponding id</returns>
-        /// <response code="200">Returns the account with the specified id</response>
-        /// <response code="404">No account found with the specified id</response>
-        /// <response code="500">Internal server error</response>
-        [HttpGet("{id}")]
-        [Produces("application/json")]
-        public async Task<ActionResult<AccountProfileVM>> GetAccountById([FromRoute] int id)
-        {
-            try
-            {
-                Account account = await _accountService.GetByIdAsync(id);
+                else if(searchType == SearchType.Email && !string.IsNullOrEmpty(search))
+                {
+                    account = _accountService.GetAccountByEmail(search.Trim());
+                }
                 if(account != null)
                 {
                     return Ok(_mapper.Map<AccountProfileVM>(account));
@@ -254,14 +244,10 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="404">Not Found</response>
         /// <response code="400">Field is not matched</response>
         /// <response code="500">Failed to save request</response>
-        [HttpPut("{id}")]
+        [HttpPut]
         [Produces("application/json")]
-        public async Task<ActionResult<AccountProfileVM>> UpdateAccount([FromRoute] int id, [FromBody] AccountProfileUM model)
+        public async Task<ActionResult<AccountProfileVM>> UpdateAccount([FromBody] AccountProfileUM model)
         {
-            if(id != model.Id)
-            {
-                return BadRequest();
-            }
             try
             {
                 Account account = await _accountService.GetByIdAsync(model.Id);
@@ -301,7 +287,7 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="404">Not Found</response>
         /// <response code="400">Field is not matched</response>
         /// <response code="500">Failed to save request</response>
-        [HttpPut("change-status/{id}")]
+        [HttpPatch("{id}")]
         public async Task<ActionResult> ChangeStatus([FromRoute] int id)
         {
             try {
@@ -364,7 +350,7 @@ namespace TeleMedicine_BE.Controllers
         /// <summary>
         /// Create a new account
         /// </summary>
-        /// <response code="200">Created new account successfull</response>
+        /// <response code="201">Created new account successfull</response>
         /// <response code="400">Field is not matched or duplicated</response>
         /// <response code="500">Failed to save request</response>
         [HttpPost]
