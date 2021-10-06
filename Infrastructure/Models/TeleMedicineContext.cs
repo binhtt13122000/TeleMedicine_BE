@@ -82,6 +82,7 @@ namespace Infrastructure.Models
 
                 entity.Property(e => e.RegisterTime).HasColumnType("timestamp with time zone");
 
+                entity.Property(e => e.Ward);
                 entity.Property(e => e.StreetAddress).IsRequired();
 
                 entity.HasOne(d => d.Role)

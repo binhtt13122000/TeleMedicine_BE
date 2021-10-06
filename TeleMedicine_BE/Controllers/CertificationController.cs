@@ -158,15 +158,10 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="400">Field is not matched</response>
         /// <response code="500">Failed to save request</response>
         [HttpPut]
-        [Route("{id}")]
         [Produces("application/json")]
-        public async Task<ActionResult<CertificationVM>> PutCertification(int id,[FromBody] CertificationUM model)
+        public async Task<ActionResult<CertificationVM>> PutCertification([FromBody] CertificationUM model)
         {
             Certification currentCertification = await _certificationService.GetByIdAsync(model.Id);
-            if(id != model.Id)
-            {
-                return BadRequest();
-            }
             if (currentCertification == null)
             {
                 return NotFound();

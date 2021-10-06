@@ -290,14 +290,9 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="400">Field is not matched</response>
         /// <response code="500">Failed to save request</response>
         [HttpPut]
-        [Route("{id}")]
         [Produces("application/json")]
-        public async Task<ActionResult> PutTimeFrame(int id, [FromBody] SlotUM model)
+        public async Task<ActionResult> PutTimeFrame([FromBody] SlotUM model)
         {
-            if (id != model.Id)
-            {
-                return BadRequest();
-            }
 
             Slot currentSlot = await _slotService.GetByIdAsync(model.Id);
             if(currentSlot == null)

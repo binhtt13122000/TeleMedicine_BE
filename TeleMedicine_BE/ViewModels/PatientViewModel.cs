@@ -15,6 +15,7 @@ namespace TeleMedicine_BE.ViewModels
         Allergy,
         BloodGroup
     }
+
     public class PatientVM
     {
         public int Id { get; set; }

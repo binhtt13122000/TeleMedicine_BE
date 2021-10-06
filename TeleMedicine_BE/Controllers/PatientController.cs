@@ -113,56 +113,41 @@ namespace TeleMedicine_BE.Controllers
         }
 
         /// <summary>
-        /// Get a specific patient by email
+        /// Get a specific patient by type
         /// </summary>
-        /// <returns>Return the patient with the corresponding email</returns>
-        /// <response code="200">Returns the patient with the specified email</response>
-        /// <response code="404">No patient found with the specified email</response>
+        /// <returns>Return the patient with the type</returns>
+        /// <response code="200">Returns the patient with the type</response>
+        /// <response code="404">No patient found with the type</response>
         /// <response code="500">Internal server error</response>
-        [HttpGet]
-        [Route("email/{email}")]
+        [HttpGet("{search}")]
         [Produces("application/json")]
-        public ActionResult<PatientVM> GetPatientByEmail([FromRoute] string email)
+        public ActionResult<PatientVM> GetPatientByType([FromRoute] string search, [FromQuery(Name = "search-type")] SearchType searchType)
         {
             try
             {
-                Patient currentPatient = _patientService.GetPatientByEmail(email);
-                if (currentPatient == null)
+                Patient currentPatient = null;
+                if (searchType == SearchType.Id)
                 {
-                    return NotFound(new
+                    try
                     {
-                        message = "Can not found patient by email"
-                    });
+                        int result = Int32.Parse(search);
+                        IQueryable<Patient> patientList = _patientService.GetAll(s => s.HealthChecks);
+                        currentPatient = patientList.Where(s => s.Id == result).FirstOrDefault();
+                    }
+                    catch (FormatException)
+                    {
+                        return BadRequest();
+                    }
                 }
-                return Ok(_mapper.Map<PatientVM>(currentPatient));
-            }
-            catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
-
-        }
-
-        /// <summary>
-        /// Get a specific patient by patient id
-        /// </summary>
-        /// <returns>Return the patient with the corresponding id</returns>
-        /// <response code="200">Returns patient with the specified id</response>
-        /// <response code="404">No patient found with the specified id</response>
-        /// <response code="500">Internal server error</response>
-        [HttpGet("{id}")]
-        [Produces("application/json")]
-        public ActionResult GetPatientById(int id)
-        {
-            try
-            {
-                IQueryable<Patient> patientList = _patientService.GetAll(s => s.HealthChecks);
-                Patient currentPatient = patientList.Where(s => s.Id == id).FirstOrDefault();
+                else if (searchType == SearchType.Email && !string.IsNullOrEmpty(search))
+                {
+                    currentPatient = currentPatient = _patientService.GetPatientByEmail(search.Trim());
+                }
                 if (currentPatient != null)
                 {
                     return Ok(_mapper.Map<PatientVM>(currentPatient));
                 }
-                return NotFound("Can not found patient by id: " + id);
+                return NotFound();
             }
             catch (Exception)
             {
@@ -256,22 +241,17 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="400">Field is not matched</response>
         /// <response code="500">Failed to save request</response>
         [HttpPut]
-        [Route("{id}")]
         [Produces("application/json")]
-        public async Task<ActionResult<PatientVM>> PutPatient(int id, [FromBody] PatientUM model)
+        public async Task<ActionResult<PatientVM>> PutPatient([FromBody] PatientUM model)
         {
             try
             {
-                if (id != model.Id)
-                {
-                    return BadRequest();
-                }
                 Patient currentPatient = await _patientService.GetByIdAsync(model.Id);
                 if (currentPatient == null)
                 {
                     return NotFound(new
                     {
-                        message = "Can not found patient by id: " + id
+                        message = "Can not found patient by id: " + model.Id
                     });
                 }
                 currentPatient.BackgroundDisease = model.BackgroundDisease.Trim();

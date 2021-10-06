@@ -253,9 +253,8 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="400">Field is not matched</response>
         /// <response code="500">Failed to save request</response>
         [HttpPut]
-        [Route("{id}")]
         [Produces("application/json")]
-        public async Task<ActionResult<DiseaseVM>> UpdateDisease(int id, [FromBody] DiseaseUM model)
+        public async Task<ActionResult<DiseaseVM>> UpdateDisease([FromBody] DiseaseUM model)
         {
             DiseaseGroup diseaseGroup = await _diseaseGroupService.GetByIdAsync(model.DiseaseGroupId);
             if (diseaseGroup == null)
@@ -267,10 +266,6 @@ namespace TeleMedicine_BE.Controllers
             }
 
             Disease disease = await _diseaseService.GetByIdAsync(model.Id);
-            if (id != model.Id)
-            {
-                return BadRequest();
-            }
             if (disease == null)
             {
                 return BadRequest(new

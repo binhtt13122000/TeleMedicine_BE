@@ -155,11 +155,10 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="400">Field is not matched</response>
         /// <response code="500">Failed to save request</response>
         [HttpPut]
-        [Route("{id}")]
         [Produces("application/json")]
-        public async Task<ActionResult<MajorVM>> PutMajor(int id, [FromBody] MajorUM model)
+        public async Task<ActionResult<MajorVM>> PutMajor([FromBody] MajorUM model)
         {
-            Major currentMajor = await _majorService.GetByIdAsync(id);
+            Major currentMajor = await _majorService.GetByIdAsync(model.Id);
             if(currentMajor == null)
             {
                 return NotFound();

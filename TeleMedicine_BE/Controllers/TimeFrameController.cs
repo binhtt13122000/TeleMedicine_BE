@@ -171,15 +171,9 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="400">Field is not matched</response>
         /// <response code="500">Failed to save request</response>
         [HttpPut]
-        [Route("{id}")]
         [Produces("application/json")]
-        public async Task<ActionResult> PutTimeFrame(int id, [FromBody] TimeFrameUM model)
+        public async Task<ActionResult> PutTimeFrame([FromBody] TimeFrameUM model)
         {
-            if (id != model.Id)
-            {
-                return BadRequest();
-            }
-
             TimeFrame currentTimeFrame = await _timeFrameService.GetByIdAsync(model.Id);
             if(currentTimeFrame.EndTime.CompareTo(model.EndTime) != 0 || currentTimeFrame.StartTime.CompareTo(model.StartTime) != 0)
             {
