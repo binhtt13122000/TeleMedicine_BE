@@ -25,13 +25,15 @@ namespace TeleMedicine_BE.Controllers
         private readonly ISlotService _slotService;
         private readonly ISymptomService _symptomService;
         private readonly IPatientService _patientService;
+        private readonly IDoctorService _doctorService;
         private readonly IMapper _mapper;
         private readonly IPagingSupport<HealthCheck> _pagingSupport;
 
-        public HealthCheckController(IHealthCheckService healthCheckService, ISlotService slotService, ISymptomService symptomService, IPatientService patientService, IMapper mapper, IPagingSupport<HealthCheck> pagingSupport)
+        public HealthCheckController(IHealthCheckService healthCheckService, ISlotService slotService, IDoctorService doctorService, ISymptomService symptomService, IPatientService patientService, IMapper mapper, IPagingSupport<HealthCheck> pagingSupport)
         {
             _healthCheckService = healthCheckService;
             _slotService = slotService;
+            _doctorService = doctorService;
             _symptomService = symptomService;
             _patientService = patientService;
             _mapper = mapper;
@@ -43,6 +45,7 @@ namespace TeleMedicine_BE.Controllers
         /// </summary>
         /// <returns>List health checks</returns>
         /// <response code="200">Returns list health checks</response>
+        /// <response code="400">Bad requests</response>
         /// <response code="404">Not found health checks</response>
         /// <response code="500">Internal server error</response>
         [HttpGet]
@@ -56,6 +59,7 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "order-by")] HealthCheckFieldEnum orderBy,
             [FromQuery(Name = "order-type")] SortTypeEnum orderType,
             [FromQuery(Name = "patient-id")] int patientId = 0,
+            [FromQuery(Name = "doctor-id")] int doctorId = 0,
             [FromQuery(Name = "filtering")] string filters = null,
             [FromQuery(Name = "start-rating")] int startRating = 0,
             [FromQuery(Name = "end-rating")] int endRating = 0,
@@ -112,7 +116,27 @@ namespace TeleMedicine_BE.Controllers
                 }
                 if (patientId != 0)
                 {
+                    Patient currentPatient = _patientService.GetAll().Where(s => s.Id == patientId).FirstOrDefault();
+                    if(currentPatient == null)
+                    {
+                        return BadRequest(new
+                        {
+                            message = "Bad Request"
+                        });
+                    }
                     healthChecks = healthChecks.Where(s => s.PatientId == patientId);
+                }
+                if(doctorId != 0)
+                {
+                    Doctor currentDoctor = _doctorService.GetAll().Where(s => s.Id == doctorId).FirstOrDefault();
+                    if(currentDoctor == null)
+                    {
+                        return BadRequest(new
+                        {
+                            message = "Bad Request"
+                        });
+                    }
+                    healthChecks = healthChecks.Where(s => s.Slots.Any(s => s.DoctorId == doctorId));
                 }
                 Paged<HealthCheckVM> paged = null;
                 if (orderType == SortTypeEnum.asc && typeof(HealthCheckVM).GetProperty(orderBy.ToString()) != null)
