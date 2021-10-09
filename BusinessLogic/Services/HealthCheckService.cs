@@ -1,5 +1,6 @@
 ﻿using Infrastructure.Models;
 using Infrastructure.Repositories;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Linq.Expressions;
@@ -9,7 +10,7 @@ namespace BusinessLogic.Services
 {
     public interface IHealthCheckService : IService<HealthCheck, int>
     {
-
+        DbSet<HealthCheck> access();
     }
     public class HealthCheckService : IHealthCheckService
     {
@@ -19,6 +20,12 @@ namespace BusinessLogic.Services
         {
             _healthCheckRepository = healthCheckRepository;
         }
+
+        public DbSet<HealthCheck> access()
+        {
+            return _healthCheckRepository.access();
+        }
+
         public async Task<HealthCheck> AddAsync(HealthCheck entity)
         {
             return await _healthCheckRepository.AddAsync(entity);
