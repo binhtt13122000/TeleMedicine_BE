@@ -69,10 +69,10 @@ namespace TeleMedicine_BE.Controllers
         {
             try
             {
-                IQueryable<HealthCheck> healthChecks = _healthCheckService.GetAll(s => s.Slots,
-                    s => s.Patient,
-                    s => s.HealthCheckDiseases,
-                    s => s.SymptomHealthChecks);
+                IQueryable<HealthCheck> healthChecks = _healthCheckService.access().Include(s => s.Slots).ThenInclude(s => s.Doctor)
+                                                                                    .Include(s => s.Patient)
+                                                                                    .Include(s => s.HealthCheckDiseases).ThenInclude(s => s.Disease)
+                                                                                    .Include(s => s.SymptomHealthChecks).ThenInclude(s => s.Symptom);
                 if (startRating != 0 && endRating != 0)
                 {
                     healthChecks = healthChecks.Where(s => s.Rating >= startRating).
