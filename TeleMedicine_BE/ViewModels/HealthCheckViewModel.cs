@@ -51,6 +51,8 @@ namespace TeleMedicine_BE.ViewModels
         public DateTime? CreatedTime { get; set; }
         public DateTime? CanceledTime { get; set; }
 
+        public string Status { get; set; }
+
         public virtual PatientHealthCheckVM Patient { get; set; }
 
         public virtual ICollection<HealthCheckDiseaseVM> HealthCheckDiseases { get; set; }
