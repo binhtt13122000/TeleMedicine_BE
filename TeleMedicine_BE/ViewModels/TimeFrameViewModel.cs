@@ -18,6 +18,8 @@ namespace TeleMedicine_BE.ViewModels
 
         public TimeSpan StartTime { get; set; }
         public TimeSpan EndTime { get; set; }
+
+        public bool? IsActive { get; set; }
     }
 
     public class TimeFrameCM
@@ -39,5 +41,8 @@ namespace TeleMedicine_BE.ViewModels
 
         [Required]
         public TimeSpan EndTime { get; set; }
+
+        [Required]
+        public bool? IsActive { get; set; }
     }
 }

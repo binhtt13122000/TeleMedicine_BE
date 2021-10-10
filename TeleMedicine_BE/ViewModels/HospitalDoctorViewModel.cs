@@ -19,6 +19,8 @@ namespace TeleMedicine_BE.ViewModels
         public int HospitalId { get; set; }
         public bool IsWorking { get; set; }
 
+        public bool? IsActive { get; set; }
+
         public virtual HospitalVM Hospital { get; set; }
     }
 
@@ -53,6 +55,9 @@ namespace TeleMedicine_BE.ViewModels
 
         [Required]
         public bool IsWorking { get; set; }
+
+        [Required]
+        public bool? IsActive { get; set; }
 
     }
 }

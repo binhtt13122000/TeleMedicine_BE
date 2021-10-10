@@ -25,6 +25,8 @@ namespace TeleMedicine_BE.ViewModels
         public double Lat { get; set; }
 
         public double Long { get; set; }
+
+        public bool? IsActive { get; set; }
     }
 
     public class HospitalCM
@@ -74,6 +76,9 @@ namespace TeleMedicine_BE.ViewModels
 
         [Required]
         public double Long { get; set; }
+
+        [Required]
+        public bool? IsActive { get; set; }
     }
 
     public class HospitalWithDoctorVM
@@ -84,6 +89,8 @@ namespace TeleMedicine_BE.ViewModels
 
         public string Address { get; set; }
         public string Description { get; set; }
+
+        public bool? IsActive { get; set; }
 
         public virtual ICollection<HospitalDoctor> HospitalDoctors { get; set; }
     }

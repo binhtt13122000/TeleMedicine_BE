@@ -11,6 +11,8 @@ namespace TeleMedicine_BE.ViewModels
         public int HealthCheckId { get; set; }
         public int DiseaseId { get; set; }
 
+        public bool? IsActive { get; set; }
+
         public virtual DiseaseVM Disease { get; set; }
     }
 

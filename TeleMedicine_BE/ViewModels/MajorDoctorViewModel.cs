@@ -18,6 +18,8 @@ namespace TeleMedicine_BE.ViewModels
         public int DoctorId { get; set; }
         public int MajorId { get; set; }
 
+        public bool? IsActive { get; set; }
+
         public virtual MajorVM Major { get; set; }
     }
 
@@ -47,5 +49,8 @@ namespace TeleMedicine_BE.ViewModels
 
         [Required]
         public int MajorId { get; set; }
+
+        [Required]
+        public bool? IsActive { get; set; }
     }
 }

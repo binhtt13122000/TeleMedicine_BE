@@ -42,5 +42,8 @@ namespace TeleMedicine_BE.ViewModels
 
         [StringLength(256)]
         public string Description { get; set; }
+
+        [Required]
+        public bool? IsActive { get; set; }
     }
 }

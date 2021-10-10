@@ -32,5 +32,8 @@ namespace TeleMedicine_BE.ViewModels
         [Required(AllowEmptyStrings = false)]
         [StringLength(128)]
         public string GroupName { get; set; }
+
+        [Required]
+        public bool? IsActive { get; set; }
     }
 }

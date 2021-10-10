@@ -22,11 +22,17 @@ namespace TeleMedicine_BE.ViewModels
 
         public string Email { get; set; }
 
+        public string Name { get; set; }
+
+        public string Avatar { get; set; }
+
         public string BackgroundDisease { get; set; }
 
         public string Allergy { get; set; }
 
         public string BloodGroup { get; set; }
+
+        public bool? IsActive { get; set; }
 
         public virtual ICollection<HealthCheck> HealthChecks { get; set; }
 
@@ -38,11 +44,17 @@ namespace TeleMedicine_BE.ViewModels
 
         public string Email { get; set; }
 
+        public string Name { get; set; }
+
+        public string Avatar { get; set; }
+
         public string BackgroundDisease { get; set; }
 
         public string Allergy { get; set; }
 
         public string BloodGroup { get; set; }
+
+        public bool? IsActive { get; set; }
 
 
     }
@@ -52,6 +64,13 @@ namespace TeleMedicine_BE.ViewModels
         [Required(AllowEmptyStrings = false)]
         [StringLength(128)]
         public string Email { get; set; }
+
+        [Required(AllowEmptyStrings = false)]
+        [StringLength(128)]
+        public string Name { get; set; }
+
+        [Required(AllowEmptyStrings = false)]
+        public string Avatar { get; set; }
 
         public string BackgroundDisease { get; set; }
 
@@ -65,10 +84,20 @@ namespace TeleMedicine_BE.ViewModels
         [Required]
         public int Id;
 
+        [Required(AllowEmptyStrings = false)]
+        [StringLength(128)]
+        public string Name { get; set; }
+
+        [Required(AllowEmptyStrings = false)]
+        public string Avatar { get; set; }
+
         public string BackgroundDisease { get; set; }
 
         public string Allergy { get; set; }
 
         public string BloodGroup { get; set; }
+
+        [Required]
+        public bool? IsActive { get; set; }
     }
 }

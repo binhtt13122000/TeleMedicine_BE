@@ -26,6 +26,10 @@ namespace TeleMedicine_BE.ViewModels
 
         public string Email { get; set; }
 
+        public string Name { get; set; }
+
+        public string Avatar { get; set; }
+
         public string PractisingCertificate { get; set; }
 
         public string CertificateCode { get; set; }
@@ -42,6 +46,8 @@ namespace TeleMedicine_BE.ViewModels
         public int? Rating { get; set; }
         public bool? IsVerify { get; set; }
 
+        public bool? IsActive { get; set; }
+
         public virtual ICollection<CertificationDoctorVM> CertificationDoctors { get; set; }
         public virtual ICollection<HospitalDoctorVM> HospitalDoctors { get; set; }
         public virtual ICollection<MajorDoctorVM> MajorDoctors { get; set; }
@@ -52,6 +58,10 @@ namespace TeleMedicine_BE.ViewModels
     {
 
         public string Email { get; set; }
+
+        public string Name { get; set; }
+
+        public string Avatar { get; set; }
 
         public string PractisingCertificate { get; set; }
 
@@ -71,6 +81,12 @@ namespace TeleMedicine_BE.ViewModels
         [Required(AllowEmptyStrings = false)]
         [StringLength(128)]
         public string Email { get; set; }
+        [Required(AllowEmptyStrings = false)]
+        [StringLength(128)]
+        public string Name { get; set; }
+
+        [Required(AllowEmptyStrings = false)]
+        public string Avatar { get; set; }
 
         [Required(AllowEmptyStrings = false)]
         public string PractisingCertificate { get; set; }
@@ -102,6 +118,13 @@ namespace TeleMedicine_BE.ViewModels
         public int Id { get; set; }
 
         [Required(AllowEmptyStrings = false)]
+        [StringLength(128)]
+        public string Name { get; set; }
+
+        [Required(AllowEmptyStrings = false)]
+        public string Avatar { get; set; }
+
+        [Required(AllowEmptyStrings = false)]
         public string PractisingCertificate { get; set; }
 
         [Required(AllowEmptyStrings = false)]
@@ -119,6 +142,9 @@ namespace TeleMedicine_BE.ViewModels
         public string ScopeOfPractice { get; set; }
 
         public string Description { get; set; }
+
+        [Required]
+        public bool? IsActive { get; set; }
 
         public virtual ICollection<CertificationDoctorWithRegisterCM> CertificationDoctors { get; set; }
         public virtual ICollection<HospitalDoctorWithRegisterCM> HospitalDoctors { get; set; }
