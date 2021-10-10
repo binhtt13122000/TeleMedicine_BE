@@ -107,6 +107,8 @@ namespace Infrastructure.Models
 
                 entity.Property(e => e.Evidence).IsRequired();
 
+                entity.Property(e => e.IsActive).HasDefaultValueSql("true");
+
                 entity.HasOne(d => d.Certification)
                     .WithMany(p => p.CertificationDoctors)
                     .HasForeignKey(d => d.CertificationId)
@@ -131,6 +133,8 @@ namespace Infrastructure.Models
 
                 entity.Property(e => e.Name).IsRequired();
 
+                entity.Property(e => e.IsActive).HasDefaultValueSql("true");
+
                 entity.HasOne(d => d.DiseaseGroup)
                     .WithMany(p => p.Diseases)
                     .HasForeignKey(d => d.DiseaseGroupId)
@@ -143,6 +147,8 @@ namespace Infrastructure.Models
                 entity.ToTable("DiseaseGroup");
 
                 entity.Property(e => e.GroupName).IsRequired();
+
+                entity.Property(e => e.IsActive).HasDefaultValueSql("true");
             });
 
             modelBuilder.Entity<Doctor>(entity =>
@@ -154,6 +160,10 @@ namespace Infrastructure.Models
 
                 entity.HasIndex(e => e.Email, "Doctor_Email_key")
                     .IsUnique();
+
+                entity.Property(e => e.Name).IsRequired();
+
+                entity.Property(e => e.Avatar).IsRequired();
 
                 entity.Property(e => e.CertificateCode).IsRequired();
 
@@ -172,6 +182,8 @@ namespace Infrastructure.Models
                 entity.Property(e => e.Rating).HasDefaultValueSql("0");
 
                 entity.Property(e => e.ScopeOfPractice).IsRequired();
+
+                entity.Property(e => e.IsActive).HasDefaultValueSql("true");
             });
 
             modelBuilder.Entity<Drug>(entity =>
@@ -186,6 +198,8 @@ namespace Infrastructure.Models
 
                 entity.Property(e => e.Producer).IsRequired();
 
+                entity.Property(e => e.IsActive).HasDefaultValueSql("true");
+
                 entity.HasOne(d => d.DrugType)
                     .WithMany(p => p.Drugs)
                     .HasForeignKey(d => d.DrugTypeId)
@@ -198,6 +212,8 @@ namespace Infrastructure.Models
                 entity.ToTable("DrugType");
 
                 entity.Property(e => e.Name).IsRequired();
+
+                entity.Property(e => e.IsActive).HasDefaultValueSql("true");
             });
 
             modelBuilder.Entity<HealthCheck>(entity =>
@@ -212,6 +228,7 @@ namespace Infrastructure.Models
 
                 entity.Property(e => e.Token).IsRequired();
 
+
                 entity.HasOne(d => d.Patient)
                     .WithMany(p => p.HealthChecks)
                     .HasForeignKey(d => d.PatientId)
@@ -221,7 +238,10 @@ namespace Infrastructure.Models
 
             modelBuilder.Entity<HealthCheckDisease>(entity =>
             {
+
                 entity.ToTable("HealthCheckDisease");
+
+                entity.Property(e => e.IsActive).HasDefaultValueSql("true");
 
                 entity.HasOne(d => d.Disease)
                     .WithMany(p => p.HealthCheckDiseases)
@@ -248,11 +268,15 @@ namespace Infrastructure.Models
                 entity.Property(e => e.Lat).IsRequired();
 
                 entity.Property(e => e.Long).IsRequired();
+
+                entity.Property(e => e.IsActive).HasDefaultValueSql("true");
             });
 
             modelBuilder.Entity<HospitalDoctor>(entity =>
             {
                 entity.ToTable("HospitalDoctor");
+
+                entity.Property(e => e.IsActive).HasDefaultValueSql("true");
 
                 entity.HasOne(d => d.Doctor)
                     .WithMany(p => p.HospitalDoctors)
@@ -272,11 +296,15 @@ namespace Infrastructure.Models
                 entity.ToTable("Major");
 
                 entity.Property(e => e.Name).IsRequired();
+
+                entity.Property(e => e.IsActive).HasDefaultValueSql("true");
             });
 
             modelBuilder.Entity<MajorDoctor>(entity =>
             {
                 entity.ToTable("MajorDoctor");
+
+                entity.Property(e => e.IsActive).HasDefaultValueSql("true");
 
                 entity.HasOne(d => d.Doctor)
                     .WithMany(p => p.MajorDoctors)
@@ -301,6 +329,8 @@ namespace Infrastructure.Models
 
                 entity.Property(e => e.IsSeen).HasDefaultValueSql("false");
 
+                entity.Property(e => e.IsActive).HasDefaultValueSql("true");
+
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.Notifications)
                     .HasForeignKey(d => d.UserId)
@@ -316,6 +346,12 @@ namespace Infrastructure.Models
                     .IsUnique();
 
                 entity.Property(e => e.Email).IsRequired();
+
+                entity.Property(e => e.Name).IsRequired();
+
+                entity.Property(e => e.Avatar).IsRequired();
+
+                entity.Property(e => e.IsActive).HasDefaultValueSql("true");
             });
 
             modelBuilder.Entity<Prescription>(entity =>
@@ -325,6 +361,8 @@ namespace Infrastructure.Models
                 entity.Property(e => e.EndDate).HasColumnType("date");
 
                 entity.Property(e => e.StartDate).HasColumnType("date");
+
+                entity.Property(e => e.IsActive).HasDefaultValueSql("true");
 
                 entity.HasOne(d => d.Drug)
                     .WithMany(p => p.Prescriptions)
@@ -344,6 +382,8 @@ namespace Infrastructure.Models
                 entity.ToTable("Role");
 
                 entity.Property(e => e.Name).IsRequired();
+
+                entity.Property(e => e.IsActive).HasDefaultValueSql("true");
             });
 
             modelBuilder.Entity<Slot>(entity =>
@@ -355,6 +395,8 @@ namespace Infrastructure.Models
                 entity.Property(e => e.EndTime).HasColumnType("time without time zone");
 
                 entity.Property(e => e.StartTime).HasColumnType("time without time zone");
+
+                entity.Property(e => e.IsActive).HasDefaultValueSql("true");
 
                 entity.HasOne(d => d.Doctor)
                     .WithMany(p => p.Slots)
@@ -378,6 +420,8 @@ namespace Infrastructure.Models
                 entity.Property(e => e.Name).IsRequired();
 
                 entity.Property(e => e.SymptomCode).IsRequired();
+
+                entity.Property(e => e.IsActive).HasDefaultValueSql("true");
             });
 
             modelBuilder.Entity<SymptomHealthCheck>(entity =>
@@ -385,6 +429,8 @@ namespace Infrastructure.Models
                 entity.ToTable("SymptomHealthCheck");
 
                 entity.Property(e => e.Evidence).IsRequired();
+
+                entity.Property(e => e.IsActive).HasDefaultValueSql("true");
 
                 entity.HasOne(d => d.HealthCheck)
                     .WithMany(p => p.SymptomHealthChecks)
@@ -406,6 +452,8 @@ namespace Infrastructure.Models
                 entity.Property(e => e.EndTime).HasColumnType("time without time zone");
 
                 entity.Property(e => e.StartTime).HasColumnType("time without time zone");
+
+                entity.Property(e => e.IsActive).HasDefaultValueSql("true");
             });
 
             OnModelCreatingPartial(modelBuilder);
