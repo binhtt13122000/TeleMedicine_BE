@@ -12,6 +12,8 @@ namespace TeleMedicine_BE.ViewModels
         public int HealthCheckId { get; set; }
         public string Evidence { get; set; }
 
+        public bool? IsActive { get; set; }
+
         public virtual DrugVM Drug { get; set; }
 
     }

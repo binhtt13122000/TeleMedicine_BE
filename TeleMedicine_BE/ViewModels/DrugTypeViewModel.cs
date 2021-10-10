@@ -17,6 +17,8 @@ namespace TeleMedicine_BE.ViewModels
         public int Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
+
+        public bool? IsActive { get; set; }
     }
 
     public class DrugTypeUM
@@ -28,6 +30,9 @@ namespace TeleMedicine_BE.ViewModels
         public string Name { get; set; }
         [StringLength(256)]
         public string Description { get; set; }
+
+        [Required]
+        public bool? IsActive { get; set; }
     }
 
     public class DrugTypeCM

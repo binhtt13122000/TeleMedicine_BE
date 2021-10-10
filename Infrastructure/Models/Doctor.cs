@@ -17,6 +17,10 @@ namespace Infrastructure.Models
 
         public int Id { get; set; }
         public string Email { get; set; }
+
+        public string Name { get; set; }
+
+        public string Avatar { get; set; }
         public string PractisingCertificate { get; set; }
         public string CertificateCode { get; set; }
         public string PlaceOfCertificate { get; set; }
@@ -26,6 +30,8 @@ namespace Infrastructure.Models
         public int? NumberOfConsultants { get; set; }
         public int? Rating { get; set; }
         public bool? IsVerify { get; set; }
+
+        public bool? IsActive { get; set; }
 
         public virtual ICollection<CertificationDoctor> CertificationDoctors { get; set; }
         public virtual ICollection<HospitalDoctor> HospitalDoctors { get; set; }

@@ -24,6 +24,8 @@ namespace TeleMedicine_BE.ViewModels
         public int DoctorId { get; set; }
         public TimeSpan StartTime { get; set; }
         public TimeSpan EndTime { get; set; }
+
+        public bool? IsActive { get; set; }
     }
 
     public class SlotVM
@@ -34,6 +36,8 @@ namespace TeleMedicine_BE.ViewModels
         public TimeSpan StartTime { get; set; }
         public TimeSpan EndTime { get; set; }
         public int? HealthCheckId { get; set; }
+
+        public bool? IsActive { get; set; }
 
         public virtual DoctorVM Doctor { get; set; }
         public virtual HealthCheck HealthCheck { get; set; }
@@ -83,5 +87,8 @@ namespace TeleMedicine_BE.ViewModels
 
         [Required]
         public TimeSpan EndTime { get; set; }
+    
+        [Required]
+        public bool? IsActive { get; set; }
     }
 }

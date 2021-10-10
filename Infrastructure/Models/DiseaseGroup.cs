@@ -15,6 +15,8 @@ namespace Infrastructure.Models
         public int Id { get; set; }
         public string GroupName { get; set; }
 
+        public bool? IsActive { get; set; }
+
         public virtual ICollection<Disease> Diseases { get; set; }
     }
 }

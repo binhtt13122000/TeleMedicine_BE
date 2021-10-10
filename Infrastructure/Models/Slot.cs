@@ -14,6 +14,8 @@ namespace Infrastructure.Models
         public TimeSpan EndTime { get; set; }
         public int? HealthCheckId { get; set; }
 
+        public bool? IsActive { get; set; }
+
         public virtual Doctor Doctor { get; set; }
         public virtual HealthCheck HealthCheck { get; set; }
     }

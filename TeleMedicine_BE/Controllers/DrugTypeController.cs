@@ -50,6 +50,7 @@ namespace TeleMedicine_BE.Controllers
         [Produces("application/json")]
         public ActionResult<Paged<DrugTypeVM>> GetAllDrugTypes(
             [FromQuery(Name = "name")] string name,
+            [FromQuery(Name = "is-active")] bool? isActive,
             [FromQuery(Name = "order-by")] DrugTypeFieldEnum orderBy,
             [FromQuery(Name = "order-type")] SortTypeEnum orderType,
             [FromQuery(Name = "filtering")] string filters = null,
@@ -63,6 +64,10 @@ namespace TeleMedicine_BE.Controllers
                 if (!string.IsNullOrWhiteSpace(name))
                 {
                     drugTypesQuery = drugTypesQuery.Where(_ => _.Name.ToUpper().Contains(name.Trim().ToUpper()));
+                }
+                if(isActive.HasValue)
+                {
+                    drugTypesQuery = drugTypesQuery.Where(s => s.IsActive.Value.Equals(isActive.Value));
                 }
                 Paged<DrugTypeVM> paged = null;
                 if (orderType == SortTypeEnum.asc && typeof(DrugTypeVM).GetProperty(orderBy.ToString()) != null)

@@ -18,6 +18,8 @@ namespace TeleMedicine_BE.ViewModels
         public string Producer { get; set; }
         public string DrugOrigin { get; set; }
         public string DrugForm { get; set; }
+
+        public bool? IsActive { get; set; }
         public virtual DrugTypeVM DrugType { get; set; }
         public int DrugTypeId { get; set; }
     }
@@ -58,5 +60,8 @@ namespace TeleMedicine_BE.ViewModels
         public string DrugForm { get; set; }
         [Required]
         public int DrugTypeId { get; set; }
+
+        [Required]
+        public bool? IsActive { get; set; }
     }
 }

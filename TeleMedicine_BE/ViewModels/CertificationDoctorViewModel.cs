@@ -22,6 +22,8 @@ namespace TeleMedicine_BE.ViewModels
         public int DoctorId { get; set; }
         public int CertificationId { get; set; }
         public string Evidence { get; set; }
+
+        public bool? IsActive { get; set; }
         public DateTime DateOfIssue { get; set; }
 
         public virtual CertificationVM Certification { get; set; }
@@ -74,6 +76,9 @@ namespace TeleMedicine_BE.ViewModels
 
         [Required(AllowEmptyStrings = false)]
         public string Evidence { get; set; }
+
+        [Required]
+        public bool? IsActive { get; set; }
 
         [Required]
         [DataType(DataType.DateTime)]

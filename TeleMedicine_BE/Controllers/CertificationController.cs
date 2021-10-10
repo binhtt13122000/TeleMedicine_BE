@@ -43,6 +43,7 @@ namespace TeleMedicine_BE.Controllers
         [Produces("application/json")]
         public ActionResult<IEnumerable<CertificationVM>> GetAllCertifications(
             [FromQuery(Name = "name")] string name,
+            [FromQuery(Name = "is-active")] bool? isActive,
             [FromQuery(Name = "order-by")] CertificationFieldEnum orderBy,
             [FromQuery(Name = "order-type")] SortTypeEnum orderType,
             [FromQuery(Name = "filtering")] string filters = null,
@@ -56,6 +57,10 @@ namespace TeleMedicine_BE.Controllers
                 if (!String.IsNullOrEmpty(name))
                 {
                     certificationList = certificationList.Where(s => s.Name.ToUpper().Contains(name.Trim().ToUpper()));
+                }
+                if(isActive.HasValue)
+                {
+                    certificationList = certificationList.Where(s => s.IsActive.Value.Equals(isActive.Value));
                 }
                 Paged<CertificationVM> paged = null;
                 if (orderType == SortTypeEnum.asc && typeof(CertificationVM).GetProperty(orderBy.ToString()) != null)

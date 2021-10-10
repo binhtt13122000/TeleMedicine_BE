@@ -18,6 +18,8 @@ namespace Infrastructure.Models
         public string Description { get; set; }
         public int DiseaseGroupId { get; set; }
 
+        public bool? IsActive { get; set; }
+
         public virtual DiseaseGroup DiseaseGroup { get; set; }
         public virtual ICollection<HealthCheckDisease> HealthCheckDiseases { get; set; }
     }

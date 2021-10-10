@@ -43,6 +43,7 @@ namespace TeleMedicine_BE.Controllers
         public ActionResult<Paged<TimeFrameVM>> GetAllTimeFrames(
             TimeSpan startTime,
             TimeSpan endTime,
+            [FromQuery(Name = "is-active")] bool? isActive,
             [FromQuery(Name = "order-by")] TimeFrameFieldEnum orderBy,
             [FromQuery(Name = "order-type")] SortTypeEnum orderType,
             [FromQuery(Name = "filtering")] string filters = null,
@@ -60,6 +61,10 @@ namespace TeleMedicine_BE.Controllers
                 if(endTime.CompareTo(TimeSpan.Zero) != 0)
                 {
                     timeFrames = timeFrames.Where(s => s.EndTime.CompareTo(endTime) <= 0);
+                }
+                if(isActive.HasValue)
+                {
+                    timeFrames = timeFrames.Where(s => s.IsActive.Value.Equals(isActive.Value));
                 }
                 Paged<TimeFrameVM> paged = null;
                 if (orderType == SortTypeEnum.asc && typeof(TimeFrameVM).GetProperty(orderBy.ToString()) != null)

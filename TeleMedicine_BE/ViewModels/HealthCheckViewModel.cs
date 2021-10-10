@@ -72,6 +72,7 @@ namespace TeleMedicine_BE.ViewModels
         [Required]
         public int SlotId { get; set; }
 
+
         public virtual ICollection<SymptomHealthCheckCM> SymptomHealthChecks { get; set; }
     }
 

@@ -11,6 +11,8 @@ namespace Infrastructure.Models
         public int DoctorId { get; set; }
         public int MajorId { get; set; }
 
+        public bool? IsActive { get; set; }
+
         public virtual Doctor Doctor { get; set; }
         public virtual Major Major { get; set; }
     }

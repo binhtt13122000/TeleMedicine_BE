@@ -21,6 +21,8 @@ namespace TeleMedicine_BE.ViewModels
         public string Description { get; set; }
         public int DiseaseGroupId { get; set; }
 
+        public bool? IsActive { get; set; }
+
         public virtual DiseaseGroupVM DiseaseGroup { get; set; }
     }
 
@@ -42,6 +44,9 @@ namespace TeleMedicine_BE.ViewModels
 
         [Required]
         public int DiseaseGroupId { get; set; }
+
+        [Required]
+        public bool? IsActive { get; set; }
     }
 
     public class DiseaseCM

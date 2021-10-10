@@ -197,12 +197,10 @@ namespace TeleMedicine_BE.Controllers
         {
             try
             {
-                IQueryable<HealthCheck> healthChecks =  _healthCheckService.GetAll(s => s.Slots,
-                                                                                  s => s.Patient,
-                                                                                  s => s.HealthCheckDiseases,
-                                                                                  s => s.SymptomHealthChecks,
-                                                                                  s => s.Prescriptions
-                                                                                  );
+                IQueryable<HealthCheck> healthChecks = _healthCheckService.access().Include(s => s.Slots).ThenInclude(s => s.Doctor)
+                                                                                    .Include(s => s.Patient)
+                                                                                    .Include(s => s.HealthCheckDiseases).ThenInclude(s => s.Disease)
+                                                                                    .Include(s => s.SymptomHealthChecks).ThenInclude(s => s.Symptom);
                 HealthCheck currentHealthCheck = healthChecks.Where(s => s.Id == id).FirstOrDefault();
                 if (currentHealthCheck != null)
                 {

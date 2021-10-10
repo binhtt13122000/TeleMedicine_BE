@@ -12,6 +12,8 @@ namespace Infrastructure.Models
         public int HealthCheckId { get; set; }
         public string Evidence { get; set; }
 
+        public bool? IsActive { get; set; }
+
         public virtual HealthCheck HealthCheck { get; set; }
         public virtual Symptom Symptom { get; set; }
     }

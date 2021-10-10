@@ -43,6 +43,7 @@ namespace TeleMedicine_BE.Controllers
         [Produces("application/json")]
         public ActionResult<IEnumerable<RoleVM>> GetAllRole(
             [FromQuery(Name = "name")] string name,
+            [FromQuery(Name = "is-active")] bool? isActive,
             [FromQuery(Name = "order-by")] RoleFieldEnum orderBy,
             [FromQuery(Name = "order-type")] SortTypeEnum orderType,
             [FromQuery(Name = "filtering")] string filters = null,
@@ -56,6 +57,10 @@ namespace TeleMedicine_BE.Controllers
                 if (!String.IsNullOrEmpty(name))
                 {
                     roleList = roleList.Where(s => s.Name.ToUpper().Contains(name.Trim().ToUpper()));
+                }
+                if(isActive.HasValue)
+                {
+                    roleList = roleList.Where(s => s.IsActive.Value.Equals(isActive.Value));
                 }
                 Paged<RoleVM> paged = null;
                 if (orderType == SortTypeEnum.asc && typeof(RoleVM).GetProperty(orderBy.ToString()) != null)

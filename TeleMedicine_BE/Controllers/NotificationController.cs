@@ -48,6 +48,7 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "user-id")] int[] userId,
             [FromQuery(Name = "start-date")] DateTime? startDate,
             [FromQuery(Name = "end-date")] DateTime? endDate,
+            [FromQuery(Name = "is-active")] bool? isActive,
             [FromQuery(Name = "order-by")] NotificationFieldEnum orderBy,
             [FromQuery(Name = "order-type")] SortTypeEnum orderType,
             [FromQuery(Name = "filtering")] string filters = null,
@@ -65,6 +66,10 @@ namespace TeleMedicine_BE.Controllers
                 if(userId != null && userId.Length > 0)
                 {
                     notifications = notifications.Where(s => userId.Contains(s.UserId));
+                }
+                if(isActive.HasValue)
+                {
+                    notifications = notifications.Where(s => s.IsActive.Value.Equals(isActive.Value));
                 }
                 if(startDate.HasValue && endDate.HasValue)
                 {

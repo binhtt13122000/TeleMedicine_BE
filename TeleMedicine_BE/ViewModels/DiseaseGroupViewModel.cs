@@ -15,6 +15,8 @@ namespace TeleMedicine_BE.ViewModels
     {
         public int Id { get; set; }
         public string GroupName { get; set; }
+
+        public bool? IsActive { get; set; }
     }
 
     public class DiseaseGroupCM
@@ -32,5 +34,8 @@ namespace TeleMedicine_BE.ViewModels
         [Required(AllowEmptyStrings = false)]
         [StringLength(128)]
         public string GroupName { get; set; }
+
+        [Required]
+        public bool? IsActive { get; set; }
     }
 }

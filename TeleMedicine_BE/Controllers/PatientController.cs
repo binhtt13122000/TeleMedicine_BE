@@ -46,6 +46,7 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "background-disease")] string backgroundDisease,
             [FromQuery(Name = "allergy")] string allergy,
             [FromQuery(Name = "blood-group")] string bloodGroup,
+            [FromQuery(Name = "is-active")] bool? isActive,
             [FromQuery(Name = "order-by")] PatientFieldEnum orderBy,
             [FromQuery(Name = "order-type")] SortTypeEnum orderType,
             [FromQuery(Name = "filtering")] string filters = null,
@@ -71,6 +72,10 @@ namespace TeleMedicine_BE.Controllers
                 if (!string.IsNullOrEmpty(bloodGroup))
                 {
                     patientList = patientList.Where(s => s.BloodGroup.Trim().ToUpper().Contains(bloodGroup.Trim().ToUpper()));
+                }
+                if(isActive.HasValue)
+                {
+                    patientList = patientList.Where(s => s.IsActive.Value.Equals(isActive.Value));
                 }
                 Paged<PatientVM> paged = null;
                 if (orderType == SortTypeEnum.asc && typeof(PatientVM).GetProperty(orderBy.ToString()) != null)
