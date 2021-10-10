@@ -12,6 +12,8 @@ namespace Infrastructure.Models
         public int HospitalId { get; set; }
         public bool IsWorking { get; set; }
 
+        public bool? IsActive { get; set; }
+
         public virtual Doctor Doctor { get; set; }
         public virtual Hospital Hospital { get; set; }
     }

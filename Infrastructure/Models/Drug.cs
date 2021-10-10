@@ -19,6 +19,8 @@ namespace Infrastructure.Models
         public string DrugForm { get; set; }
         public int DrugTypeId { get; set; }
 
+        public bool? IsActive { get; set; }
+
         public virtual DrugType DrugType { get; set; }
         public virtual ICollection<Prescription> Prescriptions { get; set; }
     }

@@ -13,6 +13,8 @@ namespace Infrastructure.Models
         public string Evidence { get; set; }
         public DateTime DateOfIssue { get; set; }
 
+        public bool? IsActive { get; set; }
+
         public virtual Certification Certification { get; set; }
         public virtual Doctor Doctor { get; set; }
     }

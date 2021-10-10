@@ -17,6 +17,8 @@ namespace Infrastructure.Models
         public int? EveningQuantity { get; set; }
         public string Description { get; set; }
 
+        public bool? IsActive { get; set; }
+
         public virtual Drug Drug { get; set; }
         public virtual HealthCheck HealthCheck { get; set; }
     }

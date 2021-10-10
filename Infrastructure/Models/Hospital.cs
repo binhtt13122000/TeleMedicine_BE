@@ -22,6 +22,8 @@ namespace Infrastructure.Models
 
         public double Long { get; set; }
 
+        public bool? IsActive { get; set; }
+
         public virtual ICollection<HospitalDoctor> HospitalDoctors { get; set; }
     }
 }
