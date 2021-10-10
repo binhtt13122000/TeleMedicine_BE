@@ -62,6 +62,7 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "major")] int[] majorId,
             [FromQuery(Name = "start-rating")] int startRating,
             [FromQuery(Name = "end-rating")] int endRating,
+            [FromQuery(Name = "is-active")] bool? isActive,
             [FromQuery(Name = "majors")] List<int> majors,
             [FromQuery(Name = "certifications")] List<int> certifications,
             [FromQuery(Name = "hospitals")] List<int> hospitals,
@@ -129,7 +130,10 @@ namespace TeleMedicine_BE.Controllers
                         doctorList = doctorList.Where(s => s.NumberOfConsultants <= numberEndConsultants);
                     }
                 }
-                
+                if(isActive.HasValue)
+                {
+                    doctorList = doctorList.Where(s => s.IsActive.Value.Equals(isActive.Value));
+                }
                 if(startRating != 0 && endRating != 0)
                 {
                     doctorList = doctorList.Where(s => s.Rating >= startRating).Where(s => s.Rating <= endRating);

@@ -51,8 +51,6 @@ namespace TeleMedicine_BE.ViewModels
         public DateTime? CreatedTime { get; set; }
         public DateTime? CanceledTime { get; set; }
 
-        public bool? IsActive { get; set; }
-
         public virtual PatientHealthCheckVM Patient { get; set; }
 
         public virtual ICollection<HealthCheckDiseaseVM> HealthCheckDiseases { get; set; }
@@ -84,9 +82,6 @@ namespace TeleMedicine_BE.ViewModels
         public int Id;
 
         public string Advice { get; set; }
-
-        [Required]
-        public bool? IsActive { get; set; }
 
         public virtual ICollection<HealthCheckDiseaseCM> HealthCheckDiseases { get; set; }
         public virtual ICollection<PrescriptionCM> Prescriptions { get; set; }

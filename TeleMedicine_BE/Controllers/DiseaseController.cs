@@ -48,6 +48,7 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "name")] string name,
             [FromQuery(Name = "description")] string description,
             [FromQuery(Name = "disease-type")] int[] diseaseTypeIds,
+            [FromQuery(Name = "is-active")] bool? isActive,
             [FromQuery(Name = "order-by")] DiseaseFieldEnum orderBy,
             [FromQuery(Name = "order-type")] SortTypeEnum orderType,
             [FromQuery(Name = "filtering")] string filters = null,
@@ -69,6 +70,10 @@ namespace TeleMedicine_BE.Controllers
                 if (!string.IsNullOrWhiteSpace(description))
                 {
                     diseasesQuery = diseasesQuery.Where(_ => _.Description.ToUpper().Contains(description.Trim().ToUpper()));
+                }
+                if(isActive.HasValue)
+                {
+                    diseasesQuery = diseasesQuery.Where(s => s.IsActive.Value.Equals(isActive.Value));
                 }
                 if (diseaseTypeIds != null && diseaseTypeIds.Length > 0)
                 {

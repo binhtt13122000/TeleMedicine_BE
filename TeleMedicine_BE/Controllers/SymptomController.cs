@@ -52,6 +52,7 @@ namespace TeleMedicine_BE.Controllers
         public ActionResult<Paged<SymptomVM>> GetAllSymptom(
             [FromQuery(Name = "code")] string symptomCode, 
             [FromQuery(Name = "name")] string name,
+            [FromQuery(Name = "is-active")] bool? isActive,
             [FromQuery(Name = "order-by")] SymptomFieldEnum orderBy,
             [FromQuery(Name = "order-type")] SortTypeEnum orderType,
             [FromQuery(Name = "filtering")] string filters = null,
@@ -69,6 +70,10 @@ namespace TeleMedicine_BE.Controllers
                 if (!string.IsNullOrWhiteSpace(name))
                 {
                     symptomsQuery = symptomsQuery.Where(_ => _.Name.ToUpper().Contains(name.Trim().ToUpper()));
+                }
+                if(isActive.HasValue)
+                {
+                    symptomsQuery = symptomsQuery.Where(s => s.IsActive.Value.Equals(isActive.Value));
                 }
 
                 Paged<SymptomVM> paged = null;

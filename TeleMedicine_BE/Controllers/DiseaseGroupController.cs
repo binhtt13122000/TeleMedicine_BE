@@ -43,6 +43,7 @@ namespace TeleMedicine_BE.Controllers
         [Produces("application/json")]
         public ActionResult<IEnumerable<DiseaseGroupVM>> GetAllDiseaseGroups(
             [FromQuery(Name = "group-name")] string groupName,
+            [FromQuery(Name = "is-active")] bool? isActive,
             [FromQuery(Name = "order-by")] DiseaseGroupFieldEnum orderBy,
             [FromQuery(Name = "order-type")] SortTypeEnum orderType,
             [FromQuery(Name = "filtering")] string filters = null,
@@ -56,6 +57,10 @@ namespace TeleMedicine_BE.Controllers
                 if (!String.IsNullOrEmpty(groupName))
                 {
                     diseaseGroups = diseaseGroups.Where(s => s.GroupName.ToUpper().Contains(groupName.Trim().ToUpper()));
+                }
+                if(isActive.HasValue)
+                {
+                    diseaseGroups = diseaseGroups.Where(s => s.IsActive.Value.Equals(isActive.Value));
                 }
                 Paged<DiseaseGroupVM> paged = null;
                 if (orderType == SortTypeEnum.asc && typeof(DiseaseGroupVM).GetProperty(orderBy.ToString()) != null)

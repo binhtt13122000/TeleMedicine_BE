@@ -50,6 +50,7 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "doctor-id")] int doctorId,
             [FromQuery(Name = "doctor-first-name")] string doctorFirstName,
             [FromQuery(Name = "doctor-last-name")] string doctorLastName,
+            [FromQuery(Name = "is-active")] bool? isActive,
             [FromQuery(Name = "start-time")] TimeSpan startTime,
             [FromQuery(Name = "end-time")] TimeSpan endTime,
             [FromQuery(Name = "order-by")] SlotFieldEnum orderBy,
@@ -114,6 +115,10 @@ namespace TeleMedicine_BE.Controllers
                 {
                     slotList = slotList.Where(s => s.EndTime.CompareTo(endTime) <= 0);
                 }
+                if(isActive.HasValue)
+                {
+                    slotList = slotList.Where(s => s.IsActive.Value.Equals(isActive.Value));
+                }
                 Paged<SlotVM> paged = null;
                 if (orderType == SortTypeEnum.asc && typeof(SlotVM).GetProperty(orderBy.ToString()) != null)
                 {
@@ -127,6 +132,7 @@ namespace TeleMedicine_BE.Controllers
                 {
                     paged = _pagingSupport.From(slotList).GetRange(pageOffset, limit, s => s.Id, 1).Paginate<SlotVM>();
                 }
+                
                 if (!String.IsNullOrEmpty(filters))
                 {
                     bool checkHasProperty = false;

@@ -56,6 +56,7 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "producer")] string producer,
             [FromQuery(Name = "drug-form")] string drugForm,
             [FromQuery(Name = "drug-type")] int[] drugTypeIds,
+            [FromQuery(Name = "is-active")] bool? isActive,
             [FromQuery(Name = "order-by")] DrugFieldEnum orderBy,
             [FromQuery(Name = "order-type")] SortTypeEnum orderType,
             [FromQuery(Name = "filtering")] string filters = null,
@@ -85,6 +86,10 @@ namespace TeleMedicine_BE.Controllers
                 if(drugTypeIds != null && drugTypeIds.Length > 0)
                 {
                     drugsQuery = drugsQuery.Where(_ => drugTypeIds.Contains(_.DrugTypeId));
+                }
+                if(isActive.HasValue)
+                {
+                    drugsQuery = drugsQuery.Where(s => s.IsActive.Value.Equals(isActive.Value));
                 }
                 Paged<DrugVM> paged = null;
                 if (orderType == SortTypeEnum.asc && typeof(DrugVM).GetProperty(orderBy.ToString()) != null)

@@ -44,6 +44,7 @@ namespace TeleMedicine_BE.Controllers
         public ActionResult<IEnumerable<HospitalVM>> GetAllHospital(
             [FromQuery(Name = "hospital-code")] string hospitalCode,
             [FromQuery(Name = "name")] string name,
+            [FromQuery(Name = "is-active")] bool? isActive,
             [FromQuery(Name = "order-by")] HospitalFieldEnum orderBy,
             [FromQuery(Name = "order-type")] SortTypeEnum orderType,
             [FromQuery(Name = "filtering")] string filters = null,
@@ -61,6 +62,10 @@ namespace TeleMedicine_BE.Controllers
                 if (!String.IsNullOrEmpty(name))
                 {
                     hospitalList = hospitalList.Where(s => s.Name.ToUpper().Contains(name.Trim().ToUpper()));
+                }
+                if(isActive.HasValue)
+                {
+                    hospitalList = hospitalList.Where(s => s.IsActive.Value.Equals(isActive.Value));
                 }
                 Paged<HospitalVM> paged = null;
                 if (orderType == SortTypeEnum.asc && typeof(HospitalVM).GetProperty(orderBy.ToString()) != null)

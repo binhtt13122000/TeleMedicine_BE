@@ -15,6 +15,8 @@ namespace TeleMedicine_BE.ViewModels
     {
         public int Id { get; set; }
         public string GroupName { get; set; }
+
+        public bool? IsActive { get; set; }
     }
 
     public class DiseaseGroupCM
