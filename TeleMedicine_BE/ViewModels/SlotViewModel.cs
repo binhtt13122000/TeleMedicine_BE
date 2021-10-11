@@ -22,6 +22,8 @@ namespace TeleMedicine_BE.ViewModels
         public int Id { get; set; }
         public DateTime AssignedDate { get; set; }
         public int DoctorId { get; set; }
+
+        public DoctorSM Doctor { get; set; }
         public TimeSpan StartTime { get; set; }
         public TimeSpan EndTime { get; set; }
 

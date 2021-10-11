@@ -496,7 +496,7 @@ namespace TeleMedicine_BE.Controllers
                 {
                     IQueryable<Doctor> doctorList = _doctorService.GetAll(s => s.HospitalDoctors, s => s.CertificationDoctors, s => s.MajorDoctors);
                     Doctor doctor = doctorList.Where(s => s.Id == doctorCreated.Id).FirstOrDefault();
-                    return Ok(_mapper.Map<DoctorVM>(doctor));
+                    return CreatedAtAction("GetDoctorByType", new { search = doctorCreated.Id }, _mapper.Map<DoctorVM>(doctorCreated));
                 }
                 return BadRequest(new
                 {

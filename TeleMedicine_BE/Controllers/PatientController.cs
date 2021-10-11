@@ -184,7 +184,7 @@ namespace TeleMedicine_BE.Controllers
                 Patient patientCreated = await _patientService.AddAsync(_mapper.Map<Patient>(model));
                 if (patientCreated != null)
                 {
-                    return CreatedAtAction("GetPatientById", new { id = patientCreated.Id }, _mapper.Map<PatientVM>(patientCreated));
+                    return CreatedAtAction("GetPatientByType", new { search = patientCreated.Id }, _mapper.Map<PatientVM>(patientCreated));
                 }
                 return BadRequest(new
                 {

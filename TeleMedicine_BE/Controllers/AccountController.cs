@@ -18,7 +18,6 @@ namespace TeleMedicine_BE.Controllers
 {
     [Route("api/v1/accounts")]
     [ApiController]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class AccountController : ControllerBase
     {
         private readonly IAccountService _accountService;
@@ -45,6 +44,7 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="500">Internal server error</response>
         [HttpGet]
         [Produces("application/json")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public ActionResult<Paged<AccountManageVM>> GetAll(
             [FromQuery(Name = "email")] string email,
             [FromQuery(Name = "first-name")] string firstName,
@@ -204,6 +204,7 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="500">Internal server error</response>
         [HttpGet("{search}")]
         [Produces("application/json")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<ActionResult<AccountProfileVM>> GetAccountByType([FromRoute] string search, [FromQuery(Name = "search-type")] SearchType searchType)
         {
             try
@@ -246,6 +247,7 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="500">Failed to save request</response>
         [HttpPut]
         [Produces("application/json")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<ActionResult<AccountProfileVM>> UpdateAccount([FromBody] AccountProfileUM model)
         {
             try
@@ -320,6 +322,7 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="500">Internal server error</response>
         [HttpDelete("{id}")]
         [Produces("application/json")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<ActionResult> DeleteAccount([FromRoute] int id)
         {
             Account currentAccount = await _accountService.GetByIdAsync(id);
@@ -386,11 +389,11 @@ namespace TeleMedicine_BE.Controllers
                 Account accountCreated = await _accountService.AddAsync(convertAccount);
                 if (accountCreated != null)
                 {
-                    return CreatedAtAction("GetAccountById", new { id = accountCreated.Id }, _mapper.Map<AccountProfileVM>(accountCreated));
+                    return CreatedAtAction("GetAccountByType", new { search = accountCreated.Id }, _mapper.Map<AccountProfileVM>(accountCreated));
                 }
                 return BadRequest(new
                 {
-                    message = "Create doctor failed!"
+                    message = "Create account failed!"
                 });
             }
             catch (Exception)
