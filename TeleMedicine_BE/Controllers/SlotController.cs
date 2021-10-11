@@ -304,7 +304,7 @@ namespace TeleMedicine_BE.Controllers
             Slot currentSlot = await _slotService.GetByIdAsync(model.Id);
             if(currentSlot == null)
             {
-                return BadRequest(new
+                return NotFound(new
                 {
                     message = "Can not found slot"
                 });

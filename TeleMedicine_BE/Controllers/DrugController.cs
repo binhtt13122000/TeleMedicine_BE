@@ -292,7 +292,7 @@ namespace TeleMedicine_BE.Controllers
             DrugType drugType = await _drugTypeService.GetByIdAsync(model.DrugTypeId);
             if (drugType == null)
             {
-                return BadRequest(new
+                return NotFound(new
                 {
                     message = "Drug Type is not exist."
                 });

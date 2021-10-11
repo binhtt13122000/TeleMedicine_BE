@@ -265,7 +265,7 @@ namespace TeleMedicine_BE.Controllers
             DiseaseGroup diseaseGroup = await _diseaseGroupService.GetByIdAsync(model.DiseaseGroupId);
             if (diseaseGroup == null)
             {
-                return BadRequest(new
+                return NotFound(new
                 {
                     message = "Disease Group is not exist."
                 });
@@ -274,7 +274,7 @@ namespace TeleMedicine_BE.Controllers
             Disease disease = await _diseaseService.GetByIdAsync(model.Id);
             if (disease == null)
             {
-                return BadRequest(new
+                return NotFound(new
                 {
                     message = "Disease is not exist."
                 });

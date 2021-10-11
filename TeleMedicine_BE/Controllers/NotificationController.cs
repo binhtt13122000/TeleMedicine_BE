@@ -242,7 +242,7 @@ namespace TeleMedicine_BE.Controllers
             Account currentUser = await _accountService.GetByIdAsync(model.UserId);
             if (currentUser == null)
             {
-                return BadRequest(new
+                return NotFound(new
                 {
                     message = "User is not exist."
                 });

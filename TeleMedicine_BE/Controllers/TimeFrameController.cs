@@ -180,6 +180,10 @@ namespace TeleMedicine_BE.Controllers
         public async Task<ActionResult> PutTimeFrame([FromBody] TimeFrameUM model)
         {
             TimeFrame currentTimeFrame = await _timeFrameService.GetByIdAsync(model.Id);
+            if(currentTimeFrame == null)
+            {
+                return NotFound();
+            }
             if(currentTimeFrame.EndTime.CompareTo(model.EndTime) != 0 || currentTimeFrame.StartTime.CompareTo(model.StartTime) != 0)
             {
                 List<TimeFrame> getTimeFrames = _timeFrameService.GetAll().Where(s => s.Id != model.Id).ToList();
