@@ -97,6 +97,8 @@ namespace Infrastructure.Models
                 entity.ToTable("Certification");
 
                 entity.Property(e => e.Name).IsRequired();
+
+                entity.Property(e => e.IsActive).HasDefaultValueSql("true");
             });
 
             modelBuilder.Entity<CertificationDoctor>(entity =>

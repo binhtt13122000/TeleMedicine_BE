@@ -163,7 +163,7 @@ namespace TeleMedicine_BE.Controllers
         /// <summary>
         /// Create a new patient
         /// </summary>
-        /// <response code="200">Created new patient successfull</response>
+        /// <response code="201">Created new patient successfull</response>
         /// <response code="400">Field is not matched or duplicated</response>
         /// <response code="500">Failed to save request</response>
         [HttpPost]

@@ -132,7 +132,7 @@ namespace TeleMedicine_BE.Controllers
         /// <summary>
         /// Create a new role
         /// </summary>
-        /// <response code="200">Created new role successfull</response>
+        /// <response code="201">Created new role successfull</response>
         /// <response code="400">Field is not matched or duplicated</response>
         /// <response code="500">Failed to save request</response>
         [HttpPost]
@@ -211,6 +211,7 @@ namespace TeleMedicine_BE.Controllers
         /// Delete role By Id
         /// </summary>
         /// <response code="200">Success</response>
+        /// <response code="404">Not Found</response>
         /// <response code="400">Bad Request</response>
         /// <response code="500">Internal server error</response>
         [HttpDelete]
@@ -221,7 +222,7 @@ namespace TeleMedicine_BE.Controllers
             Role currentRole = await _roleService.GetByIdAsync(id);
             if (currentRole == null)
             {
-                return BadRequest(new
+                return NotFound(new
                 {
                     message = "Can not found role by id: " + id
                 });
