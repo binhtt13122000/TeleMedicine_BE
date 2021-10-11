@@ -71,6 +71,7 @@ namespace TeleMedicine_BE.Controllers
             {
                 IQueryable<HealthCheck> healthChecks = _healthCheckService.access().Include(s => s.Slots).ThenInclude(s => s.Doctor)
                                                                                     .Include(s => s.Patient)
+                                                                                    .Include(s => s.Prescriptions)
                                                                                     .Include(s => s.HealthCheckDiseases).ThenInclude(s => s.Disease)
                                                                                     .Include(s => s.SymptomHealthChecks).ThenInclude(s => s.Symptom);
                 if (startRating != 0 && endRating != 0)
@@ -199,6 +200,7 @@ namespace TeleMedicine_BE.Controllers
             {
                 IQueryable<HealthCheck> healthChecks = _healthCheckService.access().Include(s => s.Slots).ThenInclude(s => s.Doctor)
                                                                                     .Include(s => s.Patient)
+                                                                                    .Include(s => s.Prescriptions)
                                                                                     .Include(s => s.HealthCheckDiseases).ThenInclude(s => s.Disease)
                                                                                     .Include(s => s.SymptomHealthChecks).ThenInclude(s => s.Symptom);
                 HealthCheck currentHealthCheck = healthChecks.Where(s => s.Id == id).FirstOrDefault();
