@@ -220,7 +220,7 @@ namespace TeleMedicine_BE.Controllers
         /// <summary>
         /// Create a new health check
         /// </summary>
-        /// <response code="200">Created new health check successfull</response>
+        /// <response code="201">Created new health check successfull</response>
         /// <response code="404">Not found</response>
         /// <response code="400">Field is not matched or duplicated</response>
         /// <response code="500">Failed to save request</response>
@@ -251,7 +251,14 @@ namespace TeleMedicine_BE.Controllers
                     }
                 }
                 Slot currentSlot = await _slotService.GetByIdAsync(model.SlotId);
-                if(currentSlot == null && currentSlot.HealthCheckId != null)
+                if(currentSlot == null)
+                {
+                    return BadRequest(new
+                    {
+                        message = "Slot does not found!"
+                    });
+                }
+                if(currentSlot != null && currentSlot.HealthCheckId != null)
                 {
                     return BadRequest(new
                     {
@@ -263,9 +270,13 @@ namespace TeleMedicine_BE.Controllers
                 healthCheckConvert.CreatedTime = DateTime.Now;
                 healthCheckConvert.Slots.Add(currentSlot);
                 HealthCheck healthCheckCreated = await _healthCheckService.AddAsync(healthCheckConvert);
+                if (healthCheckCreated != null)
+                {
+                    return CreatedAtAction("GetHealthCheckById", new { id = healthCheckCreated.Id }, _mapper.Map<HealthCheckVM>(healthCheckCreated));
+                }
                 return BadRequest(new
                 {
-                    message = "Create slot failed!"
+                    message = "Create health check failed!"
                 });
             }
             catch (Exception)

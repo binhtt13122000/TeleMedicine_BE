@@ -229,7 +229,7 @@ namespace TeleMedicine_BE.Controllers
         /// <summary>
         /// Create a new slot
         /// </summary>
-        /// <response code="200">Created new slot successfull</response>
+        /// <response code="201">Created new slot successfull</response>
         /// <response code="404">Not found</response>
         /// <response code="400">Field is not matched or duplicated</response>
         /// <response code="500">Failed to save request</response>
