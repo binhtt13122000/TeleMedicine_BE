@@ -259,6 +259,8 @@ namespace TeleMedicine_BE.Controllers
                         message = "Can not found patient by id: " + model.Id
                     });
                 }
+                currentPatient.Name = model.Name.Trim();
+                currentPatient.Avatar = model.Avatar;
                 currentPatient.BackgroundDisease = model.BackgroundDisease.Trim();
                 currentPatient.Allergy = model.Allergy.Trim();
                 currentPatient.BloodGroup = model.BloodGroup.Trim();
