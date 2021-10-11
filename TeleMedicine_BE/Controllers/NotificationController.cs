@@ -251,7 +251,7 @@ namespace TeleMedicine_BE.Controllers
             Notification notification = await _notificationService.GetByIdAsync(model.Id);
             if (notification == null)
             {
-                return BadRequest(new
+                return NotFound(new
                 {
                     message = "Notification is not exist."
                 });
