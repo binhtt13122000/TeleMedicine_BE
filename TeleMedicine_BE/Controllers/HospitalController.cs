@@ -228,6 +228,7 @@ namespace TeleMedicine_BE.Controllers
         /// </summary>
         /// <response code="200">Success</response>
         /// <response code="400">Bad Request</response>
+        /// <response code="404">Not Found</response>
         /// <response code="500">Internal server error</response>
         [HttpDelete]
         [Route("{id}")]
@@ -237,7 +238,7 @@ namespace TeleMedicine_BE.Controllers
             Hospital currentHospital = await _hospitalService.GetByIdAsync(id);
             if (currentHospital == null)
             {
-                return BadRequest(new
+                return NotFound(new
                 {
                     message = "Can not found hospital by id: " + id
                 });

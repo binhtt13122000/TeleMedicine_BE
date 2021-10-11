@@ -218,6 +218,7 @@ namespace TeleMedicine_BE.Controllers
         /// Delete time frame By Id
         /// </summary>
         /// <response code="200">Success</response>
+        /// <response code="404">Not Found</response>
         /// <response code="400">Bad Request</response>
         /// <response code="500">Internal server error</response>
         [HttpDelete]
@@ -230,7 +231,7 @@ namespace TeleMedicine_BE.Controllers
                 TimeFrame currentTimeFrame = await _timeFrameService.GetByIdAsync(id);
                 if (currentTimeFrame == null)
                 {
-                    return BadRequest();
+                    return NotFound();
                 }
                 bool isDeleted = await _timeFrameService.DeleteAsync(currentTimeFrame);
                 if (isDeleted)

@@ -193,6 +193,7 @@ namespace TeleMedicine_BE.Controllers
         /// Delete slot By Id
         /// </summary>
         /// <response code="200">Success</response>
+        /// <response code="404">Not Found</response>
         /// <response code="400">Bad Request</response>
         /// <response code="500">Internal server error</response>
         [HttpDelete]
@@ -205,7 +206,7 @@ namespace TeleMedicine_BE.Controllers
                 Slot currentSlot = await _slotService.GetByIdAsync(id);
                 if (currentSlot == null)
                 {
-                    return BadRequest();
+                    return NotFound();
                 }
                 bool isDeleted = await _slotService.DeleteAsync(currentSlot);
                 if (isDeleted)
