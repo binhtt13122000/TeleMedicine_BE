@@ -536,7 +536,7 @@ namespace TeleMedicine_BE.Controllers
                         message = "Can not found doctor by id: " + id
                     });
                 }
-                currentDoctor.IsVerify = false;
+                currentDoctor.IsActive = false;
                 bool isDeleted = await _doctorService.UpdateAsync(currentDoctor);
                 if (isDeleted)
                 {
