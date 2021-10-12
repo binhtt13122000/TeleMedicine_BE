@@ -1,6 +1,7 @@
 ﻿using Infrastructure.Interfaces;
 using Infrastructure.Interfaces.Implements;
 using Infrastructure.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,12 +13,19 @@ namespace Infrastructure.Repositories
     public interface ISlotRepository : IRepository<Slot, int>
     {
         Task<bool> AddSlotsAsync(List<Slot> slots);
+
+        public DbSet<Slot> Access();
     }
     public class SlotRepository : Repository<Slot, int>, ISlotRepository
     {
         public SlotRepository(TeleMedicineContext dbContext) : base(dbContext)
         {
 
+        }
+
+        public DbSet<Slot> Access()
+        {
+            return _dbContext.Set<Slot>();
         }
 
         public async Task<bool> AddSlotsAsync(List<Slot> slots)

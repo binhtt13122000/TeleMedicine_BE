@@ -62,7 +62,8 @@ namespace TeleMedicine_BE.Controllers
         {
             try
             {
-                IQueryable<Slot> slotList = _slotService.GetAll(s => s.Doctor);
+                IQueryable<Slot> slotList = _slotService.Access().Include(s => s.Doctor)
+                                                                       .Include(s => s.HealthCheck).ThenInclude(s => s.Patient);
                 if (startAssignedDate.HasValue && endAssignedDate.HasValue)
                 {
                     slotList = slotList.Where(s => s.AssignedDate.CompareTo(startAssignedDate.Value) >= 0).

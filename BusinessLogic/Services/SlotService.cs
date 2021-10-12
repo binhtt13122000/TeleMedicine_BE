@@ -1,5 +1,6 @@
 ﻿using Infrastructure.Models;
 using Infrastructure.Repositories;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,7 @@ namespace BusinessLogic.Services
     {
         Task<bool> AddSlotsAsync(List<Slot> slots);
         void DeleteRange(List<int> slotIds);
+        DbSet<Slot> Access();
     }
     public class SlotService : ISlotService
     {
@@ -22,6 +24,12 @@ namespace BusinessLogic.Services
         {
             _slotRepository = roleRepository;
         }
+
+        public DbSet<Slot> Access()
+        {
+            return _slotRepository.Access();
+        }
+
         public async Task<Slot> AddAsync(Slot entity)
         {
             return await _slotRepository.AddAsync(entity);
