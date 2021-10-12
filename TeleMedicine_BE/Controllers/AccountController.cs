@@ -333,7 +333,8 @@ namespace TeleMedicine_BE.Controllers
 
             try
             {
-                bool isDeleted = await _accountService.DeleteAsync(currentAccount);
+                currentAccount.Active = false;
+                bool isDeleted = await _accountService.UpdateAsync(currentAccount);
                 if (isDeleted)
                 {
                     return Ok(new

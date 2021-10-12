@@ -219,7 +219,8 @@ namespace TeleMedicine_BE.Controllers
                         message = "Can not found patient by id: " + id
                     });
                 }
-                bool isDeleted = await _patientService.DeleteAsync(currentPatient);
+                currentPatient.IsActive = false;
+                bool isDeleted = await _patientService.UpdateAsync(currentPatient);
                 if (isDeleted)
                 {
                     return Ok(new
