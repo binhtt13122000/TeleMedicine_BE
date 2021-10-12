@@ -264,6 +264,7 @@ namespace TeleMedicine_BE.Controllers
                 currentPatient.BackgroundDisease = model.BackgroundDisease.Trim();
                 currentPatient.Allergy = model.Allergy.Trim();
                 currentPatient.BloodGroup = model.BloodGroup.Trim();
+                currentPatient.IsActive = model.IsActive;
                 bool isUpdated = await _patientService.UpdateAsync(currentPatient);
                 if (isUpdated)
                 {

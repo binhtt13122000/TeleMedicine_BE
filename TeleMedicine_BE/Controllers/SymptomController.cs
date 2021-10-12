@@ -285,6 +285,7 @@ namespace TeleMedicine_BE.Controllers
                 currentSymptom.Description = model.Description;
                 currentSymptom.Name = model.Name;
                 currentSymptom.SymptomCode = model.SymptomCode;
+                currentSymptom.IsActive = model.IsActive;
                 bool isSuccess = await _symptomService.UpdateAsync(currentSymptom);
                 if (isSuccess)
                 {

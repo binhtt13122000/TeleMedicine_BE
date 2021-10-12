@@ -314,6 +314,7 @@ namespace TeleMedicine_BE.Controllers
                 drug.Name = model.Name;
                 drug.Producer = model.Producer;
                 drug.DrugType = drugType;
+                drug.IsActive = model.IsActive;
                 bool isSuccess = await _drugService.UpdateAsync(drug);
                 if (isSuccess)
                 {

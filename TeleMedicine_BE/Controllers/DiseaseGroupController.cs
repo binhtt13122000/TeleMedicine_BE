@@ -176,6 +176,7 @@ namespace TeleMedicine_BE.Controllers
             try
             {
                 currentDiseaseGroup.GroupName = model.GroupName.Trim();
+                currentDiseaseGroup.IsActive = model.IsActive;
                 bool isUpdated = await _diseaseGroupService.UpdateAsync(currentDiseaseGroup);
                 if (isUpdated)
                 {

@@ -205,6 +205,7 @@ namespace TeleMedicine_BE.Controllers
             {
                 currentTimeFrame.StartTime = model.StartTime;
                 currentTimeFrame.EndTime = model.EndTime;
+                currentTimeFrame.IsActive = model.IsActive;
                 bool isUpdated = await _timeFrameService.UpdateAsync(currentTimeFrame);
                 if (isUpdated)
                 {

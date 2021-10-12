@@ -268,7 +268,6 @@ namespace TeleMedicine_BE.Controllers
                 account.City = model.City;
                 account.StreetAddress = model.StreetAddress;
                 account.Dob = model.Dob;
-
                 bool isUpdated = await _accountService.UpdateAsync(account);
                 if (isUpdated)
                 {

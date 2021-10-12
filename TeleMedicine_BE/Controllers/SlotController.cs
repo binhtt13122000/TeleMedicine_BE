@@ -335,6 +335,7 @@ namespace TeleMedicine_BE.Controllers
                 currentSlot.AssignedDate = date;
                 currentSlot.StartTime = model.StartTime;
                 currentSlot.EndTime = model.EndTime;
+                currentSlot.IsActive = model.IsActive;
                 bool isUpdated = await _slotService.UpdateAsync(currentSlot);
                 if (isUpdated)
                 {

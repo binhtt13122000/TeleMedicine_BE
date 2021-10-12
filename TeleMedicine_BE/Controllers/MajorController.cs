@@ -176,6 +176,7 @@ namespace TeleMedicine_BE.Controllers
             {
                 currentMajor.Name = model.Name;
                 currentMajor.Description = model.Description;
+                currentMajor.IsActive = model.IsActive;
                 bool isUpdated = await _majorService.UpdateAsync(currentMajor);
                 if(isUpdated)
                 {

@@ -210,6 +210,7 @@ namespace TeleMedicine_BE.Controllers
                 currentHospital.Address = model.Address.Trim();
                 currentHospital.Description = model.Description.Trim();
                 currentHospital.HospitalCode = model.HospitalCode.Trim().ToUpper();
+                currentHospital.IsActive = model.IsActive;
                 bool isUpdated = await _hospitalService.UpdateAsync(currentHospital);
                 if(isUpdated)
                 {
