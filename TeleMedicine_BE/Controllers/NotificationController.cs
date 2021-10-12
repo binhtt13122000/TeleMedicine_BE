@@ -157,6 +157,40 @@ namespace TeleMedicine_BE.Controllers
         }
 
         /// <summary>
+        /// Count numbers notifications unread
+        /// </summary>
+        /// <returns>Return the number notifications unread with the corresponding userId</returns>
+        /// <response code="200">Returns the number notifications unread with the specified userId</response>
+        /// <response code="404">No notification found with the specified userId</response>
+        /// <response code="500">Internal server error</response>
+        [HttpGet("users/{userId}")]
+        [Produces("application/json")]
+        public async Task<ActionResult<int>> GetNumberNotificationyUnreadByUserId([FromRoute] int userId)
+        {
+            
+            try
+            {
+                Account currentAccount = await _accountService.GetByIdAsync(userId);
+                if (currentAccount == null)
+                {
+                    return BadRequest(new
+                    {
+                        message = "User Id is not exist."
+                    });
+                }
+                int number = _notificationService.GetAll().Where(s => s.UserId == currentAccount.Id).Count();
+                return Ok(new
+                {
+                    countOfUnRead = number
+                });
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        /// <summary>
         /// Create a new notification
         /// </summary>
         /// <response code="201">Created new notification</response>
@@ -164,7 +198,7 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="500">Failed to save request</response>
         [HttpPost]
         [Produces("application/json")]
-        public async Task<ActionResult<NotificationVM>> CreateDrug([FromBody] NotificationCM model)
+        public async Task<ActionResult<NotificationVM>> CreateNotification([FromBody] NotificationCM model)
         {
             Account account = await _accountService.GetByIdAsync(model.UserId);
             if (account == null)
@@ -262,6 +296,7 @@ namespace TeleMedicine_BE.Controllers
                 notification.UserId = currentUser.Id;
                 notification.CreatedDate = model.CreatedDate;
                 notification.Content = model.Content;
+                notification.IsActive = model.IsActive;
                 bool isSuccess = await _notificationService.UpdateAsync(notification);
                 if (isSuccess)
                 {

@@ -293,6 +293,7 @@ namespace TeleMedicine_BE.Controllers
                 disease.Description = model.Description;
                 disease.DiseaseGroup = diseaseGroup;
                 disease.DiseaseGroupId = model.DiseaseGroupId;
+                disease.IsActive = model.IsActive;
                 bool isSuccess = await _diseaseService.UpdateAsync(disease);
                 if (isSuccess)
                 {

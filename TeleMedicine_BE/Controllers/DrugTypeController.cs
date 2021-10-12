@@ -260,6 +260,7 @@ namespace TeleMedicine_BE.Controllers
             {
                 currentDrugType.Description = model.Description;
                 currentDrugType.Name = model.Name;
+                currentDrugType.IsActive = model.IsActive;
                 bool isSuccess = await _drugTypeService.UpdateAsync(currentDrugType);
                 if (isSuccess)
                 {

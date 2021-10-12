@@ -401,6 +401,7 @@ namespace TeleMedicine_BE.Controllers
                 currentDoctor.DateOfCertificate = model.DateOfCertificate;
                 currentDoctor.ScopeOfPractice = model.ScopeOfPractice.Trim();
                 currentDoctor.Description = model.Description.Trim();
+                currentDoctor.IsActive = model.IsActive;
                 bool isUpdated = await _doctorService.UpdateAsync(currentDoctor);
                 if (isUpdated)
                 {

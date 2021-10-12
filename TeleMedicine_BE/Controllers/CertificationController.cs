@@ -179,6 +179,7 @@ namespace TeleMedicine_BE.Controllers
             {
                 currentCertification.Name = model.Name;
                 currentCertification.Description = model.Description;
+                currentCertification.IsActive = model.IsActive;
                 bool isUpdated = await _certificationService.UpdateAsync(currentCertification);
                 if (isUpdated)
                 {

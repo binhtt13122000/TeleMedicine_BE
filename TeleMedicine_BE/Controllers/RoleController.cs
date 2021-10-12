@@ -194,6 +194,7 @@ namespace TeleMedicine_BE.Controllers
             try
             {
                 currentRole.Name = model.Name.ToUpper();
+                currentRole.IsActive = model.IsActive;
                 bool isUpdated = await _roleService.UpdateAsync(currentRole);
                 if (isUpdated)
                 {
