@@ -160,6 +160,10 @@ namespace TeleMedicine_BE.Controllers
                     {
                         doctorList = doctorList.Where(s => s.IsVerify == false);
                     }
+                    if (isVerify == -2)
+                    {
+                        doctorList = doctorList.Where(s => s.IsVerify == null);
+                    }
                 }
                 if (majorId != null && majorId.Length > 0)
                 {
@@ -578,6 +582,45 @@ namespace TeleMedicine_BE.Controllers
                     });
                 }
                 return BadRequest();
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+
+        /// <summary>
+        /// Verify Doctor By Id
+        /// </summary>
+        /// <response code="200">Success</response>
+        /// <response code="400">Bad Request</response>
+        /// <response code="404">Not found</response>
+        /// <response code="500">Internal server error</response>
+        [HttpGet]
+        [Route("count")]
+        [Produces("application/json")]
+        public async Task<ActionResult<int>> CountDoctor([FromQuery(Name = "is-verify")] int isVerify = 0)
+        {
+            try
+            {
+                IQueryable<Doctor> doctorList = _doctorService.GetAll();
+                if (isVerify != 0)
+                {
+                    if (isVerify == 1)
+                    {
+                        doctorList = doctorList.Where(s => s.IsVerify == true);
+                    }
+                    if (isVerify == -1)
+                    {
+                        doctorList = doctorList.Where(s => s.IsVerify == false);
+                    }
+                    if (isVerify == -2)
+                    {
+                        doctorList = doctorList.Where(s => s.IsVerify == null);
+                    }
+                }
+                return Ok(await doctorList.CountAsync());
             }
             catch (Exception)
             {
