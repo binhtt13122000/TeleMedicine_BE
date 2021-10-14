@@ -23,12 +23,12 @@ using System.IO;
 using Microsoft.OpenApi.Any;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
-using BeautyAtHome.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Newtonsoft.Json.Converters;
 using System.Text.Json.Serialization;
+using TeleMedicine_BE.ExternalService;
 
 namespace TeleMedicine_BE
 {
@@ -61,6 +61,7 @@ namespace TeleMedicine_BE
             services.AddScoped(typeof(IPagingSupport<>), typeof(PagingSupport<>));
             services.AddScoped(typeof(IPagingSupport<>), typeof(PagingSupport<>));
             services.AddSingleton<IJwtTokenProvider, JwtTokenProvider>();
+            services.AddSingleton<IPushNotificationService, PushNotificationService>();
 
             services.AddTransient<ISymptomRepository, SymptomRepository>();
             services.AddTransient<ISymptomService, SymptomService>();

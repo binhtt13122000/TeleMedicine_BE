@@ -8,7 +8,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BeautyAtHome.Utils
+namespace TeleMedicine_BE.Utils
 {
     public interface IJwtTokenProvider
     {

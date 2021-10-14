@@ -27,6 +27,12 @@ namespace TeleMedicine_BE.ViewModels
         public virtual Account User { get; set; }
     }
 
+    public class NotificationRequest
+    {
+        public string Token { get; set; }
+        public int Id { get; set; }
+    }
+
     public class NotificationCM
     {
         [Required(AllowEmptyStrings = false)]

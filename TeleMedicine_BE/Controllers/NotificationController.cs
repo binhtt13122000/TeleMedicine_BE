@@ -226,6 +226,32 @@ namespace TeleMedicine_BE.Controllers
             }
         }
 
+        [HttpPost("connection")]
+        [Produces("application/json")]
+        public async Task<ActionResult> MakeConnection([FromBody] NotificationRequest model)
+        {
+            Account account = await _accountService.GetByIdAsync(model.Id);
+            if (account == null)
+            {
+                return BadRequest(new
+                {
+                    message = "User Id is not exist."
+                });
+            }
+            try
+            {
+                var response = await FirebaseAdmin.Messaging.FirebaseMessaging.DefaultInstance.SubscribeToTopicAsync(new List<string>() { model.Token }, "/topics/" + account.Id);
+                if(response.SuccessCount > 0)
+                {
+                    return Ok(new { Message = "connect success!" });
+                }
+                return BadRequest();
+            } catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
         /// <summary>
         /// Delete notification
         /// </summary>
