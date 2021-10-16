@@ -111,6 +111,8 @@ namespace TeleMedicine_BE
             services.AddTransient<IHealthCheckRepository, HealthCheckRepository>();
             services.AddTransient<IHealthCheckService, HealthCheckService>();
 
+            services.AddTransient<IUploadFileService, UploadFileService>();
+
             services
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
@@ -146,7 +148,7 @@ namespace TeleMedicine_BE
                     Type = "string",
                     Example = new OpenApiString("00:00:00")
                 });
-
+                c.OperationFilter<SwaggerFileOperationFilter>();
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Name = "Authorization",

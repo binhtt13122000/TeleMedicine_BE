@@ -8,8 +8,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TeleMedicine_BE.ViewModels;
 using TeleMedicine_BE.ExternalService;
+using TeleMedicine_BE.ViewModels;
+using static TeleMedicine_BE.Utils.Constants;
+using Role = Infrastructure.Models.Role;
 
 namespace TeleMedicine_BE.Controllers
 {
@@ -19,19 +21,40 @@ namespace TeleMedicine_BE.Controllers
     {
         private readonly IAccountService _accountService;
         private readonly IJwtTokenProvider _jwtTokenProvider;
+        private readonly IUploadFileService _uploadFileService;
         private readonly IDoctorService _doctorService;
         private readonly IRoleService _roleService;
         private readonly IMapper _mapper;
         private readonly IPushNotificationService _pushNotificationService;
 
-        public AuthController(IAccountService accountService, IJwtTokenProvider jwtTokenProvider, IDoctorService doctorService, IRoleService roleService, IMapper mapper, IPushNotificationService pushNotificationService)
+        public AuthController(IAccountService accountService, IJwtTokenProvider jwtTokenProvider, IUploadFileService uploadFileService, IDoctorService doctorService, IPushNotificationService pushNotificationService, IRoleService roleService, IMapper mapper)
         {
             _accountService = accountService;
             _jwtTokenProvider = jwtTokenProvider;
+            _uploadFileService = uploadFileService;
             _doctorService = doctorService;
             _roleService = roleService;
             _mapper = mapper;
             _pushNotificationService = pushNotificationService;
+        }
+
+        [HttpPost("upload-image")]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult> uploadFileImage([FromForm] IFormFile file)
+        {
+            try
+            {
+                string fileUrl = await _uploadFileService.UploadFile(file, "service", "service-detail");
+                return Ok(new
+                {
+                    url = fileUrl
+                });
+            }
+            catch (Exception e)
+            {
+                return Ok(e.Message);
+            }
         }
 
         [HttpPost("login")]
