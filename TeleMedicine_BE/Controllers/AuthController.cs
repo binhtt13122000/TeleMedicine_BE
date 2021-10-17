@@ -41,11 +41,11 @@ namespace TeleMedicine_BE.Controllers
         [HttpPost("upload-image")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult> uploadFileImage([FromForm] IFormFile file)
+        public async Task<ActionResult> uploadFileImage([FromForm] ImageCM model)
         {
             try
             {
-                string fileUrl = await _uploadFileService.UploadFile(file, "service", "service-detail");
+                string fileUrl = await _uploadFileService.UploadFile(model.file, "service", "service-detail");
                 return Ok(new
                 {
                     url = fileUrl

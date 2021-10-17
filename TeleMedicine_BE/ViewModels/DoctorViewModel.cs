@@ -1,4 +1,5 @@
 ﻿using Infrastructure.Models;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -86,7 +87,7 @@ namespace TeleMedicine_BE.ViewModels
         public string Name { get; set; }
 
         [Required(AllowEmptyStrings = false)]
-        public string Avatar { get; set; }
+        public IFormFile Avatar { get; set; }
 
         [Required(AllowEmptyStrings = false)]
         public string PractisingCertificate { get; set; }
@@ -107,10 +108,11 @@ namespace TeleMedicine_BE.ViewModels
 
         public string Description { get; set; }
 
-        public virtual ICollection<CertificationDoctorWithRegisterCM> CertificationDoctors { get; set; }
-        public virtual ICollection<HospitalDoctorWithRegisterCM> HospitalDoctors { get; set; }
-        public virtual ICollection<MajorDoctorWithRegisterCM> MajorDoctors { get; set; }
+        public string  HospitalDoctors { get; set; }
+        public string MajorDoctors { get; set; }
     }
+
+
 
     public class DoctorUM
     {

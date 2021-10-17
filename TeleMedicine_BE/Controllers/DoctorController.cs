@@ -13,6 +13,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
+using TeleMedicine_BE.ExternalService;
 using TeleMedicine_BE.Utils;
 using TeleMedicine_BE.ViewModels;
 
@@ -26,16 +27,18 @@ namespace TeleMedicine_BE.Controllers
         private readonly IDoctorService _doctorService;
         private readonly IHospitalService _hospitalService;
         private readonly IMajorService _majorService;
+        private readonly IUploadFileService _uploadFileService;
         private readonly ICertificationService _certificationService;
         private readonly IMapper _mapper;
         private readonly IPagingSupport<Doctor> _pagingSupport;
 
-        public DoctorController(IDoctorService doctorService, IHospitalService hospitalService, IMajorService majorService, ICertificationService certificationService, IMapper mapper, IPagingSupport<Doctor> pagingSupport)
+        public DoctorController(IDoctorService doctorService, IHospitalService hospitalService, IMajorService majorService, IUploadFileService uploadFileService, ICertificationService certificationService, IMapper mapper, IPagingSupport<Doctor> pagingSupport)
         {
             _doctorService = doctorService;
             _hospitalService = hospitalService;
             _majorService = majorService;
             _certificationService = certificationService;
+            _uploadFileService = uploadFileService;
             _mapper = mapper;
             _pagingSupport = pagingSupport;
         }
@@ -426,17 +429,15 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="400">Field is not matched or duplicated</response>
         /// <response code="500">Failed to save request</response>
         [HttpPost]
-        [Produces("application/json")]
-        public async Task<ActionResult<DoctorVM>> CreateNewDoctor([FromBody] DoctorCM model)
+        public async Task<ActionResult<DoctorVM>> CreateNewDoctor([FromForm] DoctorCM model)
         {
-            HospitalDoctorWithRegisterCM[] arrHospital = new HospitalDoctorWithRegisterCM[model.HospitalDoctors.Count];
-            model.HospitalDoctors.CopyTo(arrHospital, 0);
+            List<HospitalDoctorWithRegisterCM> hospitalsDoctor = JsonConvert.DeserializeObject<List<HospitalDoctorWithRegisterCM>>(model.HospitalDoctors);
+            List<MajorDoctorWithRegisterCM> majorsDoctor = JsonConvert.DeserializeObject<List<MajorDoctorWithRegisterCM>>(model.MajorDoctors);
 
-            MajorDoctorWithRegisterCM[] arrMajor = new MajorDoctorWithRegisterCM[model.MajorDoctors.Count];
-            model.MajorDoctors.CopyTo(arrMajor, 0);
 
-            CertificationDoctorWithRegisterCM[] arrCertification = new CertificationDoctorWithRegisterCM[model.CertificationDoctors.Count];
-            model.CertificationDoctors.CopyTo(arrCertification, 0);
+            List<HospitalDoctor> convertHospitalDoctor = new List<HospitalDoctor>();
+            List<MajorDoctor> convertMajorDoctor = new List<MajorDoctor>();
+
             try
             {
                 Doctor checkExistedDoctorWithEmail = _doctorService.GetAll().Where(s => s.Email.Trim().ToUpper().Equals(model.Email.Trim().ToUpper())).FirstOrDefault();
@@ -451,53 +452,57 @@ namespace TeleMedicine_BE.Controllers
                 if (checkExistedDoctorWithCertification != null)
                 {
                     return BadRequest(new
-                        {
-                            message = "Certification Code have been registered account!"
-                        }
+                    {
+                        message = "Certification Code have been registered account!"
+                    }
                         );
                 }
-                if(arrHospital != null && arrHospital.Length > 0)
+                if (hospitalsDoctor != null && hospitalsDoctor.Count > 0)
                 {
-                    for(int i = 0; i < arrHospital.Length; i++)
+                    for (int i = 0; i < hospitalsDoctor.Count; i++)
                     {
-                        if(_hospitalService.GetAll().Where(s => s.Id == arrHospital[i].HospitalId).FirstOrDefault() == null)
+                        if (_hospitalService.GetAll().Where(s => s.Id == hospitalsDoctor[i].HospitalId).FirstOrDefault() == null)
                         {
                             return BadRequest(new
                             {
                                 message = "Hospital is not existed!"
                             });
                         }
+                        convertHospitalDoctor.Add(_mapper.Map<HospitalDoctor>(hospitalsDoctor[i]));
                     }
                 }
-                if(arrMajor != null && arrMajor.Length > 0)
+                if (majorsDoctor != null && majorsDoctor.Count > 0)
                 {
-                    for(int i = 0; i < arrMajor.Length; i++)
+                    for (int i = 0; i < majorsDoctor.Count; i++)
                     {
-                        if(_majorService.GetAll().Where(s => s.Id == arrMajor[i].MajorId).FirstOrDefault() == null)
+                        if (_majorService.GetAll().Where(s => s.Id == majorsDoctor[i].MajorId).FirstOrDefault() == null)
                         {
                             return BadRequest(new
                             {
                                 message = "Major is not existed!"
                             });
                         }
+                        convertMajorDoctor.Add(_mapper.Map<MajorDoctor>(majorsDoctor[i]));
                     }
                 }
-                if(arrCertification != null && arrCertification.Length > 0)
-                {
-                    for (int i = 0; i < arrCertification.Length; i++)
-                    {
-                        if (_certificationService.GetAll().Where(s => s.Id == arrCertification[i].CertificationId).FirstOrDefault() == null)
-                        {
-                            return BadRequest(new
-                            {
-                                message = "Certification is not existed!"
-                            });
-                        }
-                    }
-                }
+                string fileUrl = await _uploadFileService.UploadFile(model.Avatar, "service", "service-detail");
+
                 model.CertificateCode = model.CertificateCode.Trim().ToUpper();
-                Doctor doctorCreated = await _doctorService.AddAsync(_mapper.Map<Doctor>(model));
-                if(doctorCreated != null)
+                Doctor mappedDoctor = new Doctor();
+                mappedDoctor.Email = model.Email;
+                mappedDoctor.Name = model.Name.Trim();
+                mappedDoctor.Avatar = fileUrl;
+                mappedDoctor.PractisingCertificate = model.PractisingCertificate;
+                mappedDoctor.CertificateCode = model.CertificateCode;
+                mappedDoctor.PlaceOfCertificate = model.PlaceOfCertificate;
+                mappedDoctor.DateOfCertificate = model.DateOfCertificate;
+                mappedDoctor.ScopeOfPractice = model.ScopeOfPractice;
+                mappedDoctor.Description = model.Description;
+                mappedDoctor.MajorDoctors = convertMajorDoctor;
+                mappedDoctor.HospitalDoctors = convertHospitalDoctor;
+
+                Doctor doctorCreated = await _doctorService.AddAsync(mappedDoctor);
+                if (doctorCreated != null)
                 {
                     IQueryable<Doctor> doctorList = _doctorService.GetAll(s => s.HospitalDoctors, s => s.CertificationDoctors, s => s.MajorDoctors);
                     Doctor doctor = doctorList.Where(s => s.Id == doctorCreated.Id).FirstOrDefault();
@@ -513,6 +518,7 @@ namespace TeleMedicine_BE.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
+
 
         /// <summary>
         /// Delete Doctor By Id
