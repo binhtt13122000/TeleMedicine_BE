@@ -1,4 +1,5 @@
 ﻿using Infrastructure.Models;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -81,12 +82,6 @@ namespace TeleMedicine_BE.ViewModels
         [Required(AllowEmptyStrings = false)]
         [StringLength(128)]
         public string Email { get; set; }
-        [Required(AllowEmptyStrings = false)]
-        [StringLength(128)]
-        public string Name { get; set; }
-
-        [Required(AllowEmptyStrings = false)]
-        public string Avatar { get; set; }
 
         [Required(AllowEmptyStrings = false)]
         public string PractisingCertificate { get; set; }
@@ -107,22 +102,16 @@ namespace TeleMedicine_BE.ViewModels
 
         public string Description { get; set; }
 
-        public virtual ICollection<CertificationDoctorWithRegisterCM> CertificationDoctors { get; set; }
-        public virtual ICollection<HospitalDoctorWithRegisterCM> HospitalDoctors { get; set; }
-        public virtual ICollection<MajorDoctorWithRegisterCM> MajorDoctors { get; set; }
+        public ICollection<HospitalDoctorWithRegisterCM>  HospitalDoctors { get; set; }
+        public ICollection<MajorDoctorWithRegisterCM> MajorDoctors { get; set; }
     }
+
+
 
     public class DoctorUM
     {
         [Required]
         public int Id { get; set; }
-
-        [Required(AllowEmptyStrings = false)]
-        [StringLength(128)]
-        public string Name { get; set; }
-
-        [Required(AllowEmptyStrings = false)]
-        public string Avatar { get; set; }
 
         [Required(AllowEmptyStrings = false)]
         public string PractisingCertificate { get; set; }

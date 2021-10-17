@@ -18,16 +18,17 @@ namespace TeleMedicine_BE.Controllers
 {
     [Route("api/v1/patients")]
     [ApiController]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class PatientController : Controller
     {
         private readonly IPatientService _patientService;
+        private readonly IAccountService _accountService;
         private readonly IMapper _mapper;
         private readonly IPagingSupport<Patient> _pagingSupport;
 
-        public PatientController(IPatientService patientService, IMapper mapper, IPagingSupport<Patient> pagingSupport)
+        public PatientController(IPatientService patientService, IMapper mapper, IAccountService accountService, IPagingSupport<Patient> pagingSupport)
         {
             _patientService = patientService;
+            _accountService = accountService;
             _mapper = mapper;
             _pagingSupport = pagingSupport;
         }
@@ -41,6 +42,7 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="500">Internal server error</response>
         [HttpGet]
         [Produces("application/json")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public ActionResult<IEnumerable<PatientVM>> GetAllPatients(
             [FromQuery(Name = "email")] string email,
             [FromQuery(Name = "background-disease")] string backgroundDisease,
@@ -105,7 +107,7 @@ namespace TeleMedicine_BE.Controllers
                     if (checkHasProperty)
                     {
                         PropertyRenameAndIgnoreSerializerContractResolver jsonIgnore = new PropertyRenameAndIgnoreSerializerContractResolver();
-                        string json = jsonIgnore.JsonIgnore(typeof(PatientVM), splitFilter, paged);
+                        string json = jsonIgnore.JsonIgnore(typeof(PatientVM), splitFilter, paged, PropertyRenameAndIgnoreSerializerContractResolver.IgnoreMode.EXCEPT);
                         return Ok(JsonConvert.DeserializeObject(json));
                     }
                 }
@@ -126,6 +128,7 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="500">Internal server error</response>
         [HttpGet("{search}")]
         [Produces("application/json")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public ActionResult<PatientVM> GetPatientByType([FromRoute] string search, [FromQuery(Name = "search-type")] SearchType searchType)
         {
             try
@@ -180,8 +183,17 @@ namespace TeleMedicine_BE.Controllers
                         message = "Email have been registered!"
                     });
                 }
-                model.Email = model.Email.Trim();
-                Patient patientCreated = await _patientService.AddAsync(_mapper.Map<Patient>(model));
+
+                Account currentAccount = _accountService.GetAccountByEmail(model.Email);
+                Patient convertPatient = _mapper.Map<Patient>(model);
+                if(currentAccount != null)
+                {
+                    convertPatient.Avatar = currentAccount.Avatar;
+                    convertPatient.Name = currentAccount.FirstName.Trim() + " " + currentAccount.LastName.Trim();
+                }
+
+                convertPatient.Email = model.Email.Trim();
+                Patient patientCreated = await _patientService.AddAsync(convertPatient);
                 if (patientCreated != null)
                 {
                     return CreatedAtAction("GetPatientByType", new { search = patientCreated.Id }, _mapper.Map<PatientVM>(patientCreated));
@@ -207,6 +219,7 @@ namespace TeleMedicine_BE.Controllers
         [HttpDelete]
         [Route("{id}")]
         [Produces("application/json")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "2, 3")]
         public async Task<ActionResult> DeleteById(int id)
         {
             try
@@ -248,6 +261,7 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="500">Failed to save request</response>
         [HttpPut]
         [Produces("application/json")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "2, 3")]
         public async Task<ActionResult<PatientVM>> PutPatient([FromBody] PatientUM model)
         {
             try
@@ -260,8 +274,13 @@ namespace TeleMedicine_BE.Controllers
                         message = "Can not found patient by id: " + model.Id
                     });
                 }
-                currentPatient.Name = model.Name.Trim();
-                currentPatient.Avatar = model.Avatar;
+                Account currentAccount = _accountService.GetAccountByEmail(currentPatient.Email);
+                Patient convertPatient = _mapper.Map<Patient>(model);
+                if (currentAccount != null)
+                {
+                    currentPatient.Avatar = currentAccount.Avatar;
+                    currentPatient.Name = currentAccount.FirstName.Trim() + " " + currentAccount.LastName.Trim();
+                }
                 currentPatient.BackgroundDisease = model.BackgroundDisease.Trim();
                 currentPatient.Allergy = model.Allergy.Trim();
                 currentPatient.BloodGroup = model.BloodGroup.Trim();

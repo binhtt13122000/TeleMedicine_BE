@@ -88,6 +88,9 @@ namespace TeleMedicine_BE.ViewModels
         [StringLength(128)]
         public string LastName { get; set; }
 
+        [Required]
+        public IFormFile Image { get; set; }
+
         [Required(AllowEmptyStrings = false)]
         [StringLength(128)]
         public string Ward { get; set; }
@@ -104,7 +107,7 @@ namespace TeleMedicine_BE.ViewModels
         [Required(AllowEmptyStrings = false)]
         [StringLength(128)]
         public string Phone { get; set; }
-        public string Avatar { get; set; }
+
         [Required]
         public DateTime Dob { get; set; }
         public bool? IsMale { get; set; }
@@ -123,6 +126,9 @@ namespace TeleMedicine_BE.ViewModels
         [Required(AllowEmptyStrings = false)]
         [StringLength(128)]
         public string LastName { get; set; }
+
+        public IFormFile Image { get; set; }
+
         [Required(AllowEmptyStrings = false)]
         [StringLength(128)]
         public string Ward { get; set; }
@@ -141,7 +147,7 @@ namespace TeleMedicine_BE.ViewModels
         [Required(AllowEmptyStrings = false)]
         [StringLength(128)]
         public string Phone { get; set; }
-        public string Avatar { get; set; }
+
         [Required]
         public DateTime Dob { get; set; }
         public bool? IsMale { get; set; }

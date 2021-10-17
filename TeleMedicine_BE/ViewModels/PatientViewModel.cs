@@ -65,13 +65,6 @@ namespace TeleMedicine_BE.ViewModels
         [StringLength(128)]
         public string Email { get; set; }
 
-        [Required(AllowEmptyStrings = false)]
-        [StringLength(128)]
-        public string Name { get; set; }
-
-        [Required(AllowEmptyStrings = false)]
-        public string Avatar { get; set; }
-
         public string BackgroundDisease { get; set; }
 
         public string Allergy { get; set; }
@@ -83,13 +76,6 @@ namespace TeleMedicine_BE.ViewModels
     {
         [Required]
         public int Id;
-
-        [Required(AllowEmptyStrings = false)]
-        [StringLength(128)]
-        public string Name { get; set; }
-
-        [Required(AllowEmptyStrings = false)]
-        public string Avatar { get; set; }
 
         public string BackgroundDisease { get; set; }
 

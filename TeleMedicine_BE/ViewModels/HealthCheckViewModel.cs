@@ -28,6 +28,18 @@ namespace TeleMedicine_BE.ViewModels
         COMPLETED,
     }
 
+    public enum HealthCheckMode
+    {
+        NORMAL,
+        CALL
+    }
+
+    public enum HealthCheckTypeRole
+    {
+        DOCTORS,
+        USERS
+    }
+
     public class HealthCheckStatusUM
     {
         public int Id;
@@ -82,6 +94,10 @@ namespace TeleMedicine_BE.ViewModels
     {
         [Required]
         public int Id;
+
+        public int Rating { get; set; }
+
+        public string Comment { get; set; }
 
         public string Advice { get; set; }
 

@@ -18,7 +18,7 @@ namespace TeleMedicine_BE.Controllers
 {
     [Route("api/v1/health-checks")]
     [ApiController]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class HealthCheckController : Controller
     {
         private readonly IHealthCheckService _healthCheckService;
@@ -52,6 +52,7 @@ namespace TeleMedicine_BE.Controllers
         [Produces("application/json")]
         public ActionResult<IEnumerable<HealthCheckVM>> GetAllHealthChecks(
             [FromQuery(Name = "status")] HealthCheckStatus status,
+            [FromQuery(Name = "mode")] HealthCheckMode mode,
             [FromQuery(Name = "start-created-time")] DateTime? startCreatedTime,
             [FromQuery(Name = "end-created-time")] DateTime? endCreatedTime,
             [FromQuery(Name = "start-canceled-time")] DateTime? startCanceledTime,
@@ -139,6 +140,17 @@ namespace TeleMedicine_BE.Controllers
                     }
                     healthChecks = healthChecks.Where(s => s.Slots.Any(s => s.DoctorId == doctorId));
                 }
+                if(mode == HealthCheckMode.CALL)
+                {
+                    DateTime currentDate = DateTime.Now;
+                    foreach(HealthCheck item in healthChecks)
+                    {
+                        if(item.Slots.Any(s => s.AssignedDate.Date.CompareTo(currentDate.Date) != 0))
+                        {
+                            item.Token = null;
+                        }
+                    }
+                }
                 Paged<HealthCheckVM> paged = null;
                 if (orderType == SortTypeEnum.asc && typeof(HealthCheckVM).GetProperty(orderBy.ToString()) != null)
                 {
@@ -158,11 +170,14 @@ namespace TeleMedicine_BE.Controllers
                    .GetRange(pageOffset, limit, s => s.Id, 1)
                    .Paginate<HealthCheckVM>();
                 }
-                if (!String.IsNullOrEmpty(filters))
+                if(mode != HealthCheckMode.CALL)
                 {
+                    List<string> splitFilter = new List<string>();
                     bool checkHasProperty = false;
-
-                    String[] splitFilter = filters.Split(",");
+                    if (mode == HealthCheckMode.NORMAL)
+                    {
+                        splitFilter.Add("Token");
+                    }
                     foreach (var prop in splitFilter)
                     {
                         if (typeof(HealthCheckVM).GetProperty(prop) != null)
@@ -173,7 +188,26 @@ namespace TeleMedicine_BE.Controllers
                     if (checkHasProperty)
                     {
                         PropertyRenameAndIgnoreSerializerContractResolver jsonIgnore = new PropertyRenameAndIgnoreSerializerContractResolver();
-                        string json = jsonIgnore.JsonIgnore(typeof(HealthCheckVM), splitFilter, paged);
+                        string json = jsonIgnore.JsonIgnore(typeof(HealthCheckVM), splitFilter.ToArray(), paged, PropertyRenameAndIgnoreSerializerContractResolver.IgnoreMode.IGNORE);
+                        return Ok(JsonConvert.DeserializeObject(json));
+                    }
+                }
+                if (!String.IsNullOrEmpty(filters))
+                {
+                    bool checkHasProperty = false;
+
+                    List<string> splitFilter = filters.Split(",").ToList();
+                    foreach (var prop in splitFilter)
+                    {
+                        if (typeof(HealthCheckVM).GetProperty(prop) != null)
+                        {
+                            checkHasProperty = true;
+                        }
+                    }
+                    if (checkHasProperty)
+                    {
+                        PropertyRenameAndIgnoreSerializerContractResolver jsonIgnore = new PropertyRenameAndIgnoreSerializerContractResolver();
+                        string json = jsonIgnore.JsonIgnore(typeof(HealthCheckVM), splitFilter.ToArray(), paged, PropertyRenameAndIgnoreSerializerContractResolver.IgnoreMode.EXCEPT);
                         return Ok(JsonConvert.DeserializeObject(json));
                     }
                 }
@@ -194,7 +228,7 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="500">Internal server error</response>
         [HttpGet("{id}")]
         [Produces("application/json")]
-        public ActionResult<HealthCheckVM> GetHealthCheckById([FromRoute] int id)
+        public ActionResult<HealthCheckVM> GetHealthCheckById([FromRoute] int id, [FromQuery(Name = "mode")] HealthCheckMode mode)
         {
             try
             {
@@ -206,6 +240,33 @@ namespace TeleMedicine_BE.Controllers
                 HealthCheck currentHealthCheck = healthChecks.Where(s => s.Id == id).FirstOrDefault();
                 if (currentHealthCheck != null)
                 {
+                    HealthCheckVM convertHealthCheck = _mapper.Map<HealthCheckVM>(currentHealthCheck);
+                    if(mode == HealthCheckMode.NORMAL)
+                    {
+                        List<string> splitFilter = new List<string>();
+                        bool checkHasProperty = false;
+                        splitFilter.Add("Token");
+                        foreach (var prop in splitFilter)
+                        {
+                            if (typeof(HealthCheckVM).GetProperty(prop) != null)
+                            {
+                                checkHasProperty = true;
+                            }
+                        }
+                        if (checkHasProperty)
+                        {
+                            PropertyRenameAndIgnoreSerializerContractResolver jsonIgnore = new PropertyRenameAndIgnoreSerializerContractResolver();
+                            string json = jsonIgnore.JsonIgnoreObject(typeof(HealthCheckVM), splitFilter.ToArray(), convertHealthCheck, PropertyRenameAndIgnoreSerializerContractResolver.IgnoreMode.IGNORE);
+                            return Ok(JsonConvert.DeserializeObject(json));
+                        }
+                    }else if(mode == HealthCheckMode.CALL)
+                    {
+                        DateTime currentDate = DateTime.Now;
+                        if (currentHealthCheck.Slots.Any(s => s.AssignedDate.Date.CompareTo(currentDate.Date) != 0))
+                        {
+                            currentHealthCheck.Token = null;
+                        }
+                    }
                     return Ok(_mapper.Map<HealthCheckVM>(currentHealthCheck));
                 }
                 return NotFound(new
@@ -399,40 +460,55 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="500">Failed to save request</response>
         [HttpPut]
         [Produces("application/json")]
-        public async Task<ActionResult<HealthCheckVM>> UpdateHealthCheck([FromBody] HealthCheckUM model)
+        public async Task<ActionResult<HealthCheckVM>> UpdateHealthCheck([FromQuery] HealthCheckTypeRole mode, [FromBody] HealthCheckUM model)
         {
-            HealthCheck currentHealthCheck = await _healthCheckService.GetByIdAsync(model.Id);
-            if (currentHealthCheck == null){
-                return NotFound();
-            }
-            List<HealthCheckDisease> converDisease = new List<HealthCheckDisease>();
-            List<HealthCheckDiseaseCM> diseases = model.HealthCheckDiseases.ToList();
-            if(diseases != null && diseases.Count > 0)
-            {
-                foreach(HealthCheckDiseaseCM item in diseases)
-                {
-                    converDisease.Add(_mapper.Map<HealthCheckDisease>(item));
-                }
-            }
-
-            List<SymptomHealthCheck> converSymptom = new List<SymptomHealthCheck>();
-            List<SymptomHealthCheckCM> symptoms = model.SymptomHealthChecks.ToList();
-            if (symptoms != null && symptoms.Count > 0)
-            {
-                foreach (SymptomHealthCheckCM item in symptoms)
-                {
-                    converSymptom.Add(_mapper.Map<SymptomHealthCheck>(item));
-                }
-            }
             try
             {
-                currentHealthCheck.Advice = model.Advice;
-                currentHealthCheck.HealthCheckDiseases = converDisease;
-                currentHealthCheck.SymptomHealthChecks = converSymptom;
-                bool isSuccess = await _healthCheckService.UpdateAsync(currentHealthCheck);
-                if (isSuccess)
+                HealthCheck currentHealthCheck = await _healthCheckService.GetByIdAsync(model.Id);
+                if (currentHealthCheck == null)
                 {
-                    return Ok(_mapper.Map<HealthCheckVM>(currentHealthCheck));
+                    return NotFound();
+                }
+                if (mode == HealthCheckTypeRole.USERS)
+                {
+                    currentHealthCheck.Rating = model.Rating;
+                    currentHealthCheck.Comment = model.Comment;
+                    bool isSuccess = await _healthCheckService.UpdateAsync(currentHealthCheck);
+                    if (isSuccess)
+                    {
+                        return Ok(_mapper.Map<HealthCheckVM>(currentHealthCheck));
+                    }
+                    return BadRequest();
+                }else if(mode == HealthCheckTypeRole.DOCTORS)
+                {
+                    List<HealthCheckDisease> converDisease = new List<HealthCheckDisease>();
+                    List<HealthCheckDiseaseCM> diseases = model.HealthCheckDiseases.ToList();
+                    if (diseases != null && diseases.Count > 0)
+                    {
+                        foreach (HealthCheckDiseaseCM item in diseases)
+                        {
+                            converDisease.Add(_mapper.Map<HealthCheckDisease>(item));
+                        }
+                    }
+
+                    List<SymptomHealthCheck> converSymptom = new List<SymptomHealthCheck>();
+                    List<SymptomHealthCheckCM> symptoms = model.SymptomHealthChecks.ToList();
+                    if (symptoms != null && symptoms.Count > 0)
+                    {
+                        foreach (SymptomHealthCheckCM item in symptoms)
+                        {
+                            converSymptom.Add(_mapper.Map<SymptomHealthCheck>(item));
+                        }
+                    }
+                    currentHealthCheck.Advice = model.Advice;
+                    currentHealthCheck.HealthCheckDiseases = converDisease;
+                    currentHealthCheck.SymptomHealthChecks = converSymptom;
+                    bool isSuccess = await _healthCheckService.UpdateAsync(currentHealthCheck);
+                    if (isSuccess)
+                    {
+                        return Ok(_mapper.Map<HealthCheckVM>(currentHealthCheck));
+                    }
+                    return BadRequest();
                 }
                 return BadRequest();
             }
