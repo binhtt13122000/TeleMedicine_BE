@@ -19,7 +19,13 @@ namespace TeleMedicine_BE.Utils
             _renames = new Dictionary<Type, Dictionary<string, string>>();
         }
 
-        public void IgnoreProperty(Type type, params string[] jsonPropertyNames)
+        public enum IgnoreMode
+        {
+            IGNORE,
+            EXCEPT
+        }
+
+        public void EcxceptProperty(Type type, params string[] jsonPropertyNames)
         {
             if (!_ignores.ContainsKey(type))
                 _ignores[type] = new HashSet<string>();
@@ -34,12 +40,45 @@ namespace TeleMedicine_BE.Utils
             }
         }
 
-        public string JsonIgnore<T>(Type type, string[] jsonPropertyNames, Paged<T> paged)
+        public void IgnoreProperty(Type type, params string[] jsonPropertyNames)
+        {
+            if (!_ignores.ContainsKey(type))
+                _ignores[type] = new HashSet<string>();
+            PropertyInfo[] props = type.GetProperties();
+            foreach (var prop in jsonPropertyNames)
+            {
+                _ignores[type].Add(prop);
+            }
+        }
+
+        public string JsonIgnore<T>(Type type, string[] jsonPropertyNames, Paged<T> paged, IgnoreMode mode)
         {
             PropertyRenameAndIgnoreSerializerContractResolver jsonIgnore = new PropertyRenameAndIgnoreSerializerContractResolver();
-            jsonIgnore.IgnoreProperty(type, jsonPropertyNames);
+            if(mode == IgnoreMode.EXCEPT)
+            {
+                jsonIgnore.EcxceptProperty(type, jsonPropertyNames);
+            }else if(mode == IgnoreMode.IGNORE)
+            {
+                jsonIgnore.IgnoreProperty(type, jsonPropertyNames);
+            }
+            var serializerSettings = new JsonSerializerSettings();
+            serializerSettings.ContractResolver = jsonIgnore;
 
+            var json = JsonConvert.SerializeObject(paged, serializerSettings);
+            return json;
+        }
 
+        public string JsonIgnoreObject<T>(Type type, string[] jsonPropertyNames, T paged, IgnoreMode mode)
+        {
+            PropertyRenameAndIgnoreSerializerContractResolver jsonIgnore = new PropertyRenameAndIgnoreSerializerContractResolver();
+            if (mode == IgnoreMode.EXCEPT)
+            {
+                jsonIgnore.EcxceptProperty(type, jsonPropertyNames);
+            }
+            else if (mode == IgnoreMode.IGNORE)
+            {
+                jsonIgnore.IgnoreProperty(type, jsonPropertyNames);
+            }
             var serializerSettings = new JsonSerializerSettings();
             serializerSettings.ContractResolver = jsonIgnore;
 

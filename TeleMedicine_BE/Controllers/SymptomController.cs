@@ -110,7 +110,7 @@ namespace TeleMedicine_BE.Controllers
                     if (checkHasProperty)
                     {
                         PropertyRenameAndIgnoreSerializerContractResolver jsonIgnore = new PropertyRenameAndIgnoreSerializerContractResolver();
-                        string json = jsonIgnore.JsonIgnore(typeof(SymptomVM), splitFilter, paged);
+                        string json = jsonIgnore.JsonIgnore(typeof(SymptomVM), splitFilter, paged, PropertyRenameAndIgnoreSerializerContractResolver.IgnoreMode.EXCEPT);
                         return Ok(JsonConvert.DeserializeObject(json));
                     }
                 }
