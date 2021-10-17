@@ -266,6 +266,7 @@ namespace TeleMedicine_BE.Controllers
                 account.PostalCode = model.PostalCode;
                 account.Avatar = model.Avatar;
                 account.City = model.City;
+                account.Ward = model.Ward.Trim();
                 account.StreetAddress = model.StreetAddress;
                 account.Dob = model.Dob;
                 bool isUpdated = await _accountService.UpdateAsync(account);
@@ -385,6 +386,7 @@ namespace TeleMedicine_BE.Controllers
                 convertAccount.FirstName = model.FirstName.Trim();
                 convertAccount.LastName = model.LastName.Trim();
                 convertAccount.StreetAddress = model.StreetAddress.Trim();
+                convertAccount.Ward = model.Ward.Trim();
                 convertAccount.RoleId = model.RoleId;
                 convertAccount.Role = currenRole;
                 Account accountCreated = await _accountService.AddAsync(convertAccount);
