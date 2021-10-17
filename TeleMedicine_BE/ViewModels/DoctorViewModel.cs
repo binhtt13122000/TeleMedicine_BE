@@ -82,12 +82,6 @@ namespace TeleMedicine_BE.ViewModels
         [Required(AllowEmptyStrings = false)]
         [StringLength(128)]
         public string Email { get; set; }
-        [Required(AllowEmptyStrings = false)]
-        [StringLength(128)]
-        public string Name { get; set; }
-
-        [Required(AllowEmptyStrings = false)]
-        public IFormFile Avatar { get; set; }
 
         [Required(AllowEmptyStrings = false)]
         public string PractisingCertificate { get; set; }
@@ -108,8 +102,8 @@ namespace TeleMedicine_BE.ViewModels
 
         public string Description { get; set; }
 
-        public string  HospitalDoctors { get; set; }
-        public string MajorDoctors { get; set; }
+        public ICollection<HospitalDoctorWithRegisterCM>  HospitalDoctors { get; set; }
+        public ICollection<MajorDoctorWithRegisterCM> MajorDoctors { get; set; }
     }
 
 
@@ -118,13 +112,6 @@ namespace TeleMedicine_BE.ViewModels
     {
         [Required]
         public int Id { get; set; }
-
-        [Required(AllowEmptyStrings = false)]
-        [StringLength(128)]
-        public string Name { get; set; }
-
-        [Required(AllowEmptyStrings = false)]
-        public string Avatar { get; set; }
 
         [Required(AllowEmptyStrings = false)]
         public string PractisingCertificate { get; set; }

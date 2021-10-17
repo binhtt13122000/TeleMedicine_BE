@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TeleMedicine_BE.ExternalService;
 using TeleMedicine_BE.Utils;
 using TeleMedicine_BE.ViewModels;
 
@@ -22,13 +23,15 @@ namespace TeleMedicine_BE.Controllers
     {
         private readonly IAccountService _accountService;
         private readonly IRoleService _roleService;
+        private readonly IUploadFileService _uploadFileService;
         private readonly IDoctorService _doctorService;
         private readonly IMapper _mapper;
         private readonly IPagingSupport<Account> _pagingSupport;
 
-        public AccountController(IAccountService accountService, IDoctorService doctorService, IRoleService roleService, IMapper mapper, IPagingSupport<Account> pagingSupport)
+        public AccountController(IAccountService accountService, IDoctorService doctorService, IUploadFileService uploadFileService, IRoleService roleService, IMapper mapper, IPagingSupport<Account> pagingSupport)
         {
             _accountService = accountService;
+            _uploadFileService = uploadFileService;
             _doctorService = doctorService;
             _roleService = roleService;
             _mapper = mapper;
@@ -248,7 +251,7 @@ namespace TeleMedicine_BE.Controllers
         [HttpPut]
         [Produces("application/json")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<ActionResult<AccountProfileVM>> UpdateAccount([FromBody] AccountProfileUM model)
+        public async Task<ActionResult<AccountProfileVM>> UpdateAccount([FromForm] AccountProfileUM model)
         {
             try
             {
@@ -258,13 +261,18 @@ namespace TeleMedicine_BE.Controllers
                     return NotFound();
                 }
 
+                if(model.Image != null)
+                {
+                    string fileUrl = await _uploadFileService.UploadFile(model.Image, "service", "service-detail");
+                    account.Avatar = fileUrl;
+                }
+
                 account.FirstName = model.FirstName;
                 account.LastName = model.LastName;
                 account.Phone = model.Phone;
                 account.IsMale = model.IsMale;
                 account.Locality = model.Locality;
                 account.PostalCode = model.PostalCode;
-                account.Avatar = model.Avatar;
                 account.City = model.City;
                 account.Ward = model.Ward.Trim();
                 account.StreetAddress = model.StreetAddress;
@@ -360,7 +368,7 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="500">Failed to save request</response>
         [HttpPost]
         [Produces("application/json")]
-        public async Task<ActionResult<AccountProfileVM>> CreateNewAccount([FromBody] AccountProfileCM model)
+        public async Task<ActionResult<AccountProfileVM>> CreateNewAccount([FromForm] AccountProfileCM model)
         {
             try
             {
@@ -380,11 +388,14 @@ namespace TeleMedicine_BE.Controllers
                         message = "Can not found role by id!"
                     });
                 }
-                
+
+                string fileUrl = await _uploadFileService.UploadFile(model.Image, "service", "service-detail");
+
                 Account convertAccount = _mapper.Map<Account>(model);
                 convertAccount.Email = model.Email.Trim().ToLower();
                 convertAccount.FirstName = model.FirstName.Trim();
                 convertAccount.LastName = model.LastName.Trim();
+                convertAccount.Avatar = fileUrl;
                 convertAccount.StreetAddress = model.StreetAddress.Trim();
                 convertAccount.Ward = model.Ward.Trim();
                 convertAccount.RoleId = model.RoleId;

@@ -21,19 +21,20 @@ namespace TeleMedicine_BE.Controllers
 {
     [Route("api/v1/doctors")]
     [ApiController]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class DoctorController : Controller
     {
         private readonly IDoctorService _doctorService;
         private readonly IHospitalService _hospitalService;
+        private readonly IAccountService _accountService;
         private readonly IMajorService _majorService;
         private readonly IUploadFileService _uploadFileService;
         private readonly ICertificationService _certificationService;
         private readonly IMapper _mapper;
         private readonly IPagingSupport<Doctor> _pagingSupport;
 
-        public DoctorController(IDoctorService doctorService, IHospitalService hospitalService, IMajorService majorService, IUploadFileService uploadFileService, ICertificationService certificationService, IMapper mapper, IPagingSupport<Doctor> pagingSupport)
+        public DoctorController(IDoctorService doctorService, IHospitalService hospitalService, IAccountService accountService, IMajorService majorService, IUploadFileService uploadFileService, ICertificationService certificationService, IMapper mapper, IPagingSupport<Doctor> pagingSupport)
         {
+            _accountService = accountService;
             _doctorService = doctorService;
             _hospitalService = hospitalService;
             _majorService = majorService;
@@ -52,6 +53,7 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="500">Internal server error</response>
         [HttpGet]
         [Produces("application/json")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public ActionResult<IEnumerable<DoctorVM>> GetAllDoctors(
             [FromQuery(Name = "email")] string email,
             [FromQuery(Name = "practising-certificate")] string practisingCertificate,
@@ -291,6 +293,7 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="500">Internal server error</response>
         [HttpGet("{search}")]
         [Produces("application/json")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public ActionResult<DoctorVM> GetDoctorByType([FromRoute] string search, [FromQuery(Name = "search-type")] SearchType searchType)
         {
             try
@@ -339,6 +342,7 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="500">Failed to save request</response>
         [HttpPut]
         [Produces("application/json")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "1, 2")]
         public async Task<ActionResult<DoctorVM>> PutDoctor([FromBody] DoctorUM model)
         {
             Doctor currentDoctor = await _doctorService.GetByIdAsync(model.Id);
@@ -388,6 +392,12 @@ namespace TeleMedicine_BE.Controllers
                     convertHospital.Add(_mapper.Map<HospitalDoctor>(item));
                 }
             }
+            Account currentAccount = _accountService.GetAccountByEmail(currentDoctor.Email);
+            if(currentAccount != null)
+            {
+                currentDoctor.Avatar = currentAccount.Avatar;
+                currentDoctor.Name = currentAccount.FirstName.Trim() + " "  + currentAccount.LastName.Trim();
+            }
             try
             {
                 if(convertCetification != null && convertCetification.Count > 0)
@@ -429,10 +439,13 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="400">Field is not matched or duplicated</response>
         /// <response code="500">Failed to save request</response>
         [HttpPost]
-        public async Task<ActionResult<DoctorVM>> CreateNewDoctor([FromForm] DoctorCM model)
+        public async Task<ActionResult<DoctorVM>> CreateNewDoctor([FromBody] DoctorCM model)
         {
-            List<HospitalDoctorWithRegisterCM> hospitalsDoctor = JsonConvert.DeserializeObject<List<HospitalDoctorWithRegisterCM>>(model.HospitalDoctors);
-            List<MajorDoctorWithRegisterCM> majorsDoctor = JsonConvert.DeserializeObject<List<MajorDoctorWithRegisterCM>>(model.MajorDoctors);
+            HospitalDoctorWithRegisterCM[] arrHospital = new HospitalDoctorWithRegisterCM[model.HospitalDoctors.Count];
+            model.HospitalDoctors.CopyTo(arrHospital, 0);
+
+            MajorDoctorWithRegisterCM[] arrMajor = new MajorDoctorWithRegisterCM[model.MajorDoctors.Count];
+            model.MajorDoctors.CopyTo(arrMajor, 0);
 
 
             List<HospitalDoctor> convertHospitalDoctor = new List<HospitalDoctor>();
@@ -457,41 +470,44 @@ namespace TeleMedicine_BE.Controllers
                     }
                         );
                 }
-                if (hospitalsDoctor != null && hospitalsDoctor.Count > 0)
+                if (arrHospital != null && arrHospital.Length > 0)
                 {
-                    for (int i = 0; i < hospitalsDoctor.Count; i++)
+                    for (int i = 0; i < arrHospital.Length; i++)
                     {
-                        if (_hospitalService.GetAll().Where(s => s.Id == hospitalsDoctor[i].HospitalId).FirstOrDefault() == null)
+                        if (_hospitalService.GetAll().Where(s => s.Id == arrHospital[i].HospitalId).FirstOrDefault() == null)
                         {
                             return BadRequest(new
                             {
                                 message = "Hospital is not existed!"
                             });
                         }
-                        convertHospitalDoctor.Add(_mapper.Map<HospitalDoctor>(hospitalsDoctor[i]));
+                        convertHospitalDoctor.Add(_mapper.Map<HospitalDoctor>(arrHospital[i]));
                     }
                 }
-                if (majorsDoctor != null && majorsDoctor.Count > 0)
+                if (arrMajor != null && arrMajor.Length > 0)
                 {
-                    for (int i = 0; i < majorsDoctor.Count; i++)
+                    for (int i = 0; i < arrMajor.Length; i++)
                     {
-                        if (_majorService.GetAll().Where(s => s.Id == majorsDoctor[i].MajorId).FirstOrDefault() == null)
+                        if (_majorService.GetAll().Where(s => s.Id == arrMajor[i].MajorId).FirstOrDefault() == null)
                         {
                             return BadRequest(new
                             {
                                 message = "Major is not existed!"
                             });
                         }
-                        convertMajorDoctor.Add(_mapper.Map<MajorDoctor>(majorsDoctor[i]));
+                        convertMajorDoctor.Add(_mapper.Map<MajorDoctor>(arrMajor[i]));
                     }
                 }
-                string fileUrl = await _uploadFileService.UploadFile(model.Avatar, "service", "service-detail");
-
+                
                 model.CertificateCode = model.CertificateCode.Trim().ToUpper();
                 Doctor mappedDoctor = new Doctor();
                 mappedDoctor.Email = model.Email;
-                mappedDoctor.Name = model.Name.Trim();
-                mappedDoctor.Avatar = fileUrl;
+                Account currentAccount = _accountService.GetAccountByEmail(model.Email);
+                if (currentAccount != null)
+                {
+                    mappedDoctor.Avatar = currentAccount.Avatar;
+                    mappedDoctor.Name = currentAccount.FirstName.Trim() + " " + currentAccount.LastName.Trim();
+                }
                 mappedDoctor.PractisingCertificate = model.PractisingCertificate;
                 mappedDoctor.CertificateCode = model.CertificateCode;
                 mappedDoctor.PlaceOfCertificate = model.PlaceOfCertificate;
@@ -530,6 +546,7 @@ namespace TeleMedicine_BE.Controllers
         [HttpDelete]
         [Route("{id}")]
         [Produces("application/json")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "2")]
         public async Task<ActionResult> DeleteById(int id)
         {
             try
@@ -567,6 +584,7 @@ namespace TeleMedicine_BE.Controllers
         [HttpPatch]
         [Route("{id}")]
         [Produces("application/json")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "2")]
         public async Task<ActionResult> VerifyDoctorById(int id)
         {
             try
@@ -607,6 +625,7 @@ namespace TeleMedicine_BE.Controllers
         [HttpGet]
         [Route("count")]
         [Produces("application/json")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "2")]
         public async Task<ActionResult<int>> CountDoctor([FromQuery(Name = "is-verify")] int isVerify = 0)
         {
             try
