@@ -62,6 +62,7 @@ namespace TeleMedicine_BE
             services.AddScoped(typeof(IPagingSupport<>), typeof(PagingSupport<>));
             services.AddSingleton<IJwtTokenProvider, JwtTokenProvider>();
             services.AddSingleton<IPushNotificationService, PushNotificationService>();
+            services.AddSingleton<IUploadFileService, UploadFileService>();
             services.AddSingleton<IAgoraProvider, AgoraProvider>();
 
             services.AddTransient<ISymptomRepository, SymptomRepository>();
