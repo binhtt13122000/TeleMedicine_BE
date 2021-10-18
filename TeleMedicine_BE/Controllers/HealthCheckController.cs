@@ -60,6 +60,7 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "start-canceled-time")] DateTime? startCanceledTime,
             [FromQuery(Name = "end-canceled-time")] DateTime? endCanceledTime,
             [FromQuery(Name = "order-by")] HealthCheckFieldEnum orderBy,
+            [FromQuery(Name = "mode-search")] TypeSearch modeSearch,
             [FromQuery(Name = "order-type")] SortTypeEnum orderType,
             [FromQuery(Name = "patient-id")] int patientId = 0,
             [FromQuery(Name = "doctor-id")] int doctorId = 0,
@@ -82,10 +83,7 @@ namespace TeleMedicine_BE.Controllers
                     healthChecks = healthChecks.Where(s => s.Rating >= startRating).
                                                 Where(s => s.Rating <= endRating);
                 }
-                if (status != HealthCheckStatus.ALL)
-                {
-                    //healthChecks = healthChecks.Where(s => s.)
-                }
+                
                 if (startCreatedTime.HasValue && endCreatedTime.HasValue)
                 {
                     healthChecks = healthChecks.Where(s => s.CreatedTime.Value.CompareTo(startCreatedTime.Value) >= 0).
@@ -151,6 +149,21 @@ namespace TeleMedicine_BE.Controllers
                         {
                             item.Token = null;
                         }
+                    }
+                }
+                if(modeSearch == TypeSearch.NEAREST)
+                {
+                    healthChecks = healthChecks.Where(s => s.Status.Equals("BOOKED")).OrderByDescending(s => s.CreatedTime);
+                    HealthCheck convertHealthCheck = healthChecks.FirstOrDefault();
+                    if(convertHealthCheck != null)
+                    {
+                        return Ok(healthChecks.FirstOrDefault());
+                    }
+                    else
+                    {
+                        return NotFound(new {
+                            message = "Can not found health check nearest!"
+                        });
                     }
                 }
                 Paged<HealthCheckVM> paged = null;
