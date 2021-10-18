@@ -150,7 +150,7 @@ namespace TeleMedicine_BE
                     Example = new OpenApiString("00:00:00")
                 });
 
-                c.OperationFilter<SecurityRequirementsOperationFilter>();
+                //c.OperationFilter<SecurityRequirementsOperationFilter>();
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Name = "Authorization",

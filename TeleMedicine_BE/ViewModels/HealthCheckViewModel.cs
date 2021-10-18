@@ -20,6 +20,12 @@ namespace TeleMedicine_BE.ViewModels
         CanceledTime
     }
 
+    public enum TypeSearch
+    {
+        NORMAL,
+        NEAREST,
+    }
+
     public enum HealthCheckStatus
     {
         ALL,
