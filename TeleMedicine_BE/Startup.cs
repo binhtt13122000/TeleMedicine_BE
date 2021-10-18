@@ -29,7 +29,6 @@ using System.Text;
 using Newtonsoft.Json.Converters;
 using System.Text.Json.Serialization;
 using TeleMedicine_BE.ExternalService;
-using Swashbuckle.AspNetCore.Filters;
 
 namespace TeleMedicine_BE
 {
@@ -63,6 +62,7 @@ namespace TeleMedicine_BE
             services.AddScoped(typeof(IPagingSupport<>), typeof(PagingSupport<>));
             services.AddSingleton<IJwtTokenProvider, JwtTokenProvider>();
             services.AddSingleton<IPushNotificationService, PushNotificationService>();
+            services.AddSingleton<IAgoraProvider, AgoraProvider>();
 
             services.AddTransient<ISymptomRepository, SymptomRepository>();
             services.AddTransient<ISymptomService, SymptomService>();
@@ -112,8 +112,6 @@ namespace TeleMedicine_BE
             services.AddTransient<IHealthCheckRepository, HealthCheckRepository>();
             services.AddTransient<IHealthCheckService, HealthCheckService>();
 
-            services.AddTransient<IUploadFileService, UploadFileService>();
-
             services
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
@@ -150,7 +148,6 @@ namespace TeleMedicine_BE
                     Example = new OpenApiString("00:00:00")
                 });
 
-                c.OperationFilter<SecurityRequirementsOperationFilter>();
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Name = "Authorization",
@@ -181,9 +178,6 @@ namespace TeleMedicine_BE
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
             });
-            services.AddControllersWithViews()
-            .AddNewtonsoftJson(options =>
-            options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

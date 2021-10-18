@@ -27,9 +27,10 @@ namespace TeleMedicine_BE.Controllers
         private readonly IPatientService _patientService;
         private readonly IDoctorService _doctorService;
         private readonly IMapper _mapper;
+        private readonly IAgoraProvider _agoraProvider;
         private readonly IPagingSupport<HealthCheck> _pagingSupport;
 
-        public HealthCheckController(IHealthCheckService healthCheckService, ISlotService slotService, IDoctorService doctorService, ISymptomService symptomService, IPatientService patientService, IMapper mapper, IPagingSupport<HealthCheck> pagingSupport)
+        public HealthCheckController(IHealthCheckService healthCheckService, ISlotService slotService, IDoctorService doctorService, ISymptomService symptomService, IPatientService patientService, IMapper mapper, IPagingSupport<HealthCheck> pagingSupport, IAgoraProvider agoraProvider)
         {
             _healthCheckService = healthCheckService;
             _slotService = slotService;
@@ -38,6 +39,7 @@ namespace TeleMedicine_BE.Controllers
             _patientService = patientService;
             _mapper = mapper;
             _pagingSupport = pagingSupport;
+            _agoraProvider = agoraProvider;
         }
 
         /// <summary>
@@ -335,7 +337,14 @@ namespace TeleMedicine_BE.Controllers
                 HealthCheck healthCheckCreated = await _healthCheckService.AddAsync(healthCheckConvert);
                 if (healthCheckCreated != null)
                 {
-                    return CreatedAtAction("GetHealthCheckById", new { id = healthCheckCreated.Id }, _mapper.Map<HealthCheckVM>(healthCheckCreated));
+                    string token = _agoraProvider.GenerateToken(healthCheckCreated.Id.ToString(), healthCheckCreated.Id.ToString(), 604800);
+                    healthCheckCreated.Token = token;
+                    bool success =  await _healthCheckService.UpdateAsync(healthCheckCreated);
+                    if (success)
+                    {
+                        return CreatedAtAction("GetHealthCheckById", new { id = healthCheckCreated.Id }, _mapper.Map<HealthCheckVM>(healthCheckCreated));
+                    }
+                    return BadRequest();
                 }
                 return BadRequest(new
                 {
