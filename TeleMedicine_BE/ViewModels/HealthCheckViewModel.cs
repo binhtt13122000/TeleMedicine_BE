@@ -77,8 +77,6 @@ namespace TeleMedicine_BE.ViewModels
     {
         public int? Height { get; set; }
         public int? Weight { get; set; }
-        public string Token { get; set; }
-
         [Required]
         public int PatientId { get; set; }
 

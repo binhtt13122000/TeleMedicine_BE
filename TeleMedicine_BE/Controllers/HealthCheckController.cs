@@ -18,7 +18,7 @@ namespace TeleMedicine_BE.Controllers
 {
     [Route("api/v1/health-checks")]
     [ApiController]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class HealthCheckController : Controller
     {
         private readonly IHealthCheckService _healthCheckService;
@@ -334,17 +334,13 @@ namespace TeleMedicine_BE.Controllers
                 healthCheckConvert.Status = HealthCheckSta.BOOKED.ToString();
                 healthCheckConvert.CreatedTime = DateTime.Now;
                 healthCheckConvert.Slots.Add(currentSlot);
+                healthCheckConvert.Token = _agoraProvider.GenerateToken("SLOT_" + model.SlotId, 0.ToString(), 0);
                 HealthCheck healthCheckCreated = await _healthCheckService.AddAsync(healthCheckConvert);
                 if (healthCheckCreated != null)
                 {
-                    string token = _agoraProvider.GenerateToken(healthCheckCreated.Id.ToString(), healthCheckCreated.Id.ToString(), 604800);
-                    healthCheckCreated.Token = token;
-                    bool success =  await _healthCheckService.UpdateAsync(healthCheckCreated);
-                    if (success)
-                    {
-                        return CreatedAtAction("GetHealthCheckById", new { id = healthCheckCreated.Id }, _mapper.Map<HealthCheckVM>(healthCheckCreated));
-                    }
-                    return BadRequest();
+                    return CreatedAtAction("GetHealthCheckById", new { id = healthCheckCreated.Id }, _mapper.Map<HealthCheckVM>(healthCheckCreated));
+
+                    
                 }
                 return BadRequest(new
                 {
