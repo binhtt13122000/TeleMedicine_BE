@@ -323,6 +323,7 @@ namespace TeleMedicine_BE.Controllers
                 notification.CreatedDate = model.CreatedDate;
                 notification.Content = model.Content;
                 notification.IsActive = model.IsActive;
+                notification.Type = model.Type;
                 bool isSuccess = await _notificationService.UpdateAsync(notification);
                 if (isSuccess)
                 {

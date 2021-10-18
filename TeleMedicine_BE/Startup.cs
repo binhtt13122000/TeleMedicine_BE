@@ -113,6 +113,8 @@ namespace TeleMedicine_BE
             services.AddTransient<IHealthCheckRepository, HealthCheckRepository>();
             services.AddTransient<IHealthCheckService, HealthCheckService>();
 
+            services.AddTransient<IUploadFileService, UploadFileService>();
+
             services
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
