@@ -18,7 +18,7 @@ namespace TeleMedicine_BE.Controllers
 {
     [Route("api/v1/health-checks")]
     [ApiController]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class HealthCheckController : Controller
     {
         private readonly IHealthCheckService _healthCheckService;
@@ -27,9 +27,10 @@ namespace TeleMedicine_BE.Controllers
         private readonly IPatientService _patientService;
         private readonly IDoctorService _doctorService;
         private readonly IMapper _mapper;
+        private readonly IAgoraProvider _agoraProvider;
         private readonly IPagingSupport<HealthCheck> _pagingSupport;
 
-        public HealthCheckController(IHealthCheckService healthCheckService, ISlotService slotService, IDoctorService doctorService, ISymptomService symptomService, IPatientService patientService, IMapper mapper, IPagingSupport<HealthCheck> pagingSupport)
+        public HealthCheckController(IHealthCheckService healthCheckService, ISlotService slotService, IDoctorService doctorService, ISymptomService symptomService, IPatientService patientService, IMapper mapper, IPagingSupport<HealthCheck> pagingSupport, IAgoraProvider agoraProvider)
         {
             _healthCheckService = healthCheckService;
             _slotService = slotService;
@@ -38,6 +39,7 @@ namespace TeleMedicine_BE.Controllers
             _patientService = patientService;
             _mapper = mapper;
             _pagingSupport = pagingSupport;
+            _agoraProvider = agoraProvider;
         }
 
         /// <summary>
@@ -345,10 +347,13 @@ namespace TeleMedicine_BE.Controllers
                 healthCheckConvert.Status = HealthCheckSta.BOOKED.ToString();
                 healthCheckConvert.CreatedTime = DateTime.Now;
                 healthCheckConvert.Slots.Add(currentSlot);
+                healthCheckConvert.Token = _agoraProvider.GenerateToken("SLOT_" + model.SlotId, 0.ToString(), 0);
                 HealthCheck healthCheckCreated = await _healthCheckService.AddAsync(healthCheckConvert);
                 if (healthCheckCreated != null)
                 {
                     return CreatedAtAction("GetHealthCheckById", new { id = healthCheckCreated.Id }, _mapper.Map<HealthCheckVM>(healthCheckCreated));
+
+                    
                 }
                 return BadRequest(new
                 {
