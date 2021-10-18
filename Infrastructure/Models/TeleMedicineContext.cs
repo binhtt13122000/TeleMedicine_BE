@@ -333,6 +333,8 @@ namespace Infrastructure.Models
 
                 entity.Property(e => e.IsActive).HasDefaultValueSql("true");
 
+                entity.Property(e => e.Type).IsRequired();
+
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.Notifications)
                     .HasForeignKey(d => d.UserId)

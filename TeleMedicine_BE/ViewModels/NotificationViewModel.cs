@@ -24,6 +24,8 @@ namespace TeleMedicine_BE.ViewModels
 
         public bool? IsActive { get; set; }
 
+        public int? Type { get; set; }
+
         public virtual Account User { get; set; }
     }
 
@@ -42,6 +44,9 @@ namespace TeleMedicine_BE.ViewModels
         public int UserId { get; set; }
 
         [Required]
+        public int? Type { get; set; }
+
+        [Required]
         [DataType(DataType.DateTime)]
         [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}", ApplyFormatInEditMode = true)]
         public DateTime CreatedDate { get; set; }
@@ -55,6 +60,9 @@ namespace TeleMedicine_BE.ViewModels
 
         [Required(AllowEmptyStrings = false)]
         public string Content { get; set; }
+
+        [Required]
+        public int? Type { get; set; }
 
         [Required]
         public int UserId { get; set; }

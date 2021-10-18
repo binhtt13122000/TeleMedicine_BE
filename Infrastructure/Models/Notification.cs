@@ -15,6 +15,8 @@ namespace Infrastructure.Models
         public bool? IsSeen { get; set; }
 
         public bool? IsActive { get; set; }
+
+        public int? Type { get; set; }
         public virtual Account User { get; set; }
     }
 }
