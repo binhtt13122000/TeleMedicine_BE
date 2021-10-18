@@ -18,7 +18,7 @@ namespace TeleMedicine_BE.Controllers
 {
     [Route("api/v1/health-checks")]
     [ApiController]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class HealthCheckController : Controller
     {
         private readonly IHealthCheckService _healthCheckService;
