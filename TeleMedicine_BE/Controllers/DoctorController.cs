@@ -343,8 +343,12 @@ namespace TeleMedicine_BE.Controllers
         [HttpPut]
         [Produces("application/json")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "1, 2")]
-        public async Task<ActionResult<DoctorVM>> PutDoctor([FromBody] DoctorUM model)
+        public async Task<ActionResult<DoctorVM>> PutDoctor([FromForm] DoctorUM model)
         {
+
+            List<HospitalDoctorWithRegisterCM> newHospitalDoctors = JsonConvert.DeserializeObject<List<HospitalDoctorWithRegisterCM>>(model.HospitalDoctors);
+            List<MajorDoctorWithRegisterCM> newMajorDoctors = JsonConvert.DeserializeObject<List<MajorDoctorWithRegisterCM>>(model.MajorDoctors);
+
             Doctor currentDoctor = await _doctorService.GetByIdAsync(model.Id);
             if (currentDoctor == null)
             {
@@ -358,40 +362,46 @@ namespace TeleMedicine_BE.Controllers
             if (!currentDoctor.CertificateCode.Trim().ToUpper().Equals(model.CertificateCode.Trim().ToUpper()) && checkExistedCertification != null)
             {
                 return BadRequest(new
-                {
-                    message = "Certification Code have been registered account!"
-                }
-                    );
-            }
-            List<CertificationDoctor> convertCetification = new List<CertificationDoctor>();
-            List<CertificationDoctorWithRegisterCM> certificationDoctors = model.CertificationDoctors.ToList();
-            if(certificationDoctors != null && certificationDoctors.Count > 0)
-            {
-                foreach(CertificationDoctorWithRegisterCM item in certificationDoctors)
-                {
-                    convertCetification.Add(_mapper.Map<CertificationDoctor>(item));
-                }
+                    {
+                        message = "Certification Code have been registered account!"
+                    }
+                );
             }
 
             List<MajorDoctor> convertMajor = new List<MajorDoctor>();
-            List<MajorDoctorWithRegisterCM> majorDoctors = model.MajorDoctors.ToList();
-            if (majorDoctors != null && majorDoctors.Count > 0)
+            List<HospitalDoctor> convertHospital = new List<HospitalDoctor>();
+
+
+            if (newHospitalDoctors != null && newHospitalDoctors.Count > 0)
             {
-                foreach (MajorDoctorWithRegisterCM item in majorDoctors)
+                for (int i = 0; i < newHospitalDoctors.Count; i++)
                 {
-                    convertMajor.Add(_mapper.Map<MajorDoctor>(item));
+                    if (_hospitalService.GetAll().Where(s => s.Id == newHospitalDoctors[i].HospitalId).FirstOrDefault() == null)
+                    {
+                        return BadRequest(new
+                        {
+                            message = "Hospital is not existed!"
+                        });
+                    }
+                    convertHospital.Add(_mapper.Map<HospitalDoctor>(newHospitalDoctors[i]));
+                }
+            }
+            if (newMajorDoctors != null && newMajorDoctors.Count > 0)
+            {
+                for (int i = 0; i < newMajorDoctors.Count; i++)
+                {
+                    if (_majorService.GetAll().Where(s => s.Id == newMajorDoctors[i].MajorId).FirstOrDefault() == null)
+                    {
+                        return BadRequest(new
+                        {
+                            message = "Major is not existed!"
+                        });
+                    }
+                    convertMajor.Add(_mapper.Map<MajorDoctor>(newMajorDoctors[i]));
                 }
             }
 
-            List<HospitalDoctor> convertHospital = new List<HospitalDoctor>();
-            List<HospitalDoctorWithRegisterCM> hospitalDoctors = model.HospitalDoctors.ToList();
-            if (hospitalDoctors != null && hospitalDoctors.Count > 0)
-            {
-                foreach (HospitalDoctorWithRegisterCM item in hospitalDoctors)
-                {
-                    convertHospital.Add(_mapper.Map<HospitalDoctor>(item));
-                }
-            }
+
             Account currentAccount = _accountService.GetAccountByEmail(currentDoctor.Email);
             if(currentAccount != null)
             {
@@ -400,10 +410,6 @@ namespace TeleMedicine_BE.Controllers
             }
             try
             {
-                if(convertCetification != null && convertCetification.Count > 0)
-                {
-                    currentDoctor.CertificationDoctors = convertCetification;
-                }
                 if (convertMajor != null && convertMajor.Count > 0)
                 {
                     currentDoctor.MajorDoctors = convertMajor;
@@ -412,7 +418,11 @@ namespace TeleMedicine_BE.Controllers
                 {
                     currentDoctor.HospitalDoctors = convertHospital;
                 }
-                currentDoctor.PractisingCertificate = model.PractisingCertificate.Trim();
+                if(model.PractisingCertificate != null)
+                { 
+                    string fileUrl = await _uploadFileService.UploadFile(model.PractisingCertificate, "service", "service-detail");
+                    currentDoctor.PractisingCertificate = fileUrl;
+                }
                 currentDoctor.CertificateCode = model.CertificateCode.Trim().ToUpper();
                 currentDoctor.PlaceOfCertificate = model.PlaceOfCertificate.Trim();
                 currentDoctor.DateOfCertificate = model.DateOfCertificate;
@@ -435,17 +445,20 @@ namespace TeleMedicine_BE.Controllers
         /// <summary>
         /// Create a new doctor
         /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     hospitalDoctors: "[{ "hospitalId": 1},{"hospitalId": 2},] "
+        ///     majorDoctors: "[{"majorId": 1}]"
+        /// </remarks>
         /// <response code="201">Created new doctor successfull</response>
         /// <response code="400">Field is not matched or duplicated</response>
         /// <response code="500">Failed to save request</response>
         [HttpPost]
-        public async Task<ActionResult<DoctorVM>> CreateNewDoctor([FromBody] DoctorCM model)
+        public async Task<ActionResult<DoctorVM>> CreateNewDoctor([FromForm] DoctorCM model)
         {
-            HospitalDoctorWithRegisterCM[] arrHospital = new HospitalDoctorWithRegisterCM[model.HospitalDoctors.Count];
-            model.HospitalDoctors.CopyTo(arrHospital, 0);
-
-            MajorDoctorWithRegisterCM[] arrMajor = new MajorDoctorWithRegisterCM[model.MajorDoctors.Count];
-            model.MajorDoctors.CopyTo(arrMajor, 0);
+            List<HospitalDoctorWithRegisterCM> newHospitalDoctors = JsonConvert.DeserializeObject<List<HospitalDoctorWithRegisterCM>>(model.HospitalDoctors);
+            List<MajorDoctorWithRegisterCM> newMajorDoctors = JsonConvert.DeserializeObject<List<MajorDoctorWithRegisterCM>>(model.MajorDoctors);
 
 
             List<HospitalDoctor> convertHospitalDoctor = new List<HospitalDoctor>();
@@ -470,35 +483,35 @@ namespace TeleMedicine_BE.Controllers
                     }
                         );
                 }
-                if (arrHospital != null && arrHospital.Length > 0)
+                if (newHospitalDoctors != null && newHospitalDoctors.Count > 0)
                 {
-                    for (int i = 0; i < arrHospital.Length; i++)
+                    for (int i = 0; i < newHospitalDoctors.Count; i++)
                     {
-                        if (_hospitalService.GetAll().Where(s => s.Id == arrHospital[i].HospitalId).FirstOrDefault() == null)
+                        if (_hospitalService.GetAll().Where(s => s.Id == newHospitalDoctors[i].HospitalId).FirstOrDefault() == null)
                         {
                             return BadRequest(new
                             {
                                 message = "Hospital is not existed!"
                             });
                         }
-                        convertHospitalDoctor.Add(_mapper.Map<HospitalDoctor>(arrHospital[i]));
+                        convertHospitalDoctor.Add(_mapper.Map<HospitalDoctor>(newHospitalDoctors[i]));
                     }
                 }
-                if (arrMajor != null && arrMajor.Length > 0)
+                if (newMajorDoctors != null && newMajorDoctors.Count > 0)
                 {
-                    for (int i = 0; i < arrMajor.Length; i++)
+                    for (int i = 0; i < newMajorDoctors.Count; i++)
                     {
-                        if (_majorService.GetAll().Where(s => s.Id == arrMajor[i].MajorId).FirstOrDefault() == null)
+                        if (_majorService.GetAll().Where(s => s.Id == newMajorDoctors[i].MajorId).FirstOrDefault() == null)
                         {
                             return BadRequest(new
                             {
                                 message = "Major is not existed!"
                             });
                         }
-                        convertMajorDoctor.Add(_mapper.Map<MajorDoctor>(arrMajor[i]));
+                        convertMajorDoctor.Add(_mapper.Map<MajorDoctor>(newMajorDoctors[i]));
                     }
                 }
-                
+
                 model.CertificateCode = model.CertificateCode.Trim().ToUpper();
                 Doctor mappedDoctor = new Doctor();
                 mappedDoctor.Email = model.Email;
@@ -508,7 +521,9 @@ namespace TeleMedicine_BE.Controllers
                     mappedDoctor.Avatar = currentAccount.Avatar;
                     mappedDoctor.Name = currentAccount.FirstName.Trim() + " " + currentAccount.LastName.Trim();
                 }
-                mappedDoctor.PractisingCertificate = model.PractisingCertificate;
+
+                string fileUrl = await _uploadFileService.UploadFile(model.PractisingCertificate, "service", "service-detail");
+                mappedDoctor.PractisingCertificate = fileUrl;
                 mappedDoctor.CertificateCode = model.CertificateCode;
                 mappedDoctor.PlaceOfCertificate = model.PlaceOfCertificate;
                 mappedDoctor.DateOfCertificate = model.DateOfCertificate;
