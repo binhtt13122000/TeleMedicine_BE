@@ -395,12 +395,29 @@ namespace TeleMedicine_BE.Controllers
                 {
                     if (status.status == HealthCheckSta.CANCELED)
                     {
-                        List<Slot> slotList = currentHealthCheck.Slots.ToList();
-                        for (int i = 0; i < slotList.Count; i++)
+                        int doctorId = currentHealthCheck.Slots.Select(s => s.DoctorId).FirstOrDefault();
+                        if (doctorId != 0)
                         {
-                            slotList[i].HealthCheck = null;
-                            slotList[i].HealthCheckId = null;
-                            await _slotService.UpdateAsync(slotList[i]);
+                            Doctor currentDoctor = await _doctorService.GetByIdAsync(doctorId);
+                            currentDoctor.NumberOfCancels += 1;
+                            await _doctorService.UpdateAsync(currentDoctor);
+                            List<Slot> slotList = currentHealthCheck.Slots.ToList();
+                            for (int i = 0; i < slotList.Count; i++)
+                            {
+                                slotList[i].HealthCheck = null;
+                                slotList[i].HealthCheckId = null;
+                                await _slotService.UpdateAsync(slotList[i]);
+                            }
+                        }
+                    }
+                    if(status.status == HealthCheckSta.COMPLETED)
+                    {
+                        int doctorId = currentHealthCheck.Slots.Select(s => s.DoctorId).FirstOrDefault();
+                        if(doctorId != 0)
+                        {
+                            Doctor currentDoctor = await _doctorService.GetByIdAsync(doctorId);
+                            currentDoctor.NumberOfConsultants += 1;
+                            await _doctorService.UpdateAsync(currentDoctor);
                         }
                     }
                     return Ok(new

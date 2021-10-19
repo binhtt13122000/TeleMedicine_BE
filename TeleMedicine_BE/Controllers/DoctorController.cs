@@ -552,6 +552,75 @@ namespace TeleMedicine_BE.Controllers
 
 
         /// <summary>
+        /// Add Certification for Doctor Existed
+        /// </summary>
+        /// <response code="201">Add new certifications doctor successfull</response>
+        /// <response code="400">Field is not matched or duplicated</response>
+        /// <response code="404">Not Found</response>
+        /// <response code="500">Failed to save request</response>
+        [HttpPost("{doctorId}/certifications")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "1")]
+        public async Task<ActionResult<DoctorVM>> AddCertificationInDoctorExisted([FromRoute] int doctorId, [FromForm] CertificationDoctorWithRegisterCM model)
+        {
+            try
+            {
+                Doctor currentDoctor = _doctorService.GetAll(s => s.CertificationDoctors, s => s.MajorDoctors, s => s.HospitalDoctors).Where(s => s.Id == doctorId).FirstOrDefault();
+                if(currentDoctor == null)
+                {
+                    return NotFound(new
+                    {
+                        message = "Can not found doctor by id!"
+                    });
+                }
+
+                if (model.Evidence != null)
+                {
+                    Certification currentCertification = await _certificationService.GetByIdAsync(model.CertificationId);
+                    if(currentCertification != null)
+                    {
+                        string fileUrl = await _uploadFileService.UploadFile(model.Evidence, "service", "service-detail");
+                        CertificationDoctor certificationDoctorCreated = new CertificationDoctor();
+                        certificationDoctorCreated.Evidence = fileUrl;
+                        certificationDoctorCreated.DateOfIssue = model.DateOfIssue;
+                        certificationDoctorCreated.CertificationId = model.CertificationId;
+                        certificationDoctorCreated.Certification = currentCertification;
+
+                        if(currentDoctor.CertificationDoctors != null && currentDoctor.CertificationDoctors.Count > 0)
+                        {
+                            foreach(CertificationDoctor item in currentDoctor.CertificationDoctors)
+                            {
+                                if(item.CertificationId == model.CertificationId)
+                                {
+                                    return BadRequest(new
+                                    {
+                                        message = "Certification have been existed!"
+                                    });
+                                }
+                            }
+                            currentDoctor.CertificationDoctors.Add(certificationDoctorCreated);
+                        }else
+                        {
+                            List<CertificationDoctor> certificationDoctors = new List<CertificationDoctor>();
+                            certificationDoctors.Add(certificationDoctorCreated);
+                            currentDoctor.CertificationDoctors = certificationDoctors.ToArray();
+                        }
+                        bool isUpdated = await _doctorService.UpdateAsync(currentDoctor);
+                        if(isUpdated)
+                        {
+                            return Ok(_mapper.Map<DoctorVM>(currentDoctor));
+                        }
+                    }
+                    return BadRequest();
+                }
+                return BadRequest();
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        /// <summary>
         /// Delete Doctor By Id
         /// </summary>
         /// <response code="200">Success</response>

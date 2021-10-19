@@ -177,6 +177,8 @@ namespace Infrastructure.Models
 
                 entity.Property(e => e.NumberOfConsultants).HasDefaultValueSql("0");
 
+                entity.Property(e => e.NumberOfCancels).HasDefaultValueSql("0");
+
                 entity.Property(e => e.PlaceOfCertificate).IsRequired();
 
                 entity.Property(e => e.PractisingCertificate).IsRequired();

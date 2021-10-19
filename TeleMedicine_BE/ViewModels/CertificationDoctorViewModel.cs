@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -35,8 +36,8 @@ namespace TeleMedicine_BE.ViewModels
         [Required]
         public int CertificationId { get; set; }
 
-        [Required(AllowEmptyStrings = false)]
-        public string Evidence { get; set; }
+        [Required]
+        public IFormFile Evidence { get; set; }
 
         [Required]
         [DataType(DataType.DateTime)]
