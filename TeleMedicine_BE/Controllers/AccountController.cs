@@ -23,15 +23,17 @@ namespace TeleMedicine_BE.Controllers
     {
         private readonly IAccountService _accountService;
         private readonly IRoleService _roleService;
+        private readonly IPatientService _patientService;
         private readonly IUploadFileService _uploadFileService;
         private readonly IDoctorService _doctorService;
         private readonly IMapper _mapper;
         private readonly IPagingSupport<Account> _pagingSupport;
 
-        public AccountController(IAccountService accountService, IDoctorService doctorService, IUploadFileService uploadFileService, IRoleService roleService, IMapper mapper, IPagingSupport<Account> pagingSupport)
+        public AccountController(IAccountService accountService, IDoctorService doctorService, IPatientService patientService, IUploadFileService uploadFileService, IRoleService roleService, IMapper mapper, IPagingSupport<Account> pagingSupport)
         {
             _accountService = accountService;
             _uploadFileService = uploadFileService;
+            _patientService = patientService;
             _doctorService = doctorService;
             _roleService = roleService;
             _mapper = mapper;
@@ -265,6 +267,20 @@ namespace TeleMedicine_BE.Controllers
                 {
                     string fileUrl = await _uploadFileService.UploadFile(model.Image, "service", "service-detail");
                     account.Avatar = fileUrl;
+                    Doctor currentDoctor = _doctorService.GetDoctorByEmail(account.Email);
+                    if (currentDoctor != null)
+                    {
+                        currentDoctor.Avatar = fileUrl;
+                        await _doctorService.UpdateAsync(currentDoctor);
+                    }else
+                    {
+                        Patient currentPatient = _patientService.GetPatientByEmail(account.Email);
+                        if(currentPatient != null)
+                        {
+                            currentPatient.Avatar = fileUrl;
+                            await _patientService.UpdateAsync(currentPatient);
+                        }
+                    }
                 }
 
                 account.FirstName = model.FirstName;
