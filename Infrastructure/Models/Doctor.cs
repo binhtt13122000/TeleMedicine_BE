@@ -28,6 +28,8 @@ namespace Infrastructure.Models
         public string ScopeOfPractice { get; set; }
         public string Description { get; set; }
         public int? NumberOfConsultants { get; set; }
+
+        public int? NumberOfCancels { get; set; }
         public int? Rating { get; set; }
         public bool? IsVerify { get; set; }
 

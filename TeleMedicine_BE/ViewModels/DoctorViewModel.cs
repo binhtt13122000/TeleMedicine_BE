@@ -44,6 +44,8 @@ namespace TeleMedicine_BE.ViewModels
         public string Description { get; set; }
 
         public int? NumberOfConsultants { get; set; }
+
+        public int? NumberOfCancels { get; set; }
         public int? Rating { get; set; }
         public bool? IsVerify { get; set; }
 
@@ -75,6 +77,12 @@ namespace TeleMedicine_BE.ViewModels
         public string ScopeOfPractice { get; set; }
 
         public string Description { get; set; }
+    }
+
+    public class DoctorCertificationCM
+    {
+        [Required]
+        public CertificationDoctorWithRegisterCM certification { get; set; }
     }
 
     public class DoctorCM
