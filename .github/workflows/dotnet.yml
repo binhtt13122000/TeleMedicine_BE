@@ -12,9 +12,9 @@ jobs:
     runs-on: windows-latest
     env:
       PROJECT_DIRECTORY_PATH: "TeleMedicine_BE"
-      IIS_SERVER_COMPUTER_NAME: "https://EC2AMAZ-J47RF14:8172"
+      IIS_SERVER_COMPUTER_NAME: "https://52.221.193.237"
       IIS_WEBSITE_NAME: "MySample"
-      IIS_SERVER_USERNAME: ${{ secrets.IIS_SERVER_USERNAME }}
+      IIS_SERVER_USERNAME: "52.221.193.237\Administrator"
       IIS_SERVER_PASSWORD: "wwQ2a!hewgHo-e.aN2Wb8YOU?sFZ3)IN"
       RECYCLE_APP_NAME: "MySample"
       WEBSITE_CONTENT_PATH: ${{ secrets.WEBSITE_CONTENT_PATH }}
