@@ -12,7 +12,7 @@ jobs:
     runs-on: windows-latest
     env:
       PROJECT_DIRECTORY_PATH: "TeleMedicine_BE"
-      IIS_SERVER_COMPUTER_NAME: "http://52.221.193.237"
+      IIS_SERVER_COMPUTER_NAME: "https://EC2AMAZ-J47RF14:8172"
       IIS_WEBSITE_NAME: "MySample"
       IIS_SERVER_USERNAME: ${{ secrets.IIS_SERVER_USERNAME }}
       IIS_SERVER_PASSWORD: "wwQ2a!hewgHo-e.aN2Wb8YOU?sFZ3)IN"
