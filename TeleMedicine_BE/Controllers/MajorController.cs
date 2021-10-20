@@ -18,7 +18,6 @@ namespace TeleMedicine_BE.Controllers
 {
     [Route("api/v1/majors")]
     [ApiController]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class MajorController : Controller
     {
         private readonly IMajorService _majorService;
