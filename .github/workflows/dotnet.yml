@@ -16,7 +16,7 @@ jobs:
       IIS_WEBSITE_NAME: "MySample"
       IIS_SERVER_USERNAME: ${{ secrets.IIS_SERVER_USERNAME }}
       IIS_SERVER_PASSWORD: "wwQ2a!hewgHo-e.aN2Wb8YOU?sFZ3)IN"
-      RECYCLE_APP_NAME: ="MySample"
+      RECYCLE_APP_NAME: "MySample"
       WEBSITE_CONTENT_PATH: ${{ secrets.WEBSITE_CONTENT_PATH }}
 
     steps:
