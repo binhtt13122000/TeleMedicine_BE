@@ -11,6 +11,7 @@ namespace BusinessLogic.Services
 {
     public interface INotificationService : IService<Notification, int>
     {
+        Task<bool> SetIsSeen(int userId);
     }
     public class NotificationService : INotificationService
     {
@@ -38,6 +39,11 @@ namespace BusinessLogic.Services
         public async Task<Notification> GetByIdAsync(int id)
         {
             return await _notificationRepository.GetByIdAsync(id);
+        }
+
+        public Task<bool> SetIsSeen(int userId)
+        {
+            return _notificationRepository.SetIsSeen(userId);
         }
 
         public async Task<bool> UpdateAsync(Notification entity)

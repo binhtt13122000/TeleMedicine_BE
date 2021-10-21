@@ -18,7 +18,6 @@ namespace TeleMedicine_BE.Controllers
 {
     [Route("api/v1/hospitals")]
     [ApiController]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class HospitalController : Controller
     {
         private readonly IHospitalService _hospitalService;
@@ -39,7 +38,6 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="404">Not found hospitals</response>
         /// <response code="500">Internal server error</response>
         [HttpGet]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [Produces("application/json")]
         public ActionResult<IEnumerable<HospitalVM>> GetAllHospital(
             [FromQuery(Name = "hospital-code")] string hospitalCode,
@@ -184,6 +182,7 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="500">Failed to save request</response>
         [HttpPut]
         [Produces("application/json")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<ActionResult<HospitalVM>> PutHospital([FromBody] HospitalUM model)
         {
             Hospital currentHospital = await _hospitalService.GetByIdAsync(model.Id);
@@ -234,6 +233,7 @@ namespace TeleMedicine_BE.Controllers
         [HttpDelete]
         [Route("{id}")]
         [Produces("application/json")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<ActionResult> DeleteById(int id)
         {
             Hospital currentHospital = await _hospitalService.GetByIdAsync(id);
