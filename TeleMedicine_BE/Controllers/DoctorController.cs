@@ -767,8 +767,8 @@ namespace TeleMedicine_BE.Controllers
         [HttpPatch]
         [Route("{id}")]
         [Produces("application/json")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "2")]
-        public async Task<ActionResult> VerifyDoctorById(int id, [FromQuery] string mode)
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "2")]
+        public async Task<ActionResult> VerifyDoctorById(int id, [FromQuery] DoctorStatusVerify mode)
         {
             try
             {
@@ -780,10 +780,22 @@ namespace TeleMedicine_BE.Controllers
                         message = "Can not found doctor by id: " + id
                     });
                 }
-                currentDoctor.IsVerify = true;
-                bool isDeleted = await _doctorService.UpdateAsync(currentDoctor);
-                if (isDeleted)
+                if(mode == DoctorStatusVerify.ACCEPT)
                 {
+                    currentDoctor.IsVerify = true;
+                }else if(mode == DoctorStatusVerify.CANCEL)
+                {
+                    currentDoctor.IsVerify = false;
+                }
+                bool isVerify = await _doctorService.UpdateAsync(currentDoctor);
+                if (isVerify)
+                {
+                    EmailForm mail = new EmailForm();
+                    mail.ToEmail = currentDoctor.Email;
+                    mail.Subject = mode == DoctorStatusVerify.ACCEPT ? "Thông báo tài khoản được xác nhận" : "Thông báo tài khoản bị khóa";
+                    mail.Message = mode == DoctorStatusVerify.CANCEL ? "Chúc mừng tài khoản của bạn đã được xác nhận. Bây giờ bạn đã có thể đăng nhập."
+                                                         : "Tài khoản của bạn đã bị khóa. Liên hệ admin để biết thêm chi tiết.";
+                    await _doctorService.SendEmail(mail);
                     return Ok(new
                     {
                         message = "Success"

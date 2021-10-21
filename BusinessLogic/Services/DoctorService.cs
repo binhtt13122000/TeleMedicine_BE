@@ -42,7 +42,7 @@ namespace BusinessLogic.Services
             client.Credentials = credentials;
 
             MailMessage msg = new MailMessage();
-            msg.From = new MailAddress("Danhskipper18@gmail.com", "Tele-Medicine");
+            msg.From = new MailAddress("mailclone1007@gmail.com", "Tele-Medicine");
             msg.To.Add(new MailAddress(model.ToEmail));
 
             msg.Subject = model.Subject;
