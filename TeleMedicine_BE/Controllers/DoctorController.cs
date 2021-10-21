@@ -762,17 +762,17 @@ namespace TeleMedicine_BE.Controllers
                         message = "Can not found doctor by id: " + id
                     });
                 }
-                //else
-                //{
-                //    bool check = currentDoctor.IsVerify ?? false;
-                //    if(check)
-                //    {
-                //        return BadRequest(new
-                //        {
-                //            message = "Account doctor have been verified!"
-                //        });
-                //    }
-                //}
+                else
+                {
+                    bool check = currentDoctor.IsVerify ?? false;
+                    if (check)
+                    {
+                        return BadRequest(new
+                        {
+                            message = "Account doctor have been verified!"
+                        });
+                    }
+                }
                 currentDoctor.IsVerify = true;
                 bool isVerify = await _doctorService.UpdateAsync(currentDoctor);
                 if (isVerify)
