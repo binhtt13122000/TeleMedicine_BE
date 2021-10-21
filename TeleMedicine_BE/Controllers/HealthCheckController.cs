@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿
+using AutoMapper;
 using BusinessLogic.Services;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -10,7 +11,9 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using TeleMedicine_BE.ExternalService;
 using TeleMedicine_BE.Utils;
 using TeleMedicine_BE.ViewModels;
 
@@ -29,8 +32,11 @@ namespace TeleMedicine_BE.Controllers
         private readonly IMapper _mapper;
         private readonly IAgoraProvider _agoraProvider;
         private readonly IPagingSupport<HealthCheck> _pagingSupport;
+        private readonly NotificationService _notificationService;
+        private readonly IPushNotificationService _pushNotificationService;
 
-        public HealthCheckController(IHealthCheckService healthCheckService, ISlotService slotService, IDoctorService doctorService, ISymptomService symptomService, IPatientService patientService, IMapper mapper, IPagingSupport<HealthCheck> pagingSupport, IAgoraProvider agoraProvider)
+
+        public HealthCheckController(IHealthCheckService healthCheckService, ISlotService slotService, IDoctorService doctorService, ISymptomService symptomService, IPatientService patientService, IMapper mapper, IPagingSupport<HealthCheck> pagingSupport, IAgoraProvider agoraProvider, PushNotificationService pushNotificationService, NotificationService notificationService)
         {
             _healthCheckService = healthCheckService;
             _slotService = slotService;
@@ -40,6 +46,8 @@ namespace TeleMedicine_BE.Controllers
             _mapper = mapper;
             _pagingSupport = pagingSupport;
             _agoraProvider = agoraProvider;
+            _notificationService = notificationService;
+            _pushNotificationService = pushNotificationService;
         }
 
         /// <summary>
@@ -328,7 +336,7 @@ namespace TeleMedicine_BE.Controllers
                         });
                     }
                 }
-                Slot currentSlot = await _slotService.GetByIdAsync(model.SlotId);
+                Slot currentSlot = _slotService.GetAll(s => s.Doctor).Where(s => s.Id == model.SlotId).FirstOrDefault();
                 if(currentSlot == null)
                 {
                     return BadRequest(new
@@ -351,6 +359,14 @@ namespace TeleMedicine_BE.Controllers
                 HealthCheck healthCheckCreated = await _healthCheckService.AddAsync(healthCheckConvert);
                 if (healthCheckCreated != null)
                 {
+                    await _pushNotificationService.SendMessage(Constants.Notification.REQUEST_HEALTHCHECK.ToString(), "Bạn có một lịch hẹn mới", currentSlot.Doctor.Id.ToString(), null);
+                    Notification notification = new();
+                    notification.Content = "Bạn có một lịch hẹn mới-/health-checks/" + healthCheckCreated.Id;
+                    notification.Type = Constants.Notification.REQUEST_HEALTHCHECK;
+                    notification.IsSeen = false;
+                    notification.IsActive = true;
+                    notification.UserId = currentSlot.Doctor.Id;
+                    await _notificationService.AddAsync(notification);
                     return CreatedAtAction("GetHealthCheckById", new { id = healthCheckCreated.Id }, _mapper.Map<HealthCheckVM>(healthCheckCreated));
 
                     
@@ -395,20 +411,28 @@ namespace TeleMedicine_BE.Controllers
                 {
                     if (status.status == HealthCheckSta.CANCELED)
                     {
-                        int doctorId = currentHealthCheck.Slots.Select(s => s.DoctorId).FirstOrDefault();
-                        if (doctorId != 0)
-                        {
-                            Doctor currentDoctor = await _doctorService.GetByIdAsync(doctorId);
-                            currentDoctor.NumberOfCancels += 1;
-                            await _doctorService.UpdateAsync(currentDoctor);
-                            List<Slot> slotList = currentHealthCheck.Slots.ToList();
-                            for (int i = 0; i < slotList.Count; i++)
-                            {
-                                slotList[i].HealthCheck = null;
-                                slotList[i].HealthCheckId = null;
-                                await _slotService.UpdateAsync(slotList[i]);
-                            }
-                        }
+                        //int doctorId = currentHealthCheck.Slots.Select(s => s.DoctorId).FirstOrDefault();
+                        //if (doctorId != 0)
+                        //{
+                        //    Doctor currentDoctor = await _doctorService.GetByIdAsync(doctorId);
+                        //    currentDoctor.NumberOfCancels += 1;
+                        //    await _doctorService.UpdateAsync(currentDoctor);
+                        //    List<Slot> slotList = currentHealthCheck.Slots.ToList();
+                        //    for (int i = 0; i < slotList.Count; i++)
+                        //    {
+                        //        slotList[i].HealthCheck = null;
+                        //        slotList[i].HealthCheckId = null;
+                        //        await _slotService.UpdateAsync(slotList[i]);
+                        //    }
+                        //}
+                        await _pushNotificationService.SendMessage(Constants.Notification.REQUEST_HEALTHCHECK.ToString(), "Lịch hẹn đã bị hủy", currentHealthCheck.PatientId.ToString(), null);
+                        Notification notification = new();
+                        notification.Content = "Lịch hẹn đã bị hủy";
+                        notification.Type = Constants.Notification.REQUEST_HEALTHCHECK;
+                        notification.IsSeen = false;
+                        notification.IsActive = true;
+                        notification.UserId = currentHealthCheck.PatientId;
+                        await _notificationService.AddAsync(notification);
                     }
                     if(status.status == HealthCheckSta.COMPLETED)
                     {
@@ -418,6 +442,14 @@ namespace TeleMedicine_BE.Controllers
                             Doctor currentDoctor = await _doctorService.GetByIdAsync(doctorId);
                             currentDoctor.NumberOfConsultants += 1;
                             await _doctorService.UpdateAsync(currentDoctor);
+                            await _pushNotificationService.SendMessage(Constants.Notification.FINISH_HEATHCHECK.ToString(), "Buổi khám bệnh đã kết thúc", currentHealthCheck.PatientId.ToString(), null);
+                            Notification notification = new();
+                            notification.Content = "Buổi khám bệnh đã kết thúc";
+                            notification.Type = Constants.Notification.FINISH_HEATHCHECK;
+                            notification.IsSeen = false;
+                            notification.IsActive = true;
+                            notification.UserId = currentHealthCheck.PatientId;
+                            await _notificationService.AddAsync(notification);
                         }
                     }
                     return Ok(new
@@ -535,9 +567,20 @@ namespace TeleMedicine_BE.Controllers
                             converSymptom.Add(_mapper.Map<SymptomHealthCheck>(item));
                         }
                     }
+
+                    List<Prescription> converPrescription = new List<Prescription>();
+                    List<PrescriptionCM> prescriptions = model.Prescriptions.ToList();
+                    if (prescriptions != null && prescriptions.Count > 0)
+                    {
+                        foreach (PrescriptionCM item in prescriptions)
+                        {
+                            converPrescription.Add(_mapper.Map<Prescription>(item));
+                        }
+                    }
                     currentHealthCheck.Advice = model.Advice;
                     currentHealthCheck.HealthCheckDiseases = converDisease;
                     currentHealthCheck.SymptomHealthChecks = converSymptom;
+                    currentHealthCheck.Prescriptions = converPrescription;
                     bool isSuccess = await _healthCheckService.UpdateAsync(currentHealthCheck);
                     if (isSuccess)
                     {

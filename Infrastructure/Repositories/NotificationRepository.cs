@@ -11,12 +11,29 @@ namespace Infrastructure.Repositories
 {
     public interface INotificationRepository : IRepository<Notification, int>
     {
+        Task<bool> SetIsSeen(int userId);
     }
     public class NotificationRepository : Repository<Notification, int>, INotificationRepository
     {
         public NotificationRepository(TeleMedicineContext dbContext) : base(dbContext)
         {
 
+        }
+
+        public async Task<bool> SetIsSeen(int userId)
+        {
+            IQueryable<Notification> notifications = _dbContext.Set<Notification>().Where(s => s.UserId == userId);
+
+            foreach(Notification notification in notifications)
+            {
+                notification.IsSeen = true;
+            }
+
+            _dbContext.UpdateRange(notifications);
+
+            int result = await _dbContext.SaveChangesAsync();
+
+            return result > 0;
         }
     }
 }

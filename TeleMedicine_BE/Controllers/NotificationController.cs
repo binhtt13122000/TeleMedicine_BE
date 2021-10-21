@@ -43,7 +43,7 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="500">Internal server error</response>
         [HttpGet]
         [Produces("application/json")]
-        public ActionResult<IEnumerable<NotificationVM>> GetAllRole(
+        public async Task<ActionResult<IEnumerable<NotificationVM>>> GetAllRole(
             [FromQuery(Name = "content")] string content,
             [FromQuery(Name = "user-id")] int[] userId,
             [FromQuery(Name = "start-date")] DateTime? startDate,
@@ -90,6 +90,7 @@ namespace TeleMedicine_BE.Controllers
                     }
                 }
 
+
                 Paged<NotificationVM> paged = null;
                 if (orderType == SortTypeEnum.asc && typeof(NotificationVM).GetProperty(orderBy.ToString()) != null)
                 {
@@ -121,6 +122,10 @@ namespace TeleMedicine_BE.Controllers
                         string json = jsonIgnore.JsonIgnore(typeof(NotificationVM), splitFilter, paged, PropertyRenameAndIgnoreSerializerContractResolver.IgnoreMode.EXCEPT);
                         return Ok(JsonConvert.DeserializeObject(json));
                     }
+                }
+                if(userId != null && userId.Length > 0)
+                {
+                    _ = await _notificationService.SetIsSeen(userId[0]);
                 }
                 return Ok(paged);
             }
@@ -178,7 +183,7 @@ namespace TeleMedicine_BE.Controllers
                         message = "User Id is not exist."
                     });
                 }
-                int number = _notificationService.GetAll().Where(s => s.UserId == currentAccount.Id).Count();
+                int number = _notificationService.GetAll().Where(s => (s.UserId == userId) && !s.IsSeen.Value).Count();
                 return Ok(new
                 {
                     countOfUnRead = number
@@ -212,6 +217,7 @@ namespace TeleMedicine_BE.Controllers
             try
             {
                 notification.User = account;
+                notification.CreatedDate = DateTime.Now;
                 Notification notificationCreated = await _notificationService.AddAsync(notification);
 
                 if (notificationCreated != null)

@@ -31,8 +31,11 @@ namespace TeleMedicine_BE.Controllers
         private readonly ICertificationService _certificationService;
         private readonly IMapper _mapper;
         private readonly IPagingSupport<Doctor> _pagingSupport;
+        private readonly IPushNotificationService _pushNotificationService;
+        private readonly INotificationService _notificationService;
 
-        public DoctorController(IDoctorService doctorService, IHospitalService hospitalService, IAccountService accountService, IMajorService majorService, IUploadFileService uploadFileService, ICertificationService certificationService, IMapper mapper, IPagingSupport<Doctor> pagingSupport)
+
+        public DoctorController(IDoctorService doctorService, IHospitalService hospitalService, IAccountService accountService, IMajorService majorService, IUploadFileService uploadFileService, ICertificationService certificationService, IMapper mapper, IPagingSupport<Doctor> pagingSupport, IPushNotificationService pushNotificationService, INotificationService notificationService)
         {
             _accountService = accountService;
             _doctorService = doctorService;
@@ -42,6 +45,9 @@ namespace TeleMedicine_BE.Controllers
             _uploadFileService = uploadFileService;
             _mapper = mapper;
             _pagingSupport = pagingSupport;
+            _pushNotificationService = pushNotificationService;
+            _notificationService = notificationService;
+            
         }
 
         /// <summary>
@@ -535,6 +541,18 @@ namespace TeleMedicine_BE.Controllers
                 Doctor doctorCreated = await _doctorService.AddAsync(mappedDoctor);
                 if (doctorCreated != null)
                 {
+                    IQueryable<Account> accountList = _accountService.GetAll().Where(s => s.RoleId == 2);
+                    accountList.ToList().ForEach(s =>
+                    {
+                        _pushNotificationService.SendMessage(Constants.Notification.REQUEST_VERIFY.ToString(), "Có một tài khoản mới đang yêu cầu được xác thực", s.Id.ToString(), null);
+                        Notification notification = new();
+                        notification.Content = "Có một yêu cầu xét duyệt-/doctors/" + model.Email;
+                        notification.Type = Constants.Notification.REQUEST_VERIFY;
+                        notification.IsSeen = false;
+                        notification.IsActive = true;
+                        notification.UserId = s.Id;
+                        _notificationService.AddAsync(notification);
+                    });
                     IQueryable<Doctor> doctorList = _doctorService.GetAll(s => s.HospitalDoctors, s => s.CertificationDoctors, s => s.MajorDoctors);
                     Doctor doctor = doctorList.Where(s => s.Id == doctorCreated.Id).FirstOrDefault();
                     return CreatedAtAction("GetDoctorByType", new { search = doctorCreated.Id }, _mapper.Map<DoctorVM>(doctorCreated));
@@ -669,7 +687,7 @@ namespace TeleMedicine_BE.Controllers
         [Route("{id}")]
         [Produces("application/json")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "2")]
-        public async Task<ActionResult> VerifyDoctorById(int id)
+        public async Task<ActionResult> VerifyDoctorById(int id, [FromQuery] string mode)
         {
             try
             {
@@ -681,9 +699,15 @@ namespace TeleMedicine_BE.Controllers
                         message = "Can not found doctor by id: " + id
                     });
                 }
-                currentDoctor.IsVerify = true;
-                bool isDeleted = await _doctorService.UpdateAsync(currentDoctor);
-                if (isDeleted)
+                if(mode == "ACCEPT")
+                {
+                    currentDoctor.IsVerify = true;
+                } else if(mode == "CANCEL")
+                {
+                    currentDoctor.IsVerify = false;
+                }
+                bool isVerify = await _doctorService.UpdateAsync(currentDoctor);
+                if (isVerify)
                 {
                     return Ok(new
                     {
@@ -691,46 +715,6 @@ namespace TeleMedicine_BE.Controllers
                     });
                 }
                 return BadRequest();
-            }
-            catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
-        }
-
-
-        /// <summary>
-        /// Verify Doctor By Id
-        /// </summary>
-        /// <response code="200">Success</response>
-        /// <response code="400">Bad Request</response>
-        /// <response code="404">Not found</response>
-        /// <response code="500">Internal server error</response>
-        [HttpGet]
-        [Route("count")]
-        [Produces("application/json")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "2")]
-        public async Task<ActionResult<int>> CountDoctor([FromQuery(Name = "is-verify")] int isVerify = 0)
-        {
-            try
-            {
-                IQueryable<Doctor> doctorList = _doctorService.GetAll();
-                if (isVerify != 0)
-                {
-                    if (isVerify == 1)
-                    {
-                        doctorList = doctorList.Where(s => s.IsVerify == true);
-                    }
-                    if (isVerify == -1)
-                    {
-                        doctorList = doctorList.Where(s => s.IsVerify == false);
-                    }
-                    if (isVerify == -2)
-                    {
-                        doctorList = doctorList.Where(s => s.IsVerify == null);
-                    }
-                }
-                return Ok(await doctorList.CountAsync());
             }
             catch (Exception)
             {

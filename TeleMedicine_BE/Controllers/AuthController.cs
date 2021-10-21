@@ -85,6 +85,13 @@ namespace TeleMedicine_BE.Controllers
 
                 if (account != null)
                 {
+                    if(!account.Active.Value)
+                    {
+                        return BadRequest(new
+                        {
+                            message = "Account is ban!"
+                        });
+                    }
                     if (account.Role.Id != model.LoginType)
                     {
                         return BadRequest(new
@@ -136,10 +143,7 @@ namespace TeleMedicine_BE.Controllers
 
             try
             {
-                System.Diagnostics.Debug.WriteLine(email);
                 Account account = _accountService.GetAccountByEmail(email);
-                System.Diagnostics.Debug.WriteLine(email);
-
                 if (account != null)
                 {
                     if (account.Role.Id == 1)

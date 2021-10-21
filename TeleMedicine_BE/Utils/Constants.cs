@@ -62,5 +62,14 @@ namespace TeleMedicine_BE.Utils
             public const string FirebaseAuthPassword = "abc1235";
 
         }
+
+        public static class Notification
+        {
+            public const int REQUEST_VERIFY = 1;
+            public const int REQUEST_HEALTHCHECK = 2;
+            public const int CANCEL_HEALTHCHECK = 3;
+            public const int FINISH_HEATHCHECK = 4;
+            public const int UPDATE_HEATHCHECK = 5;
+        }
     }
 }
