@@ -30,7 +30,7 @@ namespace Infrastructure.Models
         public int? NumberOfConsultants { get; set; }
 
         public int? NumberOfCancels { get; set; }
-        public int? Rating { get; set; }
+        public double? Rating { get; set; }
         public bool? IsVerify { get; set; }
 
         public bool? IsActive { get; set; }

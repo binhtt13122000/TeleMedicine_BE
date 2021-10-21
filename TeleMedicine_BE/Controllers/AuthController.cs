@@ -10,8 +10,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using TeleMedicine_BE.ExternalService;
 using TeleMedicine_BE.ViewModels;
-using static TeleMedicine_BE.Utils.Constants;
 using Role = Infrastructure.Models.Role;
+
 
 namespace TeleMedicine_BE.Controllers
 {
@@ -45,6 +45,7 @@ namespace TeleMedicine_BE.Controllers
         {
             try
             {
+                
                 string fileUrl = await _uploadFileService.UploadFile(model.file, "service", "service-detail");
                 return Ok(new
                 {

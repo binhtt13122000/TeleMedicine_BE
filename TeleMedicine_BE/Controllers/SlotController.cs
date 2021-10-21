@@ -162,6 +162,57 @@ namespace TeleMedicine_BE.Controllers
         }
 
         /// <summary>
+        /// Get list slots by doctors
+        /// </summary>
+        /// <returns>Return the slots with condition</returns>
+        /// <response code="200">Returns the slots with condition</response>
+        /// <response code="404">No slot found with condition</response>
+        /// <response code="500">Internal server error</response>
+        [HttpGet("doctors")]
+        [Produces("application/json")]
+        public ActionResult<IEnumerable<SlotVM>> GetSlotsReadyWithCondition(
+            [FromQuery(Name = "mode")] SlotStatusMode mode,
+            [FromQuery(Name = "time")] SlotTime time,
+            [FromQuery(Name = "doctor-id")] int doctorId,
+            [FromQuery(Name = "page-offset")] int pageOffset = 1,
+            int limit = 50
+        )
+        {
+            try
+            {
+                IQueryable<Slot> slots = _slotService.Access().Include(s => s.Doctor).Include(s => s.HealthCheck).OrderBy(s => s.AssignedDate).OrderBy(s => s.StartTime);
+                if (doctorId != 0)
+                {
+                    slots = slots.Where(s => s.DoctorId == doctorId);
+                }
+                if (mode != SlotStatusMode.NORMAL)
+                {
+                    if (mode == SlotStatusMode.BOOKED)
+                    {
+                        slots = slots.Where(s => s.HealthCheckId != null);
+                    }
+                    else if (mode == SlotStatusMode.NOT_BOOKED)
+                    {
+                        slots = slots.Where(s => s.HealthCheckId == null);
+                    }
+                }
+                if (time == SlotTime.FUTURE)
+                {
+                    DateTime currentDate = DateTime.Now.Date;
+                    slots = slots.Where(s => s.AssignedDate.CompareTo(currentDate) >= 0);
+                }
+                Paged<SlotVM> paged = null;
+                paged = _pagingSupport.From(slots).GetRange(pageOffset, limit, s => s.Id, 1).Paginate<SlotVM>();
+                return Ok(paged);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+
+        /// <summary>
         /// Get a specific slot by slot id
         /// </summary>
         /// <returns>Return the slot with the corresponding id</returns>

@@ -26,6 +26,12 @@ namespace TeleMedicine_BE.ViewModels
         NEAREST,
     }
 
+
+    public enum TypeRole
+    {
+        DOCTOR,
+        USER,
+    }
     public enum HealthCheckStatus
     {
         ALL,
