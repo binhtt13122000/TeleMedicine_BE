@@ -23,16 +23,18 @@ namespace TeleMedicine_BE.Controllers
         private readonly IJwtTokenProvider _jwtTokenProvider;
         private readonly IUploadFileService _uploadFileService;
         private readonly IDoctorService _doctorService;
+        private readonly IPatientService _patientService;
         private readonly IRoleService _roleService;
         private readonly IMapper _mapper;
         private readonly IPushNotificationService _pushNotificationService;
 
-        public AuthController(IAccountService accountService, IJwtTokenProvider jwtTokenProvider, IUploadFileService uploadFileService, IDoctorService doctorService, IPushNotificationService pushNotificationService, IRoleService roleService, IMapper mapper)
+        public AuthController(IAccountService accountService, IJwtTokenProvider jwtTokenProvider, IUploadFileService uploadFileService, IDoctorService doctorService, IPatientService patientService,IPushNotificationService pushNotificationService, IRoleService roleService, IMapper mapper)
         {
             _accountService = accountService;
             _jwtTokenProvider = jwtTokenProvider;
             _uploadFileService = uploadFileService;
             _doctorService = doctorService;
+            _patientService = patientService;
             _roleService = roleService;
             _mapper = mapper;
             _pushNotificationService = pushNotificationService;
@@ -80,9 +82,8 @@ namespace TeleMedicine_BE.Controllers
 
             try
             {
-                System.Diagnostics.Debug.WriteLine(email);
+                int referencesId = 0;
                 Account account = _accountService.GetAccountByEmail(email);
-                System.Diagnostics.Debug.WriteLine(email);
 
                 if (account != null)
                 {
@@ -103,10 +104,15 @@ namespace TeleMedicine_BE.Controllers
                     if (account.Role.Id == 1)
                     {
                         Doctor doctor = _doctorService.GetDoctorByEmail(email);
+                        referencesId = doctor.Id;
                         if (!doctor.IsVerify.HasValue)
                         {
                             return Ok(new { message = "The account is not verify!" });
                         }
+                    } else if(account.Role.Id == 3)
+                    {
+                        Patient patient = _patientService.GetPatientByEmail(email);
+                        referencesId = patient.Id;
                     }
 
                     string accessToken = await _jwtTokenProvider.GenerateToken(account);
@@ -115,6 +121,7 @@ namespace TeleMedicine_BE.Controllers
                     {
                         Account = accountProfileVM,
                         AccessToken = accessToken,
+                        RefenrenceId = referencesId
                     });
                 }
                 else
