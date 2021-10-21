@@ -32,11 +32,11 @@ namespace TeleMedicine_BE.Controllers
         private readonly IMapper _mapper;
         private readonly IAgoraProvider _agoraProvider;
         private readonly IPagingSupport<HealthCheck> _pagingSupport;
-        private readonly NotificationService _notificationService;
+        private readonly INotificationService _notificationService;
         private readonly IPushNotificationService _pushNotificationService;
 
 
-        public HealthCheckController(IHealthCheckService healthCheckService, ISlotService slotService, IDoctorService doctorService, ISymptomService symptomService, IPatientService patientService, IMapper mapper, IPagingSupport<HealthCheck> pagingSupport, IAgoraProvider agoraProvider, PushNotificationService pushNotificationService, NotificationService notificationService)
+        public HealthCheckController(IHealthCheckService healthCheckService, ISlotService slotService, IDoctorService doctorService, ISymptomService symptomService, IPatientService patientService, IMapper mapper, IPagingSupport<HealthCheck> pagingSupport, IAgoraProvider agoraProvider, IPushNotificationService pushNotificationService, INotificationService notificationService)
         {
             _healthCheckService = healthCheckService;
             _slotService = slotService;
