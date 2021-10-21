@@ -17,6 +17,19 @@ namespace TeleMedicine_BE.ViewModels
         HealthCheckId
     }
 
+    public enum SlotStatusMode
+    {
+        NORMAL,
+        NOT_BOOKED,
+        BOOKED
+    }
+
+    public enum SlotTime
+    {
+        ALL,
+        FUTURE
+    }
+
     public class SlotHealthCheckVM
     {
         public int Id { get; set; }

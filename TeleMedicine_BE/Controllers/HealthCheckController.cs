@@ -61,6 +61,7 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "end-canceled-time")] DateTime? endCanceledTime,
             [FromQuery(Name = "order-by")] HealthCheckFieldEnum orderBy,
             [FromQuery(Name = "mode-search")] TypeSearch modeSearch,
+            [FromQuery(Name = "type-role")] TypeRole typeRole,
             [FromQuery(Name = "order-type")] SortTypeEnum orderType,
             [FromQuery(Name = "patient-id")] int patientId = 0,
             [FromQuery(Name = "doctor-id")] int doctorId = 0,
@@ -153,18 +154,47 @@ namespace TeleMedicine_BE.Controllers
                 }
                 if(modeSearch == TypeSearch.NEAREST)
                 {
-                    healthChecks = healthChecks.Where(s => s.Status.Equals("BOOKED")).OrderByDescending(s => s.CreatedTime);
-                    HealthCheck convertHealthCheck = healthChecks.FirstOrDefault();
-                    if(convertHealthCheck != null)
+                    DateTime currentDate = DateTime.Today;
+                    TimeSpan currentTime = DateTime.Now.TimeOfDay;
+                    if(typeRole == TypeRole.DOCTOR)
                     {
-                        return Ok(healthChecks.FirstOrDefault());
-                    }
-                    else
-                    {
-                        return NotFound(new {
+                        IEnumerable<Slot> slots = _slotService.GetAll(s => s.HealthCheck).Where(s => s.HealthCheckId != null).Where(s => s.HealthCheck.Status.Equals("BOOKED")).Where(s => s.AssignedDate.CompareTo(currentDate) >= 0);
+
+                        if(doctorId != 0)
+                        {
+                            slots = slots.Where(s => s.DoctorId == doctorId);
+                        }
+
+                        if(slots.Count<Slot>() > 0)
+                        {
+                            HealthCheck healthCheck = _healthCheckService.GetNearestHealthCheckByCondition(slots.ToList(), currentDate, currentTime);
+                            return Ok(_mapper.Map<HealthCheckVM>(healthCheck));
+                        }
+                        return NotFound(new
+                        {
                             message = "Can not found health check nearest!"
                         });
                     }
+                    else if(typeRole == TypeRole.USER)
+                    {
+                        IEnumerable<Slot> slots = _slotService.GetAll(s => s.HealthCheck).Where(s => s.HealthCheckId != null).Where(s => s.HealthCheck.Status.Equals("BOOKED")).Where(s => s.AssignedDate.CompareTo(currentDate) >= 0);
+
+                        if (patientId != 0)
+                        {
+                            slots = slots.Where(s => s.HealthCheck.PatientId == patientId);
+                        }
+
+                        if (slots.Count<Slot>() > 0)
+                        {
+                            HealthCheck healthCheck = _healthCheckService.GetNearestHealthCheckByCondition(slots.ToList(), currentDate, currentTime);
+                            return Ok(_mapper.Map<HealthCheckVM>(healthCheck));
+                        }
+                        return NotFound(new
+                        {
+                            message = "Can not found health check nearest!"
+                        });
+                    }
+                    
                 }
                 Paged<HealthCheckVM> paged = null;
                 if (orderType == SortTypeEnum.asc && typeof(HealthCheckVM).GetProperty(orderBy.ToString()) != null)

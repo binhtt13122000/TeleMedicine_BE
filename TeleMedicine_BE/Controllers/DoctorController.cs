@@ -346,10 +346,20 @@ namespace TeleMedicine_BE.Controllers
         public async Task<ActionResult<DoctorVM>> PutDoctor([FromForm] DoctorUM model)
         {
 
-            List<HospitalDoctorWithRegisterCM> newHospitalDoctors = JsonConvert.DeserializeObject<List<HospitalDoctorWithRegisterCM>>(model.HospitalDoctors);
-            List<MajorDoctorWithRegisterCM> newMajorDoctors = JsonConvert.DeserializeObject<List<MajorDoctorWithRegisterCM>>(model.MajorDoctors);
+            List<HospitalDoctorWithRegisterCM> newHospitalDoctors = new List<HospitalDoctorWithRegisterCM>();
+            List<MajorDoctorWithRegisterCM> newMajorDoctors = new List<MajorDoctorWithRegisterCM>();
+            if (model.HospitalDoctors != null)
+            {
+                newHospitalDoctors = JsonConvert.DeserializeObject<List<HospitalDoctorWithRegisterCM>>(model.HospitalDoctors);
+            }
+            if (model.MajorDoctors != null)
+            {
+                newMajorDoctors = JsonConvert.DeserializeObject<List<MajorDoctorWithRegisterCM>>(model.MajorDoctors);
+            }
 
-            Doctor currentDoctor = await _doctorService.GetByIdAsync(model.Id);
+            Doctor currentDoctor = _doctorService.access().Include(s => s.CertificationDoctors).ThenInclude(s => s.Certification)
+                                                                       .Include(s => s.HospitalDoctors).ThenInclude(s => s.Hospital)
+                                                                       .Include(s => s.MajorDoctors).ThenInclude(s => s.Major).Where(s => s.Id == model.Id).FirstOrDefault();
             if (currentDoctor == null)
             {
                 return NotFound();
@@ -401,6 +411,40 @@ namespace TeleMedicine_BE.Controllers
                 }
             }
 
+            if(currentDoctor.MajorDoctors != null && currentDoctor.MajorDoctors.Count > 0 && convertMajor.Count > 0)
+            {
+                foreach(MajorDoctor item in currentDoctor.MajorDoctors)
+                {
+                    foreach(MajorDoctor checkItem in convertMajor)
+                    {
+                        if(item.MajorId == checkItem.MajorId)
+                        {
+                            return BadRequest(new
+                            {
+                                message = "Major have been registered!"
+                            });
+                        }
+                    }
+                }
+            }
+
+            if (currentDoctor.HospitalDoctors != null && currentDoctor.HospitalDoctors.Count > 0 && convertHospital.Count > 0)
+            {
+                foreach (HospitalDoctor item in currentDoctor.HospitalDoctors)
+                {
+                    foreach (HospitalDoctor checkItem in convertHospital)
+                    {
+                        if (item.HospitalId == checkItem.HospitalId)
+                        {
+                            return BadRequest(new
+                            {
+                                message = "Hospital have been registered!"
+                            });
+                        }
+                    }
+                }
+            }
+
 
             Account currentAccount = _accountService.GetAccountByEmail(currentDoctor.Email);
             if(currentAccount != null)
@@ -412,11 +456,40 @@ namespace TeleMedicine_BE.Controllers
             {
                 if (convertMajor != null && convertMajor.Count > 0)
                 {
-                    currentDoctor.MajorDoctors = convertMajor;
+                    if(currentDoctor.MajorDoctors != null && currentDoctor.MajorDoctors.Count > 0)
+                    {
+                        foreach(MajorDoctor item in convertMajor)
+                        {
+                            currentDoctor.MajorDoctors.Add(item);
+                        }
+                    }else
+                    {
+                        List<MajorDoctor> newMajorDoctor = new List<MajorDoctor>();
+                        foreach(MajorDoctor item in convertMajor)
+                        {
+                            newMajorDoctor.Add(item);
+                        }
+                        currentDoctor.MajorDoctors = newMajorDoctor.ToArray();
+                    }
                 }
                 if (convertHospital != null && convertHospital.Count > 0)
                 {
-                    currentDoctor.HospitalDoctors = convertHospital;
+                    if (currentDoctor.HospitalDoctors != null && currentDoctor.HospitalDoctors.Count > 0)
+                    {
+                        foreach (HospitalDoctor item in convertHospital)
+                        {
+                            currentDoctor.HospitalDoctors.Add(item);
+                        }
+                    }
+                    else
+                    {
+                        List<HospitalDoctor> newHospitalDoctor = new List<HospitalDoctor>();
+                        foreach (HospitalDoctor item in convertHospital)
+                        {
+                            newHospitalDoctor.Add(item);
+                        }
+                        currentDoctor.HospitalDoctors = newHospitalDoctor.ToArray();
+                    }
                 }
                 if(model.PractisingCertificate != null)
                 { 
@@ -457,8 +530,16 @@ namespace TeleMedicine_BE.Controllers
         [HttpPost]
         public async Task<ActionResult<DoctorVM>> CreateNewDoctor([FromForm] DoctorCM model)
         {
-            List<HospitalDoctorWithRegisterCM> newHospitalDoctors = JsonConvert.DeserializeObject<List<HospitalDoctorWithRegisterCM>>(model.HospitalDoctors);
-            List<MajorDoctorWithRegisterCM> newMajorDoctors = JsonConvert.DeserializeObject<List<MajorDoctorWithRegisterCM>>(model.MajorDoctors);
+            List<HospitalDoctorWithRegisterCM> newHospitalDoctors = new List<HospitalDoctorWithRegisterCM>();
+            List<MajorDoctorWithRegisterCM> newMajorDoctors = new List<MajorDoctorWithRegisterCM>();
+            if (model.HospitalDoctors != null)
+            {
+                newHospitalDoctors = JsonConvert.DeserializeObject<List<HospitalDoctorWithRegisterCM>>(model.HospitalDoctors);
+            }
+            if(model.MajorDoctors != null)
+            {
+                newMajorDoctors = JsonConvert.DeserializeObject<List<MajorDoctorWithRegisterCM>>(model.MajorDoctors);
+            }
 
 
             List<HospitalDoctor> convertHospitalDoctor = new List<HospitalDoctor>();
@@ -681,10 +762,27 @@ namespace TeleMedicine_BE.Controllers
                         message = "Can not found doctor by id: " + id
                     });
                 }
+                //else
+                //{
+                //    bool check = currentDoctor.IsVerify ?? false;
+                //    if(check)
+                //    {
+                //        return BadRequest(new
+                //        {
+                //            message = "Account doctor have been verified!"
+                //        });
+                //    }
+                //}
                 currentDoctor.IsVerify = true;
-                bool isDeleted = await _doctorService.UpdateAsync(currentDoctor);
-                if (isDeleted)
+                bool isVerify = await _doctorService.UpdateAsync(currentDoctor);
+                if (isVerify)
                 {
+                    EmailForm newEmail = new EmailForm();
+                    newEmail.FromEmail = "Danhskipper18@gmail.com";
+                    newEmail.ToEmail = currentDoctor.Email;
+                    newEmail.Subject = "Thông báo tài khoản được xác nhận";
+                    newEmail.Message = "Chúc mừng tài khoản của bạn đã được xác nhận. Bây giờ bạn đã có thể đăng nhập.";
+                    await _doctorService.SendEmail(newEmail);
                     return Ok(new
                     {
                         message = "Success"
