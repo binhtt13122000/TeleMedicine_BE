@@ -21,6 +21,12 @@ namespace TeleMedicine_BE.ViewModels
         NumberOfConsultants,
         Rating,
     }
+
+    public enum DoctorStatusVerify
+    {
+        ACCEPT,
+        CANCEL,
+    }
     public class DoctorVM
     {
         public int Id { get; set; }
