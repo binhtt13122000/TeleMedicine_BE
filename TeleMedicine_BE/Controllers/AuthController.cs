@@ -65,6 +65,13 @@ namespace TeleMedicine_BE.Controllers
         {
             return _roleService.GetAll();
         }
+
+        [HttpGet("roleCC")]
+        public IQueryable<Role> GetRoleCC()
+        {
+            return _roleService.GetAll();
+        }
+
         [HttpPost("login")]
         [Produces("application/json")]
         public async Task<ActionResult> Login([FromBody] AuthCM model)
