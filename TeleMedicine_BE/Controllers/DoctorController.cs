@@ -793,7 +793,7 @@ namespace TeleMedicine_BE.Controllers
                     EmailForm mail = new EmailForm();
                     mail.ToEmail = currentDoctor.Email;
                     mail.Subject = mode == DoctorStatusVerify.ACCEPT ? "Thông báo tài khoản được xác nhận" : "Thông báo tài khoản bị khóa";
-                    mail.Message = mode == DoctorStatusVerify.CANCEL ? "Chúc mừng tài khoản của bạn đã được xác nhận. Bây giờ bạn đã có thể đăng nhập."
+                    mail.Message = mode == DoctorStatusVerify.ACCEPT ? "Chúc mừng tài khoản của bạn đã được xác nhận. Bây giờ bạn đã có thể đăng nhập."
                                                          : "Tài khoản của bạn đã bị khóa. Liên hệ admin để biết thêm chi tiết.";
                     await _doctorService.SendEmail(mail);
                     return Ok(new
