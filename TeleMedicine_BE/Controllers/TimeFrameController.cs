@@ -18,7 +18,7 @@ namespace TeleMedicine_BE.Controllers
 {
     [Route("api/v1/time-frames")]
     [ApiController]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "1,2")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class TimeFrameController : Controller
     {
         private readonly ITimeFrameService _timeFrameService;
