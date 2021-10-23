@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -25,7 +26,9 @@ namespace TeleMedicine_BE.Controllers
     {
         private readonly IDoctorService _doctorService;
         private readonly IHospitalService _hospitalService;
+        private readonly IRoleService _roleService;
         private readonly IAccountService _accountService;
+        private readonly IJwtTokenProvider _jwtTokenProvider;
         private readonly IMajorService _majorService;
         private readonly IUploadFileService _uploadFileService;
         private readonly ICertificationService _certificationService;
@@ -35,10 +38,12 @@ namespace TeleMedicine_BE.Controllers
         private readonly INotificationService _notificationService;
 
 
-        public DoctorController(IDoctorService doctorService, IHospitalService hospitalService, IAccountService accountService, IMajorService majorService, IUploadFileService uploadFileService, ICertificationService certificationService, IMapper mapper, IPagingSupport<Doctor> pagingSupport, IPushNotificationService pushNotificationService, INotificationService notificationService)
+        public DoctorController(IDoctorService doctorService,IJwtTokenProvider jwtTokenProvider, IRoleService roleService, IHospitalService hospitalService, IAccountService accountService, IMajorService majorService, IUploadFileService uploadFileService, ICertificationService certificationService, IMapper mapper, IPagingSupport<Doctor> pagingSupport, IPushNotificationService pushNotificationService, INotificationService notificationService)
         {
             _accountService = accountService;
             _doctorService = doctorService;
+            _roleService = roleService;
+            _jwtTokenProvider = jwtTokenProvider;
             _hospitalService = hospitalService;
             _majorService = majorService;
             _certificationService = certificationService;
@@ -59,7 +64,7 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="500">Internal server error</response>
         [HttpGet]
         [Produces("application/json")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public ActionResult<IEnumerable<DoctorVM>> GetAllDoctors(
             [FromQuery(Name = "email")] string email,
             [FromQuery(Name = "practising-certificate")] string practisingCertificate,
@@ -70,12 +75,15 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "scope-certificate")] string scopeCertificate,
             [FromQuery(Name = "number-start-consultants")] int numberStartConsultants,
             [FromQuery(Name = "number-end-consultants")] int numberEndConsultants,
-            [FromQuery(Name = "major")] int[] majorId,
             [FromQuery(Name = "start-rating")] int startRating,
             [FromQuery(Name = "end-rating")] int endRating,
             [FromQuery(Name = "is-active")] bool? isActive,
             [FromQuery(Name = "majors")] List<int> majors,
             [FromQuery(Name = "certifications")] List<int> certifications,
+            [FromQuery(Name = "date-health-check")] DateTime? dateHealthCheck,
+            [FromQuery(Name = "time-start")] TimeSpan timeStart,
+            [FromQuery(Name = "time-end")] TimeSpan timeEnd,
+            [FromQuery(Name = "name-doctor")] string nameDoctor,
             [FromQuery(Name = "hospitals")] List<int> hospitals,
             [FromQuery(Name = "order-by")] DoctorFieldEnum orderBy,
             [FromQuery(Name = "order-type")] SortTypeEnum orderType,
@@ -89,7 +97,26 @@ namespace TeleMedicine_BE.Controllers
             {
                 IQueryable<Doctor> doctorList = _doctorService.access().Include(s => s.CertificationDoctors).ThenInclude(s => s.Certification)
                                                                        .Include(s => s.HospitalDoctors).ThenInclude(s => s.Hospital)
-                                                                       .Include(s => s.MajorDoctors).ThenInclude(s => s.Major);
+                                                                       .Include(s => s.MajorDoctors).ThenInclude(s => s.Major)
+                                                                       .Include(s => s.Slots);
+                var accessToken = Request.Headers[HeaderNames.Authorization];
+                if (!String.IsNullOrEmpty(accessToken))
+                {
+                    var role = _jwtTokenProvider.GetPayloadFromToken(accessToken[0].Replace("Bearer", "").Trim(), "role");
+
+                    int roleId;
+                    if (int.TryParse(role.Result, out roleId))
+                    {
+                        Role currentRole = _roleService.GetAll().Where(s => s.Id == roleId).FirstOrDefault();
+                        if (currentRole != null)
+                        {
+                            if (currentRole.Name.ToUpper().Equals("PATIENT") || currentRole.Name.ToUpper().Equals("DOCTOR"))
+                            {
+                                doctorList = doctorList.Where(s => s.IsVerify == true);
+                            }
+                        }
+                    }
+                }
                 if (!String.IsNullOrEmpty(email))
                 {
                     doctorList = doctorList.Where(s => s.Email.ToUpper().Contains(email.Trim().ToUpper()));
@@ -122,6 +149,58 @@ namespace TeleMedicine_BE.Controllers
                         doctorList = doctorList.Where(s => s.DateOfCertificate.Date.CompareTo(dateEndCertificate.Value.Date) <= 0);
                     }
                 }
+
+                if (dateHealthCheck.HasValue)
+                {
+                    if (timeStart.CompareTo(TimeSpan.Zero) != 0 && timeEnd.CompareTo(TimeSpan.Zero) != 0)
+                    {
+                        doctorList = doctorList.Where(s => s.Slots.Any(s => s.AssignedDate.Date.CompareTo(dateHealthCheck.Value.Date) == 0
+                                                                            && s.HealthCheckId == null
+                                                                            && s.StartTime.CompareTo(timeStart) >= 0 && s.EndTime.CompareTo(timeEnd) <= 0));
+                    }
+                    else
+                    {
+                        if (timeStart.CompareTo(TimeSpan.Zero) != 0)
+                        {
+                            doctorList = doctorList.Where(s => s.Slots.Any(s => s.AssignedDate.Date.CompareTo(dateHealthCheck.Value.Date) == 0
+                                                                            && s.StartTime.CompareTo(timeStart) >= 0
+                                                                            && s.HealthCheckId == null));
+                        }
+                        else if (timeEnd.CompareTo(TimeSpan.Zero) != 0)
+                        {
+                            doctorList = doctorList.Where(s => s.Slots.Any(s => s.AssignedDate.Date.CompareTo(dateHealthCheck.Value.Date) == 0
+                                                                            && s.EndTime.CompareTo(timeEnd) <= 0 && s.HealthCheckId == null));
+                        }else
+                        {
+                            doctorList = doctorList.Where(s => s.Slots.Any(s => s.AssignedDate.Date.CompareTo(dateHealthCheck.Value.Date) == 0 && s.HealthCheckId == null));
+                        }
+                    }
+                }
+                else
+                {
+
+                    if (timeStart.CompareTo(TimeSpan.Zero) != 0 && timeEnd.CompareTo(TimeSpan.Zero) != 0)
+                    {
+                        doctorList = doctorList.Where(s => s.Slots.Any(s => s.StartTime.CompareTo(timeStart) >= 0 && s.EndTime.CompareTo(timeEnd) <= 0 && s.HealthCheckId == null));
+                    }
+                    else
+                    {
+                        if (timeStart.CompareTo(TimeSpan.Zero) != 0)
+                        {
+                            doctorList = doctorList.Where(s => s.Slots.Any(s => s.StartTime.CompareTo(timeStart) >= 0 && s.HealthCheckId == null));
+                        }
+                        else if (timeEnd.CompareTo(TimeSpan.Zero) != 0)
+                        {
+                            doctorList = doctorList.Where(s => s.Slots.Any(s => s.EndTime.CompareTo(timeEnd) <= 0 && s.HealthCheckId == null));
+                        }
+                    }
+                }
+
+                if(!String.IsNullOrEmpty(nameDoctor))
+                {
+                    doctorList = doctorList.Where(s => s.Name.ToLower().Contains(nameDoctor.ToLower().Trim()));
+                }
+
                 if (!String.IsNullOrEmpty(scopeCertificate))
                 {
                     doctorList = doctorList.Where(s => s.ScopeOfPractice.ToUpper().Contains(scopeCertificate.Trim().ToUpper()));
@@ -174,21 +253,6 @@ namespace TeleMedicine_BE.Controllers
                     if (isVerify == -2)
                     {
                         doctorList = doctorList.Where(s => s.IsVerify == null);
-                    }
-                }
-                if (majorId != null && majorId.Length > 0)
-                {
-                    foreach (int major in majorId)
-                    {
-                        Major selectMajor = _majorService.GetAll(s => s.MajorDoctors).Where(s => s.Id == major).FirstOrDefault();
-                        if (selectMajor != null)
-                        {
-                            List<MajorDoctor> listMajorDoctor = selectMajor.MajorDoctors.ToList();
-                            foreach (MajorDoctor majorDoctor in listMajorDoctor)
-                            {
-                                doctorList = doctorList.Where(s => s.MajorDoctors.Count > 0 && s.MajorDoctors.Any(s => s.MajorId == majorDoctor.MajorId));
-                            }
-                        }
                     }
                 }
                 
