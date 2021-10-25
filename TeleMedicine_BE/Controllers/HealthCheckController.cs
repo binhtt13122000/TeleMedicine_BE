@@ -21,7 +21,7 @@ namespace TeleMedicine_BE.Controllers
 {
     [Route("api/v1/health-checks")]
     [ApiController]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class HealthCheckController : Controller
     {
         private readonly IHealthCheckService _healthCheckService;
@@ -84,7 +84,7 @@ namespace TeleMedicine_BE.Controllers
             {
                 IQueryable<HealthCheck> healthChecks = _healthCheckService.access().Include(s => s.Slots).ThenInclude(s => s.Doctor)
                                                                                     .Include(s => s.Patient)
-                                                                                    .Include(s => s.Prescriptions)
+                                                                                    .Include(s => s.Prescriptions).ThenInclude(s => s.Drug).ThenInclude(s => s.DrugType)
                                                                                     .Include(s => s.HealthCheckDiseases).ThenInclude(s => s.Disease)
                                                                                     .Include(s => s.SymptomHealthChecks).ThenInclude(s => s.Symptom);
                 if(status != HealthCheckStatus.ALL)
