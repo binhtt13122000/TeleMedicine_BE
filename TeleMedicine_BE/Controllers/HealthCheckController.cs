@@ -366,7 +366,7 @@ namespace TeleMedicine_BE.Controllers
                         });
                     }
                 }
-                Slot currentSlot = _slotService.GetAll(s => s.Doctor).Where(s => s.Id == model.SlotId).FirstOrDefault();
+                Slot currentSlot = await _slotService.GetByIdAsync(model.SlotId);
                 if(currentSlot == null)
                 {
                     return BadRequest(new
@@ -389,13 +389,14 @@ namespace TeleMedicine_BE.Controllers
                 HealthCheck healthCheckCreated = await _healthCheckService.AddAsync(healthCheckConvert);
                 if (healthCheckCreated != null)
                 {
-                    await _pushNotificationService.SendMessage(Constants.Notification.REQUEST_HEALTHCHECK.ToString(), "Bạn có một lịch hẹn mới", currentSlot.Doctor.Id.ToString(), null);
+                    Slot addedSlot = _slotService.GetAll(s => s.Doctor).Where(s => s.Id == model.SlotId).FirstOrDefault();
+                    await _pushNotificationService.SendMessage(Constants.Notification.REQUEST_HEALTHCHECK.ToString(), "Bạn có một lịch hẹn mới", addedSlot.Doctor.Id.ToString(), null);
                     Notification notification = new();
                     notification.Content = "Bạn có một lịch hẹn mới-/health-checks/" + healthCheckCreated.Id;
                     notification.Type = Constants.Notification.REQUEST_HEALTHCHECK;
                     notification.IsSeen = false;
                     notification.IsActive = true;
-                    notification.UserId = currentSlot.Doctor.Id;
+                    notification.UserId = addedSlot.Doctor.Id;
                     await _notificationService.AddAsync(notification);
                     return CreatedAtAction("GetHealthCheckById", new { id = healthCheckCreated.Id }, _mapper.Map<HealthCheckVM>(healthCheckCreated));
 
