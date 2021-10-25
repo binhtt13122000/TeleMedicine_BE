@@ -831,7 +831,7 @@ namespace TeleMedicine_BE.Controllers
         [HttpPatch]
         [Route("{id}")]
         [Produces("application/json")]
-        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "2")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "2")]
         public async Task<ActionResult> VerifyDoctorById(int id, [FromQuery] DoctorStatusVerify mode)
         {
             try
