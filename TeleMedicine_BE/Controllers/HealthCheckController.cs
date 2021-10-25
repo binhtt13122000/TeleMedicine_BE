@@ -87,6 +87,19 @@ namespace TeleMedicine_BE.Controllers
                                                                                     .Include(s => s.Prescriptions)
                                                                                     .Include(s => s.HealthCheckDiseases).ThenInclude(s => s.Disease)
                                                                                     .Include(s => s.SymptomHealthChecks).ThenInclude(s => s.Symptom);
+                if(status != HealthCheckStatus.ALL)
+                {
+                    if(status == HealthCheckStatus.BOOKED)
+                    {
+                        healthChecks = healthChecks.Where(s => s.Status.Equals("BOOKED"));
+                    }else if(status == HealthCheckStatus.CANCELED)
+                    {
+                        healthChecks = healthChecks.Where(s => s.Status.Equals("CANCELED"));
+                    }else if(status == HealthCheckStatus.COMPLETED)
+                    {
+                        healthChecks = healthChecks.Where(s => s.Status.Equals("COMPLETED"));
+                    }
+                }    
                 if (startRating != 0 && endRating != 0)
                 {
                     healthChecks = healthChecks.Where(s => s.Rating >= startRating).
@@ -386,6 +399,7 @@ namespace TeleMedicine_BE.Controllers
                 healthCheckConvert.CreatedTime = DateTime.Now;
                 healthCheckConvert.Slots.Add(currentSlot);
                 healthCheckConvert.Token = _agoraProvider.GenerateToken("SLOT_" + model.SlotId, 0.ToString(), 0);
+                return Ok(healthCheckConvert);
                 HealthCheck healthCheckCreated = await _healthCheckService.AddAsync(healthCheckConvert);
                 if (healthCheckCreated != null)
                 {
