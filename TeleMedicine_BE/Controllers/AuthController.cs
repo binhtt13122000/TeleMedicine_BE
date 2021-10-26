@@ -60,17 +60,17 @@ namespace TeleMedicine_BE.Controllers
             }
         }
 
-        [HttpGet("role")]
-        public IQueryable<Role> GetRole()
-        {
-            return _roleService.GetAll();
-        }
+        //[HttpGet("role")]
+        //public IQueryable<Role> GetRole()
+        //{
+        //    return _roleService.GetAll();
+        //}
 
-        [HttpGet("roleCC")]
-        public IQueryable<Role> GetRoleCC()
-        {
-            return _roleService.GetAll();
-        }
+        //[HttpGet("roleCC")]
+        //public IQueryable<Role> GetRoleCC()
+        //{
+        //    return _roleService.GetAll();
+        //}
 
         [HttpPost("login")]
         [Produces("application/json")]
