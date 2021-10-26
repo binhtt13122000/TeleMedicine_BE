@@ -64,6 +64,8 @@ namespace TeleMedicine_BE
             services.AddSingleton<IPushNotificationService, PushNotificationService>();
             services.AddSingleton<IUploadFileService, UploadFileService>();
             services.AddSingleton<IAgoraProvider, AgoraProvider>();
+            services.AddSingleton<IWorker, Worker>();
+
 
             services.AddTransient<ISymptomRepository, SymptomRepository>();
             services.AddTransient<ISymptomService, SymptomService>();
