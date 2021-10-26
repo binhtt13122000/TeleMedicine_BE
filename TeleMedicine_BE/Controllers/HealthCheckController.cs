@@ -399,7 +399,6 @@ namespace TeleMedicine_BE.Controllers
                 healthCheckConvert.CreatedTime = DateTime.Now;
                 healthCheckConvert.Slots.Add(currentSlot);
                 healthCheckConvert.Token = _agoraProvider.GenerateToken("SLOT_" + model.SlotId, 0.ToString(), 0);
-                return Ok(healthCheckConvert);
                 HealthCheck healthCheckCreated = await _healthCheckService.AddAsync(healthCheckConvert);
                 if (healthCheckCreated != null)
                 {
