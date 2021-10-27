@@ -689,7 +689,7 @@ namespace TeleMedicine_BE.Controllers
                     IQueryable<Account> accountList = _accountService.GetAll().Where(s => s.RoleId == 2);
                     accountList.ToList().ForEach(s =>
                     {
-                        _pushNotificationService.SendMessage(Constants.Notification.REQUEST_VERIFY.ToString(), "Có một tài khoản mới đang yêu cầu được xác thực", s.Id.ToString(), null);
+                        _pushNotificationService.SendMessage(Constants.Notification.REQUEST_VERIFY.ToString(), "Có một tài khoản mới đang yêu cầu được xác thực", s.Id, null);
                         Notification notification = new();
                         notification.Content = "Có một yêu cầu xét duyệt-/doctors/" + model.Email;
                         notification.Type = Constants.Notification.REQUEST_VERIFY;

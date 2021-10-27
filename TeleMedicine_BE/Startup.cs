@@ -72,7 +72,7 @@ namespace TeleMedicine_BE
             services.AddSingleton<IUploadFileService, UploadFileService>();
             services.AddSingleton<IAgoraProvider, AgoraProvider>();
             services.AddSingleton<IWorker, Worker>();
-            services.AddScoped(typeof(IRedisService<>), typeof(RedisService<>));
+            services.AddSingleton<IRedisService, RedisService>();
 
             services.AddTransient<ISymptomRepository, SymptomRepository>();
             services.AddTransient<ISymptomService, SymptomService>();

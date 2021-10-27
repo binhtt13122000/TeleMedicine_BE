@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FirebaseAdmin.Messaging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -14,9 +15,12 @@ namespace TeleMedicine_BE.Utils
     {
         private int number = 0;
 
-        public Worker()
+        private readonly IRedisService _redisService;
+
+        public Worker(IRedisService redisService)
         {
             number = 0;
+            _redisService = redisService;
         }
 
         public async Task DoWork(CancellationToken cancellationToken)
@@ -26,7 +30,14 @@ namespace TeleMedicine_BE.Utils
                 System.Diagnostics.Debug.WriteLine("cc");
                 System.Diagnostics.Debug.WriteLine(number);
                 number++;
-                await Task.Delay(1000 * 5);
+                IDictionary<string, Message> notifications = await _redisService.GetList<Message>("notification*");
+                foreach(var notification in notifications)
+                {
+                    var messaging = FirebaseMessaging.DefaultInstance;
+                    await messaging.SendAsync(notification.Value);
+                }
+                await _redisService.RemoveKeys("notification*");
+                await Task.Delay(1000 * 30);
             }
         }
     }

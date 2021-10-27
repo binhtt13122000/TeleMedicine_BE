@@ -60,18 +60,6 @@ namespace TeleMedicine_BE.Controllers
             }
         }
 
-        //[HttpGet("role")]
-        //public IQueryable<Role> GetRole()
-        //{
-        //    return _roleService.GetAll();
-        //}
-
-        //[HttpGet("roleCC")]
-        //public IQueryable<Role> GetRoleCC()
-        //{
-        //    return _roleService.GetAll();
-        //}
-
         [HttpPost("login")]
         [Produces("application/json")]
         public async Task<ActionResult> Login([FromBody] AuthCM model)
@@ -177,7 +165,7 @@ namespace TeleMedicine_BE.Controllers
 
                     string accessToken = await _jwtTokenProvider.GenerateToken(account);
                     AccountProfileVM accountProfileVM = _mapper.Map<AccountProfileVM>(account);
-                    _ = _pushNotificationService.SendMessage("Có 1 thằng đang đăng nhập", account.Email, account.Id.ToString(), null);
+                    _ = _pushNotificationService.SendMessage("Có 1 thằng đang đăng nhập", account.Email, account.Id, null);
                     return Ok(new
                     {
                         Account = accountProfileVM,

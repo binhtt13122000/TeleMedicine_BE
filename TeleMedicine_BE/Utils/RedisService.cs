@@ -8,14 +8,14 @@ using System.Threading.Tasks;
 
 namespace TeleMedicine_BE.Utils
 {
-    public interface IRedisService<T>
+    public interface IRedisService
     {
-        Task<T> Get(string key);
-        Task<IDictionary<string, T>> GetList(string pattern);
+        Task<T> Get<T>(string key);
+        Task<IDictionary<string, T>> GetList<T>(string pattern);
 
-        Task<bool> Set(string key, T value, double time);
+        Task<bool> Set<T>(string key, T value, double time);
 
-        Task<bool> SetList(List<Tuple<string, T>> data, double time);
+        Task<bool> SetList<T>(List<Tuple<string, T>> data, double time);
 
         Task<bool> RemoveKey(string key);
 
@@ -23,7 +23,7 @@ namespace TeleMedicine_BE.Utils
         Task<List<string>> GetAllKeys(string pattern);
         Task<int> Count(string pattern);
     }
-    public class RedisService<T> : IRedisService<T> where T : class
+    public class RedisService : IRedisService
     {
         private readonly IRedisCacheClient _redisCacheClient;
 
@@ -39,7 +39,7 @@ namespace TeleMedicine_BE.Utils
             return keys.Count;
         }
 
-        public async Task<T> Get(string key)
+        public async Task<T> Get<T>(string key)
         {
             T data = await _redisCacheClient.GetDbFromConfiguration().GetAsync<T>(key);
 
@@ -52,7 +52,7 @@ namespace TeleMedicine_BE.Utils
             return allKeys;
         }
 
-        public async Task<IDictionary<string, T>> GetList(string pattern)
+        public async Task<IDictionary<string, T>> GetList<T>(string pattern)
         {
             List<string> keys = await GetAllKeys(pattern);
 
@@ -74,13 +74,13 @@ namespace TeleMedicine_BE.Utils
             return success;
         }
 
-        public async Task<bool> Set(string key, T value, double time)
+        public async Task<bool> Set<T>(string key, T value, double time)
         {
             bool success = await _redisCacheClient.GetDbFromConfiguration().AddAsync<T>(key, value, DateTimeOffset.Now.AddMinutes(time));
             return success;
         }
 
-        public async Task<bool> SetList(List<Tuple<string, T>> data, double time)
+        public async Task<bool> SetList<T>(List<Tuple<string, T>> data, double time)
         {
             bool success = await _redisCacheClient.GetDbFromConfiguration().AddAllAsync(data, DateTimeOffset.Now.AddMinutes(time));
             return success;
