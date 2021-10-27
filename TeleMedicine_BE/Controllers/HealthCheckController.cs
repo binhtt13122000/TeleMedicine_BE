@@ -448,7 +448,7 @@ namespace TeleMedicine_BE.Controllers
             }
             try
             {
-                currentHealthCheck.Status = status.ToString();
+                currentHealthCheck.Status = status.status.ToString();
                 currentHealthCheck.ReasonCancel = status.ReasonCancel;
                 bool isUpdated = await _healthCheckService.UpdateAsync(currentHealthCheck);
                 if (isUpdated)
