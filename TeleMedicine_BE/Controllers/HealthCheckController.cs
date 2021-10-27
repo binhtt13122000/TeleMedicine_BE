@@ -453,22 +453,8 @@ namespace TeleMedicine_BE.Controllers
                 bool isUpdated = await _healthCheckService.UpdateAsync(currentHealthCheck);
                 if (isUpdated)
                 {
-                    if (status.status == HealthCheckSta.CANCELED)
+                    if (status.status.Equals("CANCELED)"))
                     {
-                        //int doctorId = currentHealthCheck.Slots.Select(s => s.DoctorId).FirstOrDefault();
-                        //if (doctorId != 0)
-                        //{
-                        //    Doctor currentDoctor = await _doctorService.GetByIdAsync(doctorId);
-                        //    currentDoctor.NumberOfCancels += 1;
-                        //    await _doctorService.UpdateAsync(currentDoctor);
-                        //    List<Slot> slotList = currentHealthCheck.Slots.ToList();
-                        //    for (int i = 0; i < slotList.Count; i++)
-                        //    {
-                        //        slotList[i].HealthCheck = null;
-                        //        slotList[i].HealthCheckId = null;
-                        //        await _slotService.UpdateAsync(slotList[i]);
-                        //    }
-                        //}
                         await _pushNotificationService.SendMessage(Constants.Notification.REQUEST_HEALTHCHECK.ToString(), "Lịch hẹn đã bị hủy", currentHealthCheck.PatientId.ToString(), null);
                         Notification notification = new();
                         notification.Content = "Lịch hẹn đã bị hủy";
@@ -478,7 +464,7 @@ namespace TeleMedicine_BE.Controllers
                         notification.UserId = currentHealthCheck.PatientId;
                         await _notificationService.AddAsync(notification);
                     }
-                    if(status.status == HealthCheckSta.COMPLETED)
+                    if(status.status.Equals("COMPLETED"))
                     {
                         int doctorId = currentHealthCheck.Slots.Select(s => s.DoctorId).FirstOrDefault();
                         if(doctorId != 0)
