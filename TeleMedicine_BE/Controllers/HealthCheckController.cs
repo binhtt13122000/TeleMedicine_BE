@@ -403,7 +403,7 @@ namespace TeleMedicine_BE.Controllers
                 if (healthCheckCreated != null)
                 {
                     Slot addedSlot = _slotService.GetAll(s => s.Doctor).Where(s => s.Id == model.SlotId).FirstOrDefault();
-                    await _pushNotificationService.SendMessage(Constants.Notification.REQUEST_HEALTHCHECK.ToString(), "Bạn có một lịch hẹn mới", addedSlot.Doctor.Id.ToString(), null);
+                    await _pushNotificationService.SendMessage("Bạn có một lịch hẹn mới", "Bạn có một lịch hẹn mới", addedSlot.Doctor.Email, null);
                     Notification notification = new();
                     notification.Content = "Bạn có một lịch hẹn mới-/health-checks/" + healthCheckCreated.Id;
                     notification.Type = Constants.Notification.REQUEST_HEALTHCHECK;
@@ -455,7 +455,21 @@ namespace TeleMedicine_BE.Controllers
                 {
                     if (status.status.Equals("CANCELED)"))
                     {
-                        await _pushNotificationService.SendMessage(Constants.Notification.REQUEST_HEALTHCHECK.ToString(), "Lịch hẹn đã bị hủy", currentHealthCheck.PatientId.ToString(), null);
+                        //int doctorId = currentHealthCheck.Slots.Select(s => s.DoctorId).FirstOrDefault();
+                        //if (doctorId != 0)
+                        //{
+                        //    Doctor currentDoctor = await _doctorService.GetByIdAsync(doctorId);
+                        //    currentDoctor.NumberOfCancels += 1;
+                        //    await _doctorService.UpdateAsync(currentDoctor);
+                        //    List<Slot> slotList = currentHealthCheck.Slots.ToList();
+                        //    for (int i = 0; i < slotList.Count; i++)
+                        //    {
+                        //        slotList[i].HealthCheck = null;
+                        //        slotList[i].HealthCheckId = null;
+                        //        await _slotService.UpdateAsync(slotList[i]);
+                        //    }
+                        //}
+                        await _pushNotificationService.SendMessage("Lịch hẹn đã bị hủy", "Lịch hẹn đã bị hủy", currentHealthCheck.Patient.Email, null);
                         Notification notification = new();
                         notification.Content = "Lịch hẹn đã bị hủy";
                         notification.Type = Constants.Notification.REQUEST_HEALTHCHECK;
@@ -472,7 +486,7 @@ namespace TeleMedicine_BE.Controllers
                             Doctor currentDoctor = await _doctorService.GetByIdAsync(doctorId);
                             currentDoctor.NumberOfConsultants += 1;
                             await _doctorService.UpdateAsync(currentDoctor);
-                            await _pushNotificationService.SendMessage(Constants.Notification.FINISH_HEATHCHECK.ToString(), "Buổi khám bệnh đã kết thúc", currentHealthCheck.PatientId.ToString(), null);
+                            await _pushNotificationService.SendMessage(Constants.Notification.FINISH_HEATHCHECK.ToString(), "Buổi khám bệnh đã kết thúc", currentHealthCheck.Patient.Email, null);
                             Notification notification = new();
                             notification.Content = "Buổi khám bệnh đã kết thúc";
                             notification.Type = Constants.Notification.FINISH_HEATHCHECK;

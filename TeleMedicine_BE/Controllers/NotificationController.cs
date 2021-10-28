@@ -25,13 +25,15 @@ namespace TeleMedicine_BE.Controllers
         private readonly IAccountService _accountService;
         private readonly IMapper _mapper;
         private readonly IPagingSupport<Notification> _pagingSupport;
+        private readonly IRedisService _redisService;
 
-        public NotificationController(INotificationService notificationService, IMapper mapper, IAccountService accountService, IPagingSupport<Notification> pagingSupport)
+        public NotificationController(INotificationService notificationService, IMapper mapper, IAccountService accountService, IPagingSupport<Notification> pagingSupport, IRedisService redisService)
         {
             _notificationService = notificationService;
             _mapper = mapper;
             _accountService = accountService;
             _pagingSupport = pagingSupport;
+            _redisService = redisService;
         }
 
         /// <summary>
@@ -59,7 +61,7 @@ namespace TeleMedicine_BE.Controllers
             try
             {
                 IQueryable<Notification> notifications = _notificationService.GetAll();
-                if (!String.IsNullOrEmpty(content))
+                if (!string.IsNullOrEmpty(content))
                 {
                     notifications = notifications.Where(s => s.Content.ToUpper().Contains(content.Trim().ToUpper()));
                 }
@@ -236,20 +238,23 @@ namespace TeleMedicine_BE.Controllers
         [Produces("application/json")]
         public async Task<ActionResult> MakeConnection([FromBody] NotificationRequest model)
         {
-            Account account = await _accountService.GetByIdAsync(model.Id);
+            Account account = _accountService.GetAccountByEmail(model.Email);
             if (account == null)
             {
                 return BadRequest(new
                 {
-                    message = "User Id is not exist."
+                    message = "Email is not exist."
                 });
             }
             try
             {
-                var response = await FirebaseAdmin.Messaging.FirebaseMessaging.DefaultInstance.SubscribeToTopicAsync(new List<string>() { model.Token }, "/topics/" + account.Id);
-                if(response.SuccessCount > 0)
+                bool isSuccess = await _redisService.Set("user:" + model.Email, model.Token, 1440);
+                if (isSuccess)
                 {
-                    return Ok(new { Message = "connect success!" });
+                    return Ok(new
+                    {
+                        message = "Success"
+                    });
                 }
                 return BadRequest();
             } catch (Exception)
@@ -326,7 +331,6 @@ namespace TeleMedicine_BE.Controllers
             {
                 notification.User = currentUser;
                 notification.UserId = currentUser.Id;
-                notification.CreatedDate = model.CreatedDate;
                 notification.Content = model.Content;
                 notification.IsActive = model.IsActive;
                 notification.Type = model.Type;

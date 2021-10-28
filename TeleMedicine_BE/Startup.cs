@@ -29,6 +29,8 @@ using System.Text;
 using Newtonsoft.Json.Converters;
 using System.Text.Json.Serialization;
 using TeleMedicine_BE.ExternalService;
+using StackExchange.Redis.Extensions.Newtonsoft;
+using StackExchange.Redis.Extensions.Core.Configuration;
 
 namespace TeleMedicine_BE
 {
@@ -57,6 +59,11 @@ namespace TeleMedicine_BE
             services.AddDbContext<TeleMedicineContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("DBConnection")));
 
+            services.AddStackExchangeRedisExtensions<NewtonsoftSerializer>((options) =>
+            {
+                return Configuration.GetSection("Redis").Get<RedisConfiguration>();
+            });
+
             services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
             services.AddScoped(typeof(IPagingSupport<>), typeof(PagingSupport<>));
             services.AddScoped(typeof(IPagingSupport<>), typeof(PagingSupport<>));
@@ -64,6 +71,8 @@ namespace TeleMedicine_BE
             services.AddSingleton<IPushNotificationService, PushNotificationService>();
             services.AddSingleton<IUploadFileService, UploadFileService>();
             services.AddSingleton<IAgoraProvider, AgoraProvider>();
+            services.AddSingleton<IWorker, Worker>();
+            services.AddSingleton<IRedisService, RedisService>();
 
             services.AddTransient<ISymptomRepository, SymptomRepository>();
             services.AddTransient<ISymptomService, SymptomService>();

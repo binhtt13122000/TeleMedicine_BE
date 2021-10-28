@@ -12,6 +12,8 @@ namespace BusinessLogic.Services
     public interface INotificationService : IService<Notification, int>
     {
         Task<bool> SetIsSeen(int userId);
+
+        void AddManyAsync(List<Notification> notifications);
     }
     public class NotificationService : INotificationService
     {
@@ -24,6 +26,11 @@ namespace BusinessLogic.Services
         public async Task<Notification> AddAsync(Notification entity)
         {
             return await _notificationRepository.AddAsync(entity);
+        }
+
+        public void AddManyAsync(List<Notification> notifications)
+        {
+            _notificationRepository.AddManyAsync(notifications);
         }
 
         public async Task<bool> DeleteAsync(Notification entity)

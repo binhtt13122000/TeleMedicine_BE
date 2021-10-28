@@ -12,12 +12,19 @@ namespace Infrastructure.Repositories
     public interface INotificationRepository : IRepository<Notification, int>
     {
         Task<bool> SetIsSeen(int userId);
+
+        void AddManyAsync(List<Notification> notifications);
     }
     public class NotificationRepository : Repository<Notification, int>, INotificationRepository
     {
         public NotificationRepository(TeleMedicineContext dbContext) : base(dbContext)
         {
 
+        }
+
+        public async void AddManyAsync(List<Notification> notifications)
+        {
+            await _dbContext.Set<Notification>().AddRangeAsync(notifications);
         }
 
         public async Task<bool> SetIsSeen(int userId)
