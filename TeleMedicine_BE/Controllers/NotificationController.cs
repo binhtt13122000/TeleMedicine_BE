@@ -238,17 +238,17 @@ namespace TeleMedicine_BE.Controllers
         [Produces("application/json")]
         public async Task<ActionResult> MakeConnection([FromBody] NotificationRequest model)
         {
-            Account account = await _accountService.GetByIdAsync(model.Id);
+            Account account = _accountService.GetAccountByEmail(model.Email);
             if (account == null)
             {
                 return BadRequest(new
                 {
-                    message = "User Id is not exist."
+                    message = "Email is not exist."
                 });
             }
             try
             {
-                bool isSuccess = await _redisService.Set("user:" + model.Id, model.Token, 1440);
+                bool isSuccess = await _redisService.Set("user:" + model.Email, model.Token, 1440);
                 if (isSuccess)
                 {
                     return Ok(new

@@ -32,7 +32,7 @@ namespace TeleMedicine_BE.ViewModels
     public class NotificationRequest
     {
         public string Token { get; set; }
-        public int Id { get; set; }
+        public string Email { get; set; }
     }
 
     public class NotificationCM

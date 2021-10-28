@@ -9,7 +9,7 @@ namespace TeleMedicine_BE.ExternalService
 {
     public interface IPushNotificationService
     {
-        Task<bool> SendMessage(string title, string body, int accountId, Dictionary<String, String> additionalDatas);
+        Task<bool> SendMessage(string title, string body, string email, Dictionary<String, String> additionalDatas);
     }
     public class PushNotificationService : IPushNotificationService
     {
@@ -18,9 +18,9 @@ namespace TeleMedicine_BE.ExternalService
         {
             _redisService = redisService;
         }
-        public async Task<bool> SendMessage(string title, string body, int accountId, Dictionary<String, String> additionalDatas)
+        public async Task<bool> SendMessage(string title, string body, string email, Dictionary<String, String> additionalDatas)
         {
-            string token = await _redisService.Get<string>("user:" + accountId);
+            string token = await _redisService.Get<string>("user:" + email);
             if (token != null)
             {
                 var message = new Message()
@@ -34,8 +34,10 @@ namespace TeleMedicine_BE.ExternalService
                     Token = token,
                     Data = additionalDatas,
                 };
-
-                return await _redisService.Set<Message>("notification:" + accountId, message, 60);
+                string format = "Mddyyyyhhmmsstt";
+                string key = string.Format("{0}", DateTime.Now.ToString(format));
+                System.Diagnostics.Debug.WriteLine(key);
+                return await _redisService.Set<Message>("notification:" + key, message, 60);
             }
             return false;
         }

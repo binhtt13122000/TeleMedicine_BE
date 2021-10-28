@@ -36,9 +36,10 @@ namespace TeleMedicine_BE.Controllers
         private readonly IPagingSupport<Doctor> _pagingSupport;
         private readonly IPushNotificationService _pushNotificationService;
         private readonly INotificationService _notificationService;
+        private readonly IRedisService _redisService;
 
 
-        public DoctorController(IDoctorService doctorService,IJwtTokenProvider jwtTokenProvider, IRoleService roleService, IHospitalService hospitalService, IAccountService accountService, IMajorService majorService, IUploadFileService uploadFileService, ICertificationService certificationService, IMapper mapper, IPagingSupport<Doctor> pagingSupport, IPushNotificationService pushNotificationService, INotificationService notificationService)
+        public DoctorController(IDoctorService doctorService,IJwtTokenProvider jwtTokenProvider, IRoleService roleService, IHospitalService hospitalService, IAccountService accountService, IMajorService majorService, IUploadFileService uploadFileService, ICertificationService certificationService, IMapper mapper, IPagingSupport<Doctor> pagingSupport, IPushNotificationService pushNotificationService, INotificationService notificationService, IRedisService redisService)
         {
             _accountService = accountService;
             _doctorService = doctorService;
@@ -52,6 +53,7 @@ namespace TeleMedicine_BE.Controllers
             _pagingSupport = pagingSupport;
             _pushNotificationService = pushNotificationService;
             _notificationService = notificationService;
+            _redisService = redisService;
             
         }
 
@@ -65,7 +67,7 @@ namespace TeleMedicine_BE.Controllers
         [HttpGet]
         [Produces("application/json")]
         //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public ActionResult<IEnumerable<DoctorVM>> GetAllDoctors(
+        public async Task<ActionResult<IEnumerable<DoctorVM>>> GetAllDoctors(
             [FromQuery(Name = "email")] string email,
             [FromQuery(Name = "practising-certificate")] string practisingCertificate,
             [FromQuery(Name = "certificate-code")] string certificateCode,
@@ -93,6 +95,59 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "page-offset")]  int pageOffset = 1
         )
         {
+            string doctorListKey = "DOCTOR_LIST";
+            var token = Request.Headers[HeaderNames.Authorization];
+            if (!String.IsNullOrEmpty(token))
+            {
+                var role = _jwtTokenProvider.GetPayloadFromToken(token[0].Replace("Bearer", "").Trim(), "role");
+
+                int roleId;
+                if (int.TryParse(role.Result, out roleId))
+                {
+                    Role currentRole = _roleService.GetAll().Where(s => s.Id == roleId).FirstOrDefault();
+                    if (currentRole != null)
+                    {
+                        if (currentRole.Name.ToUpper().Equals("PATIENT") || currentRole.Name.ToUpper().Equals("DOCTOR"))
+                        {
+                            if (Request.QueryString.Value.ToString().ToLower().Trim() == "?limit=8&page-offset=1")
+                            {
+                                NumarablePaged<DoctorVM> cache = await _redisService.Get<NumarablePaged<DoctorVM>>(doctorListKey);
+                                if (cache != null)
+                                {
+                                    return Ok(cache);
+                                }
+                                else
+                                {
+                                    IQueryable<Doctor> doctorList = _doctorService.access().Include(s => s.CertificationDoctors).ThenInclude(s => s.Certification)
+                                                                                       .Include(s => s.HospitalDoctors).ThenInclude(s => s.Hospital)
+                                                                                       .Include(s => s.MajorDoctors).ThenInclude(s => s.Major)
+                                                                                       .Include(s => s.Slots).Where(s => s.IsVerify == true);
+                                    Paged<DoctorVM> paged = _pagingSupport.From(doctorList).GetRange(1, 8, s => s.Rating, 1).Paginate<DoctorVM>();
+                                    bool succcess = await _redisService.Set(doctorListKey, paged, 60);
+                                    if (succcess)
+                                    {
+                                        return Ok(paged);
+                                    }
+                                    return BadRequest();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            //if(string.IsNullOrEmpty(email) && 
+            //    string.IsNullOrEmpty(placeCertificate) && 
+            //    string.IsNullOrEmpty(practisingCertificate) &&
+            //    string.IsNullOrEmpty(certificateCode) &&
+            //    !dateStartCertificate.HasValue &&
+            //    !dateEndCertificate.HasValue &&
+            //    string.IsNullOrEmpty(scopeCertificate) &&
+            //    numberStartConsultants == 0 && numberEndConsultants == 0 &&
+            //    startRating == 0 && endRating == 0 && !isActive.HasValue &&
+            //    !dateHealthCheck.HasValue && ) 
+            //{
+
+            //}
             try
             {
                 IQueryable<Doctor> doctorList = _doctorService.access().Include(s => s.CertificationDoctors).ThenInclude(s => s.Certification)
@@ -684,20 +739,22 @@ namespace TeleMedicine_BE.Controllers
                 mappedDoctor.HospitalDoctors = convertHospitalDoctor;
 
                 Doctor doctorCreated = await _doctorService.AddAsync(mappedDoctor);
+                List<Notification> notifications = new();
                 if (doctorCreated != null)
                 {
                     IQueryable<Account> accountList = _accountService.GetAll().Where(s => s.RoleId == 2);
                     accountList.ToList().ForEach(s =>
                     {
-                        _pushNotificationService.SendMessage(Constants.Notification.REQUEST_VERIFY.ToString(), "Có một tài khoản mới đang yêu cầu được xác thực", s.Id, null);
+                        _pushNotificationService.SendMessage("Có một tài khoản mới đang yêu cầu được xác thực", "Tài khoản " + model.Email +" yêu cầu xác thực!", s.Email, null);
                         Notification notification = new();
                         notification.Content = "Có một yêu cầu xét duyệt-/doctors/" + model.Email;
                         notification.Type = Constants.Notification.REQUEST_VERIFY;
                         notification.IsSeen = false;
                         notification.IsActive = true;
                         notification.UserId = s.Id;
-                        _notificationService.AddAsync(notification);
+                        notifications.Add(notification);
                     });
+                    _notificationService.AddManyAsync(notifications);
                     IQueryable<Doctor> doctorList = _doctorService.GetAll(s => s.HospitalDoctors, s => s.CertificationDoctors, s => s.MajorDoctors);
                     Doctor doctor = doctorList.Where(s => s.Id == doctorCreated.Id).FirstOrDefault();
                     return CreatedAtAction("GetDoctorByType", new { search = doctorCreated.Id }, _mapper.Map<DoctorVM>(doctorCreated));
@@ -810,6 +867,7 @@ namespace TeleMedicine_BE.Controllers
                 bool isDeleted = await _doctorService.UpdateAsync(currentDoctor);
                 if (isDeleted)
                 {
+                    await _redisService.RemoveKey("DOCTOR_LIST");
                     return Ok(new { 
                         message = "Success"
                     });
@@ -856,10 +914,11 @@ namespace TeleMedicine_BE.Controllers
                 {
                     EmailForm mail = new EmailForm();
                     mail.ToEmail = currentDoctor.Email;
-                    mail.Subject = mode == DoctorStatusVerify.ACCEPT ? "Thông báo tài khoản được xác nhận" : "Thông báo tài khoản bị khóa";
+                    mail.Subject = mode == DoctorStatusVerify.ACCEPT ? "Thông báo tài khoản được xác nhận" : "Thông báo tài khoản đã bị từ chối";
                     mail.Message = mode == DoctorStatusVerify.ACCEPT ? "Chúc mừng tài khoản của bạn đã được xác nhận. Bây giờ bạn đã có thể đăng nhập."
-                                                         : "Tài khoản của bạn đã bị khóa. Liên hệ admin để biết thêm chi tiết.";
+                                                         : "Tài khoản của bạn đã bị từ chối. Mong có thể làm việc với bạn trong tương lai.";
                     await _doctorService.SendEmail(mail);
+                    await _redisService.RemoveKey("DOCTOR_LIST");
                     return Ok(new
                     {
                         message = "Success"

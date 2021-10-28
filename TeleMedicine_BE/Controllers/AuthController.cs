@@ -28,7 +28,7 @@ namespace TeleMedicine_BE.Controllers
         private readonly IMapper _mapper;
         private readonly IPushNotificationService _pushNotificationService;
 
-        public AuthController(IAccountService accountService, IJwtTokenProvider jwtTokenProvider, IUploadFileService uploadFileService, IDoctorService doctorService, IPatientService patientService,IPushNotificationService pushNotificationService, IRoleService roleService, IMapper mapper)
+        public AuthController(IAccountService accountService, IJwtTokenProvider jwtTokenProvider, IUploadFileService uploadFileService, IDoctorService doctorService, IPatientService patientService,IPushNotificationService pushNotificationService, IRoleService roleService, IMapper mapper, IRedisService redisService)
         {
             _accountService = accountService;
             _jwtTokenProvider = jwtTokenProvider;
@@ -165,7 +165,7 @@ namespace TeleMedicine_BE.Controllers
 
                     string accessToken = await _jwtTokenProvider.GenerateToken(account);
                     AccountProfileVM accountProfileVM = _mapper.Map<AccountProfileVM>(account);
-                    _ = _pushNotificationService.SendMessage("Có 1 thằng đang đăng nhập", account.Email, account.Id, null);
+                    _ = _pushNotificationService.SendMessage("Có 1 thằng đang đăng nhập", account.Email, account.Email, null);
                     return Ok(new
                     {
                         Account = accountProfileVM,
@@ -190,7 +190,7 @@ namespace TeleMedicine_BE.Controllers
         [HttpPost("logout")]
         public async Task<ActionResult> Logout([FromBody] NotificationRequest model)
         {
-            Account account = await _accountService.GetByIdAsync(model.Id);
+            Account account = _accountService.GetAccountByEmail(model.Email);
             if (account == null)
             {
                 return BadRequest(new
