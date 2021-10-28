@@ -49,13 +49,19 @@ namespace TeleMedicine_BE.Utils
         {
             _pageIndex = pageIndex;
             _pageSize = pageSize;
-            if(type == 1)
+            if(selector != null)
             {
-                _sourcePageSize = _source.OrderByDescending(selector).Skip((pageIndex - 1) * pageSize).Take(pageSize);
-
-            } else if(type == 0)
+                if (type == 1)
+                {
+                    _sourcePageSize = _source.OrderByDescending(selector).Skip((pageIndex - 1) * pageSize).Take(pageSize);
+                }
+                else if (type == 0)
+                {
+                    _sourcePageSize = _source.OrderBy(selector).Skip((pageIndex - 1) * pageSize).Take(pageSize);
+                }
+            }else
             {
-                _sourcePageSize = _source.OrderBy(selector).Skip((pageIndex - 1) * pageSize).Take(pageSize);
+                _sourcePageSize = _source.Skip((pageSize - 1) * pageSize).Take(pageSize);
             }
             return this;
         }
