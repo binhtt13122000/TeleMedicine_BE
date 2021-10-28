@@ -10,6 +10,7 @@ using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Device.Location;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -66,7 +67,7 @@ namespace TeleMedicine_BE.Controllers
         /// <response code="500">Internal server error</response>
         [HttpGet]
         [Produces("application/json")]
-        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<ActionResult<IEnumerable<DoctorVM>>> GetAllDoctors(
             [FromQuery(Name = "email")] string email,
             [FromQuery(Name = "practising-certificate")] string practisingCertificate,
@@ -85,6 +86,8 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "date-health-check")] DateTime? dateHealthCheck,
             [FromQuery(Name = "time-start")] TimeSpan timeStart,
             [FromQuery(Name = "time-end")] TimeSpan timeEnd,
+            [FromQuery(Name = "latitude")] double latitude,
+            [FromQuery(Name = "longitude")] double longitude,
             [FromQuery(Name = "name-doctor")] string nameDoctor,
             [FromQuery(Name = "hospitals")] List<int> hospitals,
             [FromQuery(Name = "order-by")] DoctorFieldEnum orderBy,
@@ -154,6 +157,8 @@ namespace TeleMedicine_BE.Controllers
                                                                        .Include(s => s.HospitalDoctors).ThenInclude(s => s.Hospital)
                                                                        .Include(s => s.MajorDoctors).ThenInclude(s => s.Major)
                                                                        .Include(s => s.Slots);
+                Paged<DoctorVM> paged = null;
+                bool isMapped = false;
                 var accessToken = Request.Headers[HeaderNames.Authorization];
                 if (!String.IsNullOrEmpty(accessToken))
                 {
@@ -370,19 +375,54 @@ namespace TeleMedicine_BE.Controllers
                     }
                 }
 
-                Paged<DoctorVM> paged = null;
-                if (orderType == SortTypeEnum.asc && typeof(DoctorVM).GetProperty(orderBy.ToString()) != null)
+                if (latitude != 0 && longitude != 0)
                 {
-                    paged = _pagingSupport.From(doctorList).GetRange(pageOffset, limit, p => EF.Property<object>(p, orderBy.ToString()), 0).Paginate<DoctorVM>();
+                    List<DoctorVM> converDoctorList = new List<DoctorVM>();
+                    List<DoctorVM> _mappedDoctorVmList = new List<DoctorVM>();
+                    foreach (Doctor doctor in doctorList)
+                    {
+                        _mappedDoctorVmList.Add(_mapper.Map<DoctorVM>(doctor));
+                    }
+                    var currentCoordinate = new GeoCoordinate(latitude, longitude);
+                    List<Hospital> hospitalList = _hospitalService.GetAll().AsEnumerable().OrderBy(location => currentCoordinate.GetDistanceTo(new GeoCoordinate(location.Lat, location.Long))).ToList();
+                    foreach (Hospital itemHospital in hospitalList)
+                    {
+                        foreach (DoctorVM itemDoctor in _mappedDoctorVmList)
+                        {
+                            if (itemDoctor.HospitalDoctors.Any(s => s.Hospital.Id == itemHospital.Id))
+                            {
+                                if (!converDoctorList.Contains(itemDoctor))
+                                {
+                                    converDoctorList.Add(itemDoctor);
+                                }
+                            }
+                        }
+                    }
+                    List<Doctor> convertDoctorVmToDoctor = new List<Doctor>();
+                    foreach (DoctorVM doctorItem in converDoctorList)
+                    {
+                        convertDoctorVmToDoctor.Add(_mapper.Map<Doctor>(doctorItem));
+                    }
+                    doctorList = convertDoctorVmToDoctor.AsQueryable();
+                    paged = _pagingSupport.From(doctorList).GetRange(pageOffset, limit, null, 1).Paginate<DoctorVM>();
+                    isMapped = true;
                 }
-                else if (orderType == SortTypeEnum.desc && typeof(DoctorVM).GetProperty(orderBy.ToString()) != null)
+                if (!isMapped)
                 {
-                    paged = _pagingSupport.From(doctorList).GetRange(pageOffset, limit, p => EF.Property<object>(p, orderBy.ToString()), 1).Paginate<DoctorVM>();
-                }else
-                {
-                    paged = _pagingSupport.From(doctorList).GetRange(pageOffset, limit, s => s.Id, 1).Paginate<DoctorVM>();
+
+                    if (orderType == SortTypeEnum.asc && typeof(DoctorVM).GetProperty(orderBy.ToString()) != null)
+                    {
+                        paged = _pagingSupport.From(doctorList).GetRange(pageOffset, limit, p => EF.Property<object>(p, orderBy.ToString()), 0).Paginate<DoctorVM>();
+                    }
+                    else if (orderType == SortTypeEnum.desc && typeof(DoctorVM).GetProperty(orderBy.ToString()) != null)
+                    {
+                        paged = _pagingSupport.From(doctorList).GetRange(pageOffset, limit, p => EF.Property<object>(p, orderBy.ToString()), 1).Paginate<DoctorVM>();
+                    }
+                    else
+                    {
+                        paged = _pagingSupport.From(doctorList).GetRange(pageOffset, limit, s => s.Id, 1).Paginate<DoctorVM>();
+                    }
                 }
-                
                 if (!String.IsNullOrEmpty(filters))
                 {
                     bool checkHasProperty = false;
