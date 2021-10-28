@@ -41,7 +41,7 @@ namespace TeleMedicine_BE.ViewModels
         public string Content { get; set; }
         
         [Required]
-        public int UserId { get; set; }
+        public string Email { get; set; }
 
         [Required]
         public int? Type { get; set; }

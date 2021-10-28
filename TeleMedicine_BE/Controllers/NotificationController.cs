@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TeleMedicine_BE.ExternalService;
 using TeleMedicine_BE.Utils;
 using TeleMedicine_BE.ViewModels;
 
@@ -26,14 +27,16 @@ namespace TeleMedicine_BE.Controllers
         private readonly IMapper _mapper;
         private readonly IPagingSupport<Notification> _pagingSupport;
         private readonly IRedisService _redisService;
+        private readonly IPushNotificationService _pushNotification;
 
-        public NotificationController(INotificationService notificationService, IMapper mapper, IAccountService accountService, IPagingSupport<Notification> pagingSupport, IRedisService redisService)
+        public NotificationController(INotificationService notificationService, IMapper mapper, IAccountService accountService, IPagingSupport<Notification> pagingSupport, IRedisService redisService, IPushNotificationService pushNotificationService)
         {
             _notificationService = notificationService;
             _mapper = mapper;
             _accountService = accountService;
             _pagingSupport = pagingSupport;
             _redisService = redisService;
+            _pushNotification = pushNotificationService;
         }
 
         /// <summary>
@@ -207,7 +210,7 @@ namespace TeleMedicine_BE.Controllers
         [Produces("application/json")]
         public async Task<ActionResult<NotificationVM>> CreateNotification([FromBody] NotificationCM model)
         {
-            Account account = await _accountService.GetByIdAsync(model.UserId);
+            Account account = _accountService.GetAccountByEmail(model.Email);
             if (account == null)
             {
                 return BadRequest(new
@@ -218,13 +221,17 @@ namespace TeleMedicine_BE.Controllers
             Notification notification = _mapper.Map<Notification>(model);
             try
             {
-                notification.User = account;
-                notification.CreatedDate = DateTime.Now;
-                Notification notificationCreated = await _notificationService.AddAsync(notification);
-
-                if (notificationCreated != null)
+                if(account != null)
                 {
-                    return CreatedAtAction("GetNotificationyId", new { id = notificationCreated.Id }, _mapper.Map<NotificationVM>(notificationCreated));
+                    notification.CreatedDate = DateTime.Now;
+                    notification.UserId = account.Id;
+                    Notification notificationCreated = await _notificationService.AddAsync(notification);
+
+                    if (notificationCreated != null)
+                    {
+                        await _pushNotification.SendMessage("Bạn đã nhận được một lời mời tham gia", notification.Content, account.Email, null);
+                        return CreatedAtAction("GetNotificationyId", new { id = notificationCreated.Id }, _mapper.Map<NotificationVM>(notificationCreated));
+                    }
                 }
                 return BadRequest();
             }
