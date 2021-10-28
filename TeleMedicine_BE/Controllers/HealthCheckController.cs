@@ -453,7 +453,7 @@ namespace TeleMedicine_BE.Controllers
                 bool isUpdated = await _healthCheckService.UpdateAsync(currentHealthCheck);
                 if (isUpdated)
                 {
-                    if (status.status == HealthCheckSta.CANCELED)
+                    if (status.status.Equals("CANCELED)"))
                     {
                         //int doctorId = currentHealthCheck.Slots.Select(s => s.DoctorId).FirstOrDefault();
                         //if (doctorId != 0)
@@ -478,7 +478,7 @@ namespace TeleMedicine_BE.Controllers
                         notification.UserId = currentHealthCheck.PatientId;
                         await _notificationService.AddAsync(notification);
                     }
-                    if(status.status == HealthCheckSta.COMPLETED)
+                    if(status.status.Equals("COMPLETED"))
                     {
                         int doctorId = currentHealthCheck.Slots.Select(s => s.DoctorId).FirstOrDefault();
                         if(doctorId != 0)

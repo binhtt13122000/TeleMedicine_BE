@@ -54,10 +54,10 @@ namespace TeleMedicine_BE.ViewModels
 
     public class HealthCheckStatusUM
     {
-        public int Id;
+        public int Id { set; get; }
         public string ReasonCancel { get; set; }
 
-        public HealthCheckSta status;
+        public string status { set; get; }
 
     }
 
