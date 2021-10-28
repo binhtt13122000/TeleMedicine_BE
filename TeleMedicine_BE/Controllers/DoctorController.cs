@@ -752,6 +752,7 @@ namespace TeleMedicine_BE.Controllers
                         notification.IsSeen = false;
                         notification.IsActive = true;
                         notification.UserId = s.Id;
+                        notification.CreatedDate = DateTime.Now;
                         notifications.Add(notification);
                     });
                     _notificationService.AddManyAsync(notifications);

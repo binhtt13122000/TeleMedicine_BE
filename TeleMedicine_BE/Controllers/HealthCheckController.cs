@@ -34,9 +34,10 @@ namespace TeleMedicine_BE.Controllers
         private readonly IPagingSupport<HealthCheck> _pagingSupport;
         private readonly INotificationService _notificationService;
         private readonly IPushNotificationService _pushNotificationService;
+        private readonly IAccountService _accountService;
 
 
-        public HealthCheckController(IHealthCheckService healthCheckService, ISlotService slotService, IDoctorService doctorService, ISymptomService symptomService, IPatientService patientService, IMapper mapper, IPagingSupport<HealthCheck> pagingSupport, IAgoraProvider agoraProvider, IPushNotificationService pushNotificationService, INotificationService notificationService)
+        public HealthCheckController(IHealthCheckService healthCheckService, ISlotService slotService, IDoctorService doctorService, ISymptomService symptomService, IPatientService patientService, IMapper mapper, IPagingSupport<HealthCheck> pagingSupport, IAgoraProvider agoraProvider, IPushNotificationService pushNotificationService, INotificationService notificationService, IAccountService accountService)
         {
             _healthCheckService = healthCheckService;
             _slotService = slotService;
@@ -48,6 +49,7 @@ namespace TeleMedicine_BE.Controllers
             _agoraProvider = agoraProvider;
             _notificationService = notificationService;
             _pushNotificationService = pushNotificationService;
+            _accountService = accountService;
         }
 
         /// <summary>
@@ -409,7 +411,8 @@ namespace TeleMedicine_BE.Controllers
                     notification.Type = Constants.Notification.REQUEST_HEALTHCHECK;
                     notification.IsSeen = false;
                     notification.IsActive = true;
-                    notification.UserId = addedSlot.Doctor.Id;
+                    notification.CreatedDate = DateTime.Now;
+                    notification.UserId = _accountService.GetAccountByEmail(addedSlot.Doctor.Email).Id;
                     await _notificationService.AddAsync(notification);
                     return CreatedAtAction("GetHealthCheckById", new { id = healthCheckCreated.Id }, _mapper.Map<HealthCheckVM>(healthCheckCreated));
 
@@ -475,7 +478,8 @@ namespace TeleMedicine_BE.Controllers
                         notification.Type = Constants.Notification.REQUEST_HEALTHCHECK;
                         notification.IsSeen = false;
                         notification.IsActive = true;
-                        notification.UserId = currentHealthCheck.PatientId;
+                        notification.UserId = _accountService.GetAccountByEmail(currentHealthCheck.Patient.Email).Id;
+                        notification.CreatedDate = DateTime.Now;
                         await _notificationService.AddAsync(notification);
                     }
                     if(status.status.Equals("COMPLETED"))
@@ -492,7 +496,7 @@ namespace TeleMedicine_BE.Controllers
                             notification.Type = Constants.Notification.FINISH_HEATHCHECK;
                             notification.IsSeen = false;
                             notification.IsActive = true;
-                            notification.UserId = currentHealthCheck.PatientId;
+                            notification.UserId = _accountService.GetAccountByEmail(currentHealthCheck.Patient.Email).Id;
                             await _notificationService.AddAsync(notification);
                         }
                     }
