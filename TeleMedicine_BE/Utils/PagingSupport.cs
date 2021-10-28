@@ -61,7 +61,7 @@ namespace TeleMedicine_BE.Utils
                 }
             }else
             {
-                _sourcePageSize = _source.Skip((pageSize - 1) * pageSize).Take(pageSize);
+                _sourcePageSize = _source.Skip((pageIndex - 1) * pageSize).Take(pageSize);
             }
             return this;
         }
