@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="Crc32.NET" Version="1.2.0" />
+    <PackageReference Include="System.Device.Location.Portable" Version="1.0.0" />
   </ItemGroup>
 
 </Project>
