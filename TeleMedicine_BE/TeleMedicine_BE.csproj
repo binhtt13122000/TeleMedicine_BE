@@ -32,6 +32,7 @@
     <PackageReference Include="StackExchange.Redis.Extensions.Newtonsoft" Version="7.1.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
     <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="7.0.2" />
+    <PackageReference Include="System.Device.Location.Portable" Version="1.0.0" />
     <PackageReference Include="System.Drawing.Common" Version="5.0.2" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.12.2" />
   </ItemGroup>
