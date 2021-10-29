@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Device.Location;
 using System.Linq;
 using System.Threading.Tasks;
 using TeleMedicine_BE.Utils;
@@ -42,6 +43,8 @@ namespace TeleMedicine_BE.Controllers
         public ActionResult<IEnumerable<HospitalVM>> GetAllHospital(
             [FromQuery(Name = "hospital-code")] string hospitalCode,
             [FromQuery(Name = "name")] string name,
+            [FromQuery(Name = "latitude")] double latitude,
+            [FromQuery(Name = "longitude")] double longitude,
             [FromQuery(Name = "is-active")] bool? isActive,
             [FromQuery(Name = "order-by")] HospitalFieldEnum orderBy,
             [FromQuery(Name = "order-type")] SortTypeEnum orderType,
@@ -53,6 +56,8 @@ namespace TeleMedicine_BE.Controllers
             try
             {
                 IQueryable<Hospital> hospitalList = _hospitalService.GetAll();
+                Paged<HospitalVM> paged = null;
+                bool isMapped = false;
                 if (!String.IsNullOrEmpty(hospitalCode))
                 {
                     hospitalList = hospitalList.Where(s => s.HospitalCode.ToUpper().Contains(hospitalCode.Trim().ToUpper()));
@@ -65,19 +70,29 @@ namespace TeleMedicine_BE.Controllers
                 {
                     hospitalList = hospitalList.Where(s => s.IsActive.Value.Equals(isActive.Value));
                 }
-                Paged<HospitalVM> paged = null;
-                if (orderType == SortTypeEnum.asc && typeof(HospitalVM).GetProperty(orderBy.ToString()) != null)
+                if (latitude != 0 && longitude != 0)
                 {
-                    paged = _pagingSupport.From(hospitalList).GetRange(pageOffset, limit, p => EF.Property<object>(p, orderBy.ToString()), 0).Paginate<HospitalVM>();
+                    var currentCoordinate = new GeoCoordinate(latitude, longitude);
+                    hospitalList = hospitalList.AsEnumerable().OrderBy(location => currentCoordinate.GetDistanceTo(new GeoCoordinate(location.Lat, location.Long))).ToList().AsQueryable();
+                    paged = _pagingSupport.From(hospitalList).GetRange(pageOffset, limit, null, 1).Paginate<HospitalVM>();
+                    isMapped = true;
                 }
-                else if (orderType == SortTypeEnum.desc && typeof(HospitalVM).GetProperty(orderBy.ToString()) != null)
+                if(!isMapped)
                 {
-                    paged = _pagingSupport.From(hospitalList).GetRange(pageOffset, limit, p => EF.Property<object>(p, orderBy.ToString()), 1).Paginate<HospitalVM>();
+                    if (orderType == SortTypeEnum.asc && typeof(HospitalVM).GetProperty(orderBy.ToString()) != null)
+                    {
+                        paged = _pagingSupport.From(hospitalList).GetRange(pageOffset, limit, p => EF.Property<object>(p, orderBy.ToString()), 0).Paginate<HospitalVM>();
+                    }
+                    else if (orderType == SortTypeEnum.desc && typeof(HospitalVM).GetProperty(orderBy.ToString()) != null)
+                    {
+                        paged = _pagingSupport.From(hospitalList).GetRange(pageOffset, limit, p => EF.Property<object>(p, orderBy.ToString()), 1).Paginate<HospitalVM>();
+                    }
+                    else
+                    {
+                        paged = _pagingSupport.From(hospitalList).GetRange(pageOffset, limit, s => s.Id, 1).Paginate<HospitalVM>();
+                    }
                 }
-                else
-                {
-                    paged = _pagingSupport.From(hospitalList).GetRange(pageOffset, limit, s => s.Id, 1).Paginate<HospitalVM>();
-                }
+
                 if (!String.IsNullOrEmpty(filters))
                 {
                     bool checkHasProperty = false;
