@@ -35,9 +35,10 @@ namespace TeleMedicine_BE.Controllers
         private readonly INotificationService _notificationService;
         private readonly IPushNotificationService _pushNotificationService;
         private readonly IAccountService _accountService;
+        private readonly IFirestoreService _firestoreService;
 
 
-        public HealthCheckController(IHealthCheckService healthCheckService, ISlotService slotService, IDoctorService doctorService, ISymptomService symptomService, IPatientService patientService, IMapper mapper, IPagingSupport<HealthCheck> pagingSupport, IAgoraProvider agoraProvider, IPushNotificationService pushNotificationService, INotificationService notificationService, IAccountService accountService)
+        public HealthCheckController(IHealthCheckService healthCheckService, ISlotService slotService, IDoctorService doctorService, ISymptomService symptomService, IPatientService patientService, IMapper mapper, IPagingSupport<HealthCheck> pagingSupport, IAgoraProvider agoraProvider, IPushNotificationService pushNotificationService, INotificationService notificationService, IAccountService accountService, IFirestoreService firestoreService)
         {
             _healthCheckService = healthCheckService;
             _slotService = slotService;
@@ -50,6 +51,7 @@ namespace TeleMedicine_BE.Controllers
             _notificationService = notificationService;
             _pushNotificationService = pushNotificationService;
             _accountService = accountService;
+            _firestoreService = firestoreService;
         }
 
         /// <summary>
@@ -429,6 +431,116 @@ namespace TeleMedicine_BE.Controllers
             }
         }
 
+        [HttpPost("join-call")]
+        public async Task<ActionResult> JoinCall([FromBody] JoinCallRequest model)
+        {
+            HealthCheck healthCheck = await _healthCheckService.access().Include(s => s.Slots).ThenInclude(s => s.Doctor)
+                                                                                    .Include(s => s.Patient).Where(s => s.Id == model.HealthCheckId).FirstOrDefaultAsync();
+            if(healthCheck == null)
+            {
+                return BadRequest(new
+                {
+                    message = "Room is not exist!"
+                });
+            }
+            Dictionary<string, object> data = await _firestoreService.Get("healthcheck", healthCheck.Id.ToString());
+            if (model.Email.ToLower().Equals(healthCheck.Patient.Email.ToLower()) || model.Email.ToLower().Equals(healthCheck.Slots.ElementAt(0).Doctor.Email.ToLower()))
+            {
+                if(data == null)
+                {
+                    
+                    Dictionary<string, object> createData = new Dictionary<string, object>()
+                    {
+                        {"1", model.DisplayName }
+                    };
+                    await _firestoreService.Create("healthcheck", healthCheck.Id.ToString(), createData);
+                    return Ok(new
+                    {
+                        Uid = 1,
+                        healthCheck.Token
+                    });
+                } else
+                {
+                    int count = data.Count;
+                    data[(count + 1) + ""] = model.DisplayName;
+                    await _firestoreService.Update("healthcheck", healthCheck.Id.ToString(), data);
+                    return Ok(new
+                    {
+                        Uid = (count + 1),
+                        healthCheck.Token
+                    });
+                }
+            } else
+            {
+                Account account = _accountService.GetAccountByEmail(model.Email);
+                if(account != null)
+                {
+                    if (model.IsInvited)
+                    {
+                        if(data == null)
+                        {
+                            return BadRequest(new
+                            {
+                                message = "You can't join!"
+                            });
+                        } else
+                        {
+                            int count = data.Count;
+                            data[(count + 1) + ""] = model.DisplayName;
+                            await _firestoreService.Update("healthcheck", healthCheck.Id.ToString(), data);
+                            return Ok(new
+                            {
+                                Uid = (count + 1),
+                                healthCheck.Token
+                            });
+                        }
+                    } else
+                    {
+                        await _pushNotificationService.SendMessage("Có một yêu cầu tham gia cuộc họp!", model.DisplayName, healthCheck.Slots.ElementAt(0).Doctor.Email.ToLower(), null);
+                    }
+                } else
+                {
+                    if(data != null)
+                    {
+                        await _pushNotificationService.SendMessage("Có một yêu cầu tham gia cuộc họp!", model.DisplayName, healthCheck.Slots.ElementAt(0).Doctor.Email.ToLower(), new Dictionary<string, string> {
+                            {"email", model.Email },
+                            {"name", model.DisplayName }
+                        });
+                        return Ok(new
+                        {
+                            message = "Waiting!"
+                        });
+                    } else
+                    {
+                        return BadRequest(new
+                        {
+                            message = "You can't join!"
+                        });
+                    }
+                }
+            }
+            return Ok();
+        }
+
+        [HttpPost("accept-request")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "1")]
+        public async Task<ActionResult> AcceptRequest(AcceptRequestModel model)
+        {
+            await _pushNotificationService.SendMessage("Yêu cầu tham gia của bạn đã được đồng ý", "", model.Email, new Dictionary<string, string> {
+                {"email", model.Email },
+                {"name", model.DisplayName },
+                {"token", model.Token }
+             });
+            Dictionary<string, object> data = await _firestoreService.Get("healthcheck", model.HealthCheckId);
+            if(data == null)
+            {
+                return BadRequest();
+            } else
+            {
+                return Ok();
+            }
+
+        }
 
         /// <summary>
         /// Change status health check

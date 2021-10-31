@@ -31,6 +31,7 @@ using System.Text.Json.Serialization;
 using TeleMedicine_BE.ExternalService;
 using StackExchange.Redis.Extensions.Newtonsoft;
 using StackExchange.Redis.Extensions.Core.Configuration;
+using Google.Cloud.Firestore;
 
 namespace TeleMedicine_BE
 {
@@ -55,6 +56,9 @@ namespace TeleMedicine_BE
             {
                 Credential = GoogleCredential.FromFile(pathToKey)
             });
+
+            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", pathToKey);
+            FirestoreDb firestoreDb = FirestoreDb.Create("telemedicine-fc0ee");
 
             services.AddDbContext<TeleMedicineContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("DBConnection")));
@@ -123,6 +127,7 @@ namespace TeleMedicine_BE
             services.AddTransient<IHealthCheckService, HealthCheckService>();
 
             services.AddTransient<IUploadFileService, UploadFileService>();
+            services.AddTransient<IFirestoreService, FirestoreService>();
 
             services
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

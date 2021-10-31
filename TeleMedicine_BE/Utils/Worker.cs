@@ -27,17 +27,28 @@ namespace TeleMedicine_BE.Utils
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                System.Diagnostics.Debug.WriteLine("cc");
-                System.Diagnostics.Debug.WriteLine(number);
-                number++;
-                IDictionary<string, Message> notifications = await _redisService.GetList<Message>("notification*");
-                foreach(var notification in notifications)
+                try
                 {
-                    var messaging = FirebaseMessaging.DefaultInstance;
-                    await messaging.SendAsync(notification.Value);
+                    System.Diagnostics.Debug.WriteLine("cc");
+                    System.Diagnostics.Debug.WriteLine(number);
+                    number++;
+                    IDictionary<string, Message> notifications = await _redisService.GetList<Message>("notification*");
+                    foreach (var notification in notifications)
+                    {
+                        var messaging = FirebaseMessaging.DefaultInstance;
+                        await messaging.SendAsync(notification.Value);
+                    }
+                    await _redisService.RemoveKeys("notification*");
+                } catch(Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("error");
+                    System.Diagnostics.Debug.WriteLine(ex.Message);
+                    System.Diagnostics.Debug.WriteLine(ex.StackTrace);
                 }
-                await _redisService.RemoveKeys("notification*");
-                await Task.Delay(1000 * 30);
+                finally
+                {
+                    await Task.Delay(1000 * 30);
+                }
             }
         }
     }

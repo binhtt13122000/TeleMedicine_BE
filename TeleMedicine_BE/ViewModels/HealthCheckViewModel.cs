@@ -85,6 +85,30 @@ namespace TeleMedicine_BE.ViewModels
         public virtual ICollection<SymptomHealthCheckVM> SymptomHealthChecks { get; set; }
     }
 
+    public class AcceptRequestModel
+    {
+        [Required]
+        public string Email { get; set; }
+        [Required]
+        public string DisplayName { get; set; }
+        [Required]
+        public string Token { get; set; }
+
+        [Required]
+        public string HealthCheckId { get; set; }
+    }
+    public class JoinCallRequest
+    {
+        [Required]
+        public int HealthCheckId { get; set; }
+        [Required]
+        public string Email { get; set; }
+        [Required]
+        public string DisplayName { get; set; }
+        [Required]
+        public bool IsInvited { get; set; }
+    }
+
     public class HealthCheckCM
     {
         public int? Height { get; set; }
