@@ -165,7 +165,9 @@ namespace TeleMedicine_BE.Controllers
 
                     string accessToken = await _jwtTokenProvider.GenerateToken(account);
                     AccountProfileVM accountProfileVM = _mapper.Map<AccountProfileVM>(account);
-                    _ = _pushNotificationService.SendMessage("Có 1 thằng đang đăng nhập", account.Email, account.Email, null);
+                    _ = _pushNotificationService.SendMessage("Có 1 thằng đang đăng nhập", account.Email, account.Email, new Dictionary<string, string> {
+                        {"cc", "cl"}
+                    });
                     return Ok(new
                     {
                         Account = accountProfileVM,

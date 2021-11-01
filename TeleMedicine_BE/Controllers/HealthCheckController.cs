@@ -35,9 +35,10 @@ namespace TeleMedicine_BE.Controllers
         private readonly INotificationService _notificationService;
         private readonly IPushNotificationService _pushNotificationService;
         private readonly IAccountService _accountService;
+        private readonly IFirestoreService _firestoreService;
 
 
-        public HealthCheckController(IHealthCheckService healthCheckService, ISlotService slotService, IDoctorService doctorService, ISymptomService symptomService, IPatientService patientService, IMapper mapper, IPagingSupport<HealthCheck> pagingSupport, IAgoraProvider agoraProvider, IPushNotificationService pushNotificationService, INotificationService notificationService, IAccountService accountService)
+        public HealthCheckController(IHealthCheckService healthCheckService, ISlotService slotService, IDoctorService doctorService, ISymptomService symptomService, IPatientService patientService, IMapper mapper, IPagingSupport<HealthCheck> pagingSupport, IAgoraProvider agoraProvider, IPushNotificationService pushNotificationService, INotificationService notificationService, IAccountService accountService, IFirestoreService firestoreService)
         {
             _healthCheckService = healthCheckService;
             _slotService = slotService;
@@ -50,6 +51,7 @@ namespace TeleMedicine_BE.Controllers
             _notificationService = notificationService;
             _pushNotificationService = pushNotificationService;
             _accountService = accountService;
+            _firestoreService = firestoreService;
         }
 
         /// <summary>
@@ -175,21 +177,25 @@ namespace TeleMedicine_BE.Controllers
                         }
                     }
                 }
-                if(modeSearch == TypeSearch.NEAREST)
+                System.Diagnostics.Debug.WriteLine("cc");
+                if (modeSearch == TypeSearch.NEAREST)
                 {
                     DateTime currentDate = DateTime.Today;
                     TimeSpan currentTime = DateTime.Now.TimeOfDay;
                     if(typeRole == TypeRole.DOCTOR)
                     {
+                        System.Diagnostics.Debug.WriteLine("ccc");
                         IEnumerable<Slot> slots = _slotService.GetAll(s => s.HealthCheck).Where(s => s.HealthCheckId != null).Where(s => s.HealthCheck.Status.Equals("BOOKED")).Where(s => s.AssignedDate.CompareTo(currentDate) >= 0);
-
-                        if(doctorId != 0)
+                        System.Diagnostics.Debug.WriteLine("cccccc");
+                        if (doctorId != 0)
                         {
+                            System.Diagnostics.Debug.WriteLine("ccccccm");
                             slots = slots.Where(s => s.DoctorId == doctorId);
                         }
 
                         if(slots.Count<Slot>() > 0)
                         {
+                            System.Diagnostics.Debug.WriteLine("cccccn");
                             HealthCheck healthCheck = _healthCheckService.GetNearestHealthCheckByCondition(slots.ToList(), currentDate, currentTime);
                             return Ok(_mapper.Map<HealthCheckVM>(healthCheck));
                         }
@@ -429,6 +435,136 @@ namespace TeleMedicine_BE.Controllers
             }
         }
 
+        [HttpPost("join-call")]
+        public async Task<ActionResult> JoinCall([FromBody] JoinCallRequest model)
+        {
+            HealthCheck healthCheck = await _healthCheckService.access().Include(s => s.Slots).ThenInclude(s => s.Doctor)
+                                                                                    .Include(s => s.Patient).Where(s => s.Id == model.HealthCheckId).FirstOrDefaultAsync();
+            if(healthCheck == null)
+            {
+                return BadRequest(new
+                {
+                    message = "Room is not exist!"
+                });
+            }
+            Dictionary<string, object> data = await _firestoreService.Get("healthcheck", healthCheck.Id.ToString());
+            if (model.Email.ToLower().Equals(healthCheck.Patient.Email.ToLower()) || model.Email.ToLower().Equals(healthCheck.Slots.ElementAt(0).Doctor.Email.ToLower()))
+            {
+                if(data == null)
+                {
+                    
+                    Dictionary<string, object> createData = new Dictionary<string, object>()
+                    {
+                        {"1", model.DisplayName }
+                    };
+                    await _firestoreService.Create("healthcheck", healthCheck.Id.ToString(), createData);
+                    return Ok(new
+                    {
+                        Uid = 1,
+                        healthCheck.Token,
+                        Slot = healthCheck.Slots.ElementAt(0).Id,
+                    });
+                } else
+                {
+                    int count = data.Count;
+                    data[(count + 1) + ""] = model.DisplayName;
+                    await _firestoreService.Update("healthcheck", healthCheck.Id.ToString(), data);
+                    return Ok(new
+                    {
+                        Uid = (count + 1),
+                        healthCheck.Token,
+                        Slot = healthCheck.Slots.ElementAt(0).Id,
+                    }); ;
+                }
+            } else
+            {
+                Account account = _accountService.GetAccountByEmail(model.Email);
+                if(account != null)
+                {
+                    if (model.IsInvited)
+                    {
+                        if(data == null)
+                        {
+                            return BadRequest(new
+                            {
+                                message = "You can't join!"
+                            });
+                        } else
+                        {
+                            int count = data.Count;
+                            data[(count + 1) + ""] = model.DisplayName;
+                            await _firestoreService.Update("healthcheck", healthCheck.Id.ToString(), data);
+                            return Ok(new
+                            {
+                                Uid = (count + 1),
+                                healthCheck.Token,
+                                Slot = healthCheck.Slots.ElementAt(0).Id,
+                            });
+                        }
+                    } else
+                    {
+                        await _pushNotificationService.SendMessage("Có một yêu cầu tham gia cuộc họp!", model.DisplayName, healthCheck.Slots.ElementAt(0).Doctor.Email.ToLower(), new Dictionary<string, string> {
+                            {"email", model.Email },
+                            {"name", model.DisplayName },
+                            {"token", healthCheck.Token },
+                            {"slot", healthCheck.Slots.ElementAt(0).Id.ToString() },
+                            {"id", healthCheck.Id.ToString() }
+                        });
+                        return BadRequest(new
+                        {
+                            message = "Waiting!"
+                        });
+                    }
+                } else
+                {
+                    if(data != null)
+                    {
+                        await _pushNotificationService.SendMessage("Có một yêu cầu tham gia cuộc họp!", model.DisplayName, healthCheck.Slots.ElementAt(0).Doctor.Email.ToLower(), new Dictionary<string, string> {
+                            {"email", model.Email },
+                            {"name", model.DisplayName },
+                            {"token", healthCheck.Token },
+                            {"slot", healthCheck.Slots.ElementAt(0).Id.ToString() },
+                            {"id", healthCheck.Id.ToString() }
+                        });
+                        return BadRequest(new
+                        {
+                            message = "Waiting!"
+                        });
+                    } else
+                    {
+                        return BadRequest(new
+                        {
+                            message = "You can't join!"
+                        });
+                    }
+                }
+            }
+        }
+
+        [HttpPost("accept-request")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "1")]
+        public async Task<ActionResult> AcceptRequest(AcceptRequestModel model)
+        {
+            Dictionary<string, object> data = await _firestoreService.Get("healthcheck", model.HealthCheckId);
+            if (data == null)
+            {
+                return BadRequest();
+            } else
+            {
+                int count = data.Count;
+                data[(count + 1) + ""] = model.DisplayName;
+                await _firestoreService.Update("healthcheck", model.HealthCheckId, data);
+                await _pushNotificationService.SendMessage("Yêu cầu tham gia của bạn đã được đồng ý", "", model.Email, new Dictionary<string, string> {
+                {"uid", (count + 1) + ""},
+                {"email", model.Email },
+                {"name", model.DisplayName },
+                {"token", model.Token },
+                {"slot", model.Slot.ToString() }
+             });
+                return Ok();
+            }
+
+        }
 
         /// <summary>
         /// Change status health check
@@ -490,7 +626,7 @@ namespace TeleMedicine_BE.Controllers
                             Doctor currentDoctor = await _doctorService.GetByIdAsync(doctorId);
                             currentDoctor.NumberOfConsultants += 1;
                             await _doctorService.UpdateAsync(currentDoctor);
-                            await _pushNotificationService.SendMessage(Constants.Notification.FINISH_HEATHCHECK.ToString(), "Buổi khám bệnh đã kết thúc", currentHealthCheck.Patient.Email, null);
+                            await _pushNotificationService.SendMessage("Buổi khám bệnh đã kết thúc", "Buổi khám bệnh đã kết thúc", currentHealthCheck.Patient.Email, null);
                             Notification notification = new();
                             notification.Content = "Buổi khám bệnh đã kết thúc";
                             notification.Type = Constants.Notification.FINISH_HEATHCHECK;
@@ -606,28 +742,18 @@ namespace TeleMedicine_BE.Controllers
                         }
                     }
 
-                    List<SymptomHealthCheck> converSymptom = new List<SymptomHealthCheck>();
-                    List<SymptomHealthCheckCM> symptoms = model.SymptomHealthChecks.ToList();
-                    if (symptoms != null && symptoms.Count > 0)
-                    {
-                        foreach (SymptomHealthCheckCM item in symptoms)
-                        {
-                            converSymptom.Add(_mapper.Map<SymptomHealthCheck>(item));
-                        }
-                    }
-
                     List<Prescription> converPrescription = new List<Prescription>();
-                    List<PrescriptionCM> prescriptions = model.Prescriptions.ToList();
+                    List<PrescriptionHealthCheckCM> prescriptions = model.Prescriptions.ToList();
                     if (prescriptions != null && prescriptions.Count > 0)
                     {
-                        foreach (PrescriptionCM item in prescriptions)
+                        foreach (PrescriptionHealthCheckCM item in prescriptions)
                         {
                             converPrescription.Add(_mapper.Map<Prescription>(item));
                         }
                     }
+                    currentHealthCheck.Rating = model.Rating;
                     currentHealthCheck.Advice = model.Advice;
                     currentHealthCheck.HealthCheckDiseases = converDisease;
-                    currentHealthCheck.SymptomHealthChecks = converSymptom;
                     currentHealthCheck.Prescriptions = converPrescription;
                     bool isSuccess = await _healthCheckService.UpdateAsync(currentHealthCheck);
                     if (isSuccess)

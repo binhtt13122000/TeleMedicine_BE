@@ -85,6 +85,33 @@ namespace TeleMedicine_BE.ViewModels
         public virtual ICollection<SymptomHealthCheckVM> SymptomHealthChecks { get; set; }
     }
 
+    public class AcceptRequestModel
+    {
+        [Required]
+        public string Email { get; set; }
+        [Required]
+        public string DisplayName { get; set; }
+        [Required]
+        public string Token { get; set; }
+
+        [Required]
+        public string HealthCheckId { get; set; }
+
+        [Required]
+        public int Slot { get; set; }
+    }
+    public class JoinCallRequest
+    {
+        [Required]
+        public int HealthCheckId { get; set; }
+        [Required]
+        public string Email { get; set; }
+        [Required]
+        public string DisplayName { get; set; }
+        [Required]
+        public bool IsInvited { get; set; }
+    }
+
     public class HealthCheckCM
     {
         public int? Height { get; set; }
@@ -103,7 +130,7 @@ namespace TeleMedicine_BE.ViewModels
     public class HealthCheckUM
     {
         [Required]
-        public int Id;
+        public int Id { get; set; }
 
         public int Rating { get; set; }
 
@@ -112,7 +139,6 @@ namespace TeleMedicine_BE.ViewModels
         public string Advice { get; set; }
 
         public virtual ICollection<HealthCheckDiseaseCM> HealthCheckDiseases { get; set; }
-        public virtual ICollection<PrescriptionCM> Prescriptions { get; set; }
-        public virtual ICollection<SymptomHealthCheckCM> SymptomHealthChecks { get; set; }
+        public virtual ICollection<PrescriptionHealthCheckCM> Prescriptions { get; set; }
     }
 }
