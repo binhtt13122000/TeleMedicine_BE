@@ -36,6 +36,7 @@ namespace TeleMedicine_BE.Utils
                     foreach (var notification in notifications)
                     {
                         var messaging = FirebaseMessaging.DefaultInstance;
+                        System.Diagnostics.Debug.WriteLine(notification.Value.ToString());
                         await messaging.SendAsync(notification.Value);
                     }
                     await _redisService.RemoveKeys("notification*");

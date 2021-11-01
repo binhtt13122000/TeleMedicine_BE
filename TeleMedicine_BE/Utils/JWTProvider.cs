@@ -41,7 +41,6 @@ namespace TeleMedicine_BE.Utils
                     Subject = new ClaimsIdentity(new Claim[]
                 {
                     new Claim(ClaimTypes.NameIdentifier, accountCreated.Id + ""),
-                    new Claim(ClaimTypes.Email, accountCreated.Email + ""),
                     new Claim(ClaimTypes.GivenName, accountCreated.FirstName + " " + accountCreated.LastName),
                     new Claim(ClaimTypes.Role, accountCreated.Role.Id + "")
                 }),

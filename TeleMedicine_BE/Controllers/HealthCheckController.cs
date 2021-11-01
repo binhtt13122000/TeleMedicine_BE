@@ -457,7 +457,8 @@ namespace TeleMedicine_BE.Controllers
                     return Ok(new
                     {
                         Uid = 1,
-                        healthCheck.Token
+                        healthCheck.Token,
+                        Slot = healthCheck.Slots.ElementAt(0).Id,
                     });
                 } else
                 {
@@ -467,8 +468,9 @@ namespace TeleMedicine_BE.Controllers
                     return Ok(new
                     {
                         Uid = (count + 1),
-                        healthCheck.Token
-                    });
+                        healthCheck.Token,
+                        Slot = healthCheck.Slots.ElementAt(0).Id,
+                    }); ;
                 }
             } else
             {
@@ -491,12 +493,23 @@ namespace TeleMedicine_BE.Controllers
                             return Ok(new
                             {
                                 Uid = (count + 1),
-                                healthCheck.Token
+                                healthCheck.Token,
+                                Slot = healthCheck.Slots.ElementAt(0).Id,
                             });
                         }
                     } else
                     {
-                        await _pushNotificationService.SendMessage("Có một yêu cầu tham gia cuộc họp!", model.DisplayName, healthCheck.Slots.ElementAt(0).Doctor.Email.ToLower(), null);
+                        await _pushNotificationService.SendMessage("Có một yêu cầu tham gia cuộc họp!", model.DisplayName, healthCheck.Slots.ElementAt(0).Doctor.Email.ToLower(), new Dictionary<string, string> {
+                            {"email", model.Email },
+                            {"name", model.DisplayName },
+                            {"token", healthCheck.Token },
+                            {"slot", healthCheck.Slots.ElementAt(0).Id.ToString() },
+                            {"id", healthCheck.Id.ToString() }
+                        });
+                        return BadRequest(new
+                        {
+                            message = "Waiting!"
+                        });
                     }
                 } else
                 {
@@ -504,9 +517,12 @@ namespace TeleMedicine_BE.Controllers
                     {
                         await _pushNotificationService.SendMessage("Có một yêu cầu tham gia cuộc họp!", model.DisplayName, healthCheck.Slots.ElementAt(0).Doctor.Email.ToLower(), new Dictionary<string, string> {
                             {"email", model.Email },
-                            {"name", model.DisplayName }
+                            {"name", model.DisplayName },
+                            {"token", healthCheck.Token },
+                            {"slot", healthCheck.Slots.ElementAt(0).Id.ToString() },
+                            {"id", healthCheck.Id.ToString() }
                         });
-                        return Ok(new
+                        return BadRequest(new
                         {
                             message = "Waiting!"
                         });
@@ -519,24 +535,28 @@ namespace TeleMedicine_BE.Controllers
                     }
                 }
             }
-            return Ok();
         }
 
         [HttpPost("accept-request")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "1")]
         public async Task<ActionResult> AcceptRequest(AcceptRequestModel model)
         {
-            await _pushNotificationService.SendMessage("Yêu cầu tham gia của bạn đã được đồng ý", "", model.Email, new Dictionary<string, string> {
-                {"email", model.Email },
-                {"name", model.DisplayName },
-                {"token", model.Token }
-             });
             Dictionary<string, object> data = await _firestoreService.Get("healthcheck", model.HealthCheckId);
-            if(data == null)
+            if (data == null)
             {
                 return BadRequest();
             } else
             {
+                int count = data.Count;
+                data[(count + 1) + ""] = model.DisplayName;
+                await _firestoreService.Update("healthcheck", model.HealthCheckId, data);
+                await _pushNotificationService.SendMessage("Yêu cầu tham gia của bạn đã được đồng ý", "", model.Email, new Dictionary<string, string> {
+                {"uid", (count + 1) + ""},
+                {"email", model.Email },
+                {"name", model.DisplayName },
+                {"token", model.Token },
+                {"slot", model.Slot.ToString() }
+             });
                 return Ok();
             }
 

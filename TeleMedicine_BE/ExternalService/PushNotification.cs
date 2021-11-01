@@ -34,7 +34,7 @@ namespace TeleMedicine_BE.ExternalService
                             ImageUrl = "https://png.pngtree.com/element_our/20190530/ourlarge/pngtree-520-couple-avatar-boy-avatar-little-dinosaur-cartoon-cute-image_1263411.jpg",
                         },
                         Token = token,
-                        Data = null,
+                        Data = additionalDatas,
                     };
                     string format = "Mddyyyyhhmmsstt";
                     string key = string.Format("{0}", DateTime.Now.ToString(format));

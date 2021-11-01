@@ -96,6 +96,9 @@ namespace TeleMedicine_BE.ViewModels
 
         [Required]
         public string HealthCheckId { get; set; }
+
+        [Required]
+        public int Slot { get; set; }
     }
     public class JoinCallRequest
     {
