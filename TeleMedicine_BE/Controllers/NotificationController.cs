@@ -243,6 +243,7 @@ namespace TeleMedicine_BE.Controllers
 
         [HttpPost("connection")]
         [Produces("application/json")]
+        [AllowAnonymous]
         public async Task<ActionResult> MakeConnection([FromBody] NotificationRequest model)
         {
             Account account = _accountService.GetAccountByEmail(model.Email);
