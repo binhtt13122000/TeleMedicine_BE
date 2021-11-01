@@ -177,21 +177,25 @@ namespace TeleMedicine_BE.Controllers
                         }
                     }
                 }
-                if(modeSearch == TypeSearch.NEAREST)
+                System.Diagnostics.Debug.WriteLine("cc");
+                if (modeSearch == TypeSearch.NEAREST)
                 {
                     DateTime currentDate = DateTime.Today;
                     TimeSpan currentTime = DateTime.Now.TimeOfDay;
                     if(typeRole == TypeRole.DOCTOR)
                     {
+                        System.Diagnostics.Debug.WriteLine("ccc");
                         IEnumerable<Slot> slots = _slotService.GetAll(s => s.HealthCheck).Where(s => s.HealthCheckId != null).Where(s => s.HealthCheck.Status.Equals("BOOKED")).Where(s => s.AssignedDate.CompareTo(currentDate) >= 0);
-
-                        if(doctorId != 0)
+                        System.Diagnostics.Debug.WriteLine("cccccc");
+                        if (doctorId != 0)
                         {
+                            System.Diagnostics.Debug.WriteLine("ccccccm");
                             slots = slots.Where(s => s.DoctorId == doctorId);
                         }
 
                         if(slots.Count<Slot>() > 0)
                         {
+                            System.Diagnostics.Debug.WriteLine("cccccn");
                             HealthCheck healthCheck = _healthCheckService.GetNearestHealthCheckByCondition(slots.ToList(), currentDate, currentTime);
                             return Ok(_mapper.Map<HealthCheckVM>(healthCheck));
                         }
@@ -622,7 +626,7 @@ namespace TeleMedicine_BE.Controllers
                             Doctor currentDoctor = await _doctorService.GetByIdAsync(doctorId);
                             currentDoctor.NumberOfConsultants += 1;
                             await _doctorService.UpdateAsync(currentDoctor);
-                            await _pushNotificationService.SendMessage(Constants.Notification.FINISH_HEATHCHECK.ToString(), "Buổi khám bệnh đã kết thúc", currentHealthCheck.Patient.Email, null);
+                            await _pushNotificationService.SendMessage("Buổi khám bệnh đã kết thúc", "Buổi khám bệnh đã kết thúc", currentHealthCheck.Patient.Email, null);
                             Notification notification = new();
                             notification.Content = "Buổi khám bệnh đã kết thúc";
                             notification.Type = Constants.Notification.FINISH_HEATHCHECK;
@@ -738,28 +742,18 @@ namespace TeleMedicine_BE.Controllers
                         }
                     }
 
-                    List<SymptomHealthCheck> converSymptom = new List<SymptomHealthCheck>();
-                    List<SymptomHealthCheckCM> symptoms = model.SymptomHealthChecks.ToList();
-                    if (symptoms != null && symptoms.Count > 0)
-                    {
-                        foreach (SymptomHealthCheckCM item in symptoms)
-                        {
-                            converSymptom.Add(_mapper.Map<SymptomHealthCheck>(item));
-                        }
-                    }
-
                     List<Prescription> converPrescription = new List<Prescription>();
-                    List<PrescriptionCM> prescriptions = model.Prescriptions.ToList();
+                    List<PrescriptionHealthCheckCM> prescriptions = model.Prescriptions.ToList();
                     if (prescriptions != null && prescriptions.Count > 0)
                     {
-                        foreach (PrescriptionCM item in prescriptions)
+                        foreach (PrescriptionHealthCheckCM item in prescriptions)
                         {
                             converPrescription.Add(_mapper.Map<Prescription>(item));
                         }
                     }
+                    currentHealthCheck.Rating = model.Rating;
                     currentHealthCheck.Advice = model.Advice;
                     currentHealthCheck.HealthCheckDiseases = converDisease;
-                    currentHealthCheck.SymptomHealthChecks = converSymptom;
                     currentHealthCheck.Prescriptions = converPrescription;
                     bool isSuccess = await _healthCheckService.UpdateAsync(currentHealthCheck);
                     if (isSuccess)

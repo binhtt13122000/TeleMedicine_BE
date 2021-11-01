@@ -130,7 +130,7 @@ namespace TeleMedicine_BE.ViewModels
     public class HealthCheckUM
     {
         [Required]
-        public int Id;
+        public int Id { get; set; }
 
         public int Rating { get; set; }
 
@@ -139,7 +139,6 @@ namespace TeleMedicine_BE.ViewModels
         public string Advice { get; set; }
 
         public virtual ICollection<HealthCheckDiseaseCM> HealthCheckDiseases { get; set; }
-        public virtual ICollection<PrescriptionCM> Prescriptions { get; set; }
-        public virtual ICollection<SymptomHealthCheckCM> SymptomHealthChecks { get; set; }
+        public virtual ICollection<PrescriptionHealthCheckCM> Prescriptions { get; set; }
     }
 }

@@ -171,6 +171,7 @@ namespace TeleMedicine_BE.Utils
             CreateMap<PrescriptionHealthCheckVM, Prescription>();
             CreateMap<Prescription, PrescriptionHealthCheckVM>();
             CreateMap<PrescriptionCM, Prescription>();
+            CreateMap<PrescriptionHealthCheckCM, Prescription>();
             #endregion
 
             #region AutoMapper HealthCheckDiseaseViewModel;

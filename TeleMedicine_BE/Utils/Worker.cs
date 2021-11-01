@@ -19,7 +19,6 @@ namespace TeleMedicine_BE.Utils
 
         public Worker(IRedisService redisService)
         {
-            number = 0;
             _redisService = redisService;
         }
 
@@ -29,9 +28,6 @@ namespace TeleMedicine_BE.Utils
             {
                 try
                 {
-                    System.Diagnostics.Debug.WriteLine("cc");
-                    System.Diagnostics.Debug.WriteLine(number);
-                    number++;
                     IDictionary<string, Message> notifications = await _redisService.GetList<Message>("notification*");
                     foreach (var notification in notifications)
                     {
