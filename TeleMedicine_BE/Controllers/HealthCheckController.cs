@@ -177,25 +177,20 @@ namespace TeleMedicine_BE.Controllers
                         }
                     }
                 }
-                System.Diagnostics.Debug.WriteLine("cc");
                 if (modeSearch == TypeSearch.NEAREST)
                 {
                     DateTime currentDate = DateTime.Today;
                     TimeSpan currentTime = DateTime.Now.TimeOfDay;
                     if(typeRole == TypeRole.DOCTOR)
                     {
-                        System.Diagnostics.Debug.WriteLine("ccc");
                         IEnumerable<Slot> slots = _slotService.GetAll(s => s.HealthCheck).Where(s => s.HealthCheckId != null).Where(s => s.HealthCheck.Status.Equals("BOOKED")).Where(s => s.AssignedDate.CompareTo(currentDate) >= 0);
-                        System.Diagnostics.Debug.WriteLine("cccccc");
                         if (doctorId != 0)
                         {
-                            System.Diagnostics.Debug.WriteLine("ccccccm");
                             slots = slots.Where(s => s.DoctorId == doctorId);
                         }
 
                         if(slots.Count<Slot>() > 0)
                         {
-                            System.Diagnostics.Debug.WriteLine("cccccn");
                             HealthCheck healthCheck = _healthCheckService.GetNearestHealthCheckByCondition(slots.ToList(), currentDate, currentTime);
                             return Ok(_mapper.Map<HealthCheckVM>(healthCheck));
                         }
@@ -580,7 +575,8 @@ namespace TeleMedicine_BE.Controllers
             {
                 return BadRequest();
             }
-            HealthCheck currentHealthCheck = await _healthCheckService.GetByIdAsync(id);
+            HealthCheck currentHealthCheck = await _healthCheckService.access().Include(s => s.Slots).ThenInclude(s => s.Doctor)
+                                                                                    .Include(s => s.Patient).Where(x => x.Id == id).FirstOrDefaultAsync();
             if (currentHealthCheck == null)
             {
                 return NotFound();
@@ -621,10 +617,12 @@ namespace TeleMedicine_BE.Controllers
                     if(status.status.Equals("COMPLETED"))
                     {
                         int doctorId = currentHealthCheck.Slots.Select(s => s.DoctorId).FirstOrDefault();
-                        if(doctorId != 0)
+                        System.Diagnostics.Debug.WriteLine(doctorId);
+                        if (doctorId != 0)
                         {
                             Doctor currentDoctor = await _doctorService.GetByIdAsync(doctorId);
                             currentDoctor.NumberOfConsultants += 1;
+                            await _firestoreService.Delete("healthcheck", id.ToString());
                             await _doctorService.UpdateAsync(currentDoctor);
                             await _pushNotificationService.SendMessage("Buổi khám bệnh đã kết thúc", "Buổi khám bệnh đã kết thúc", currentHealthCheck.Patient.Email, null);
                             Notification notification = new();
