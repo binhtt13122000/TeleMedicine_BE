@@ -44,7 +44,7 @@ namespace TeleMedicine_BE.Utils
                 }
                 finally
                 {
-                    await Task.Delay(1000 * 30);
+                    await Task.Delay(1000 * 10);
                 }
             }
         }
