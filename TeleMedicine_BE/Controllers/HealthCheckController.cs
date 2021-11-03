@@ -588,22 +588,15 @@ namespace TeleMedicine_BE.Controllers
                 bool isUpdated = await _healthCheckService.UpdateAsync(currentHealthCheck);
                 if (isUpdated)
                 {
-                    if (status.status.Equals("CANCELED)"))
+                    if (status.status.Equals("CANCELED"))
                     {
-                        //int doctorId = currentHealthCheck.Slots.Select(s => s.DoctorId).FirstOrDefault();
-                        //if (doctorId != 0)
-                        //{
-                        //    Doctor currentDoctor = await _doctorService.GetByIdAsync(doctorId);
-                        //    currentDoctor.NumberOfCancels += 1;
-                        //    await _doctorService.UpdateAsync(currentDoctor);
-                        //    List<Slot> slotList = currentHealthCheck.Slots.ToList();
-                        //    for (int i = 0; i < slotList.Count; i++)
-                        //    {
-                        //        slotList[i].HealthCheck = null;
-                        //        slotList[i].HealthCheckId = null;
-                        //        await _slotService.UpdateAsync(slotList[i]);
-                        //    }
-                        //}
+                        int doctorId = currentHealthCheck.Slots.Select(s => s.DoctorId).FirstOrDefault();
+                        if (doctorId != 0)
+                        {
+                            Doctor currentDoctor = await _doctorService.GetByIdAsync(doctorId);
+                            currentDoctor.NumberOfCancels += 1;
+                            await _doctorService.UpdateAsync(currentDoctor);
+                        }
                         await _pushNotificationService.SendMessage("Lịch hẹn đã bị hủy", "Lịch hẹn đã bị hủy", currentHealthCheck.Patient.Email, null);
                         Notification notification = new();
                         notification.Content = "Lịch hẹn đã bị hủy";

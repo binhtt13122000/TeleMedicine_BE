@@ -246,14 +246,6 @@ namespace TeleMedicine_BE.Controllers
         [AllowAnonymous]
         public async Task<ActionResult> MakeConnection([FromBody] NotificationRequest model)
         {
-            Account account = _accountService.GetAccountByEmail(model.Email);
-            if (account == null)
-            {
-                return BadRequest(new
-                {
-                    message = "Email is not exist."
-                });
-            }
             try
             {
                 bool isSuccess = await _redisService.Set("user:" + model.Email, model.Token, 1440);
