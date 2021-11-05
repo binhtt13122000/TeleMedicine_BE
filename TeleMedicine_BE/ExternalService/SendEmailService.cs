@@ -1,14 +1,10 @@
-﻿using Infrastructure.Models;
-using MailKit.Net.Smtp;
-using MailKit.Security;
+﻿
+using Infrastructure.Models;
 using Microsoft.Extensions.Configuration;
-using MimeKit;
-using MimeKit.Text;
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Net;
+using System.Net.Mail;
 using System.Threading.Tasks;
-using static TeleMedicine_BE.Utils.Constants;
 
 namespace TeleMedicine_BE.ExternalService
 {
@@ -27,30 +23,37 @@ namespace TeleMedicine_BE.ExternalService
 
         public async Task<bool> SendEmail(EmailForm model)
         {
-            using var smtp = new SmtpClient();
+            SmtpClient client = new SmtpClient();
+            client.DeliveryMethod = SmtpDeliveryMethod.Network;
+            client.EnableSsl = true;
+            client.Host = "in-v3.mailjet.com";
+            client.Port = 587;
+
+            NetworkCredential credentials =
+                new NetworkCredential("2b25e32971baaf5bc39f26627fe6c6a6", "749be964508d3f95a61e0c41eee48b68");
+            client.UseDefaultCredentials = false;
+            client.Credentials = credentials;
+
+            MailMessage msg = new MailMessage();
+            msg.From = new MailAddress("mailclone1007@gmail.com", "Tele-Medicine");
+            msg.To.Add(new MailAddress(model.ToEmail));
+            msg.Priority = MailPriority.High;
+
+            msg.Subject = model.Subject;
+            msg.IsBodyHtml = true;
+            msg.Body = string.Format("<html><head></head><body><h3>" + model.Message + "</h3></body>");
+
             try
             {
-                MimeMessage email = new MimeMessage();
-                email.From.Add(new MailboxAddress("System TeleMedicine", "mailclone1007@gmail.com"));
-                System.Diagnostics.Debug.WriteLine("TO:" + model.ToEmail);
-                email.To.Add(MailboxAddress.Parse(model.ToEmail));
-                email.Subject = model.Subject;
-                email.Body = new TextPart(TextFormat.Html) { Text = "<html><head></head><body><h3>" + model.Message + "</h3></body>" };
-
-                // send email
-                smtp.Connect("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
-                smtp.Authenticate("mailclone1007@gmail.com", "vantam1007");
-                await smtp.SendAsync(email);
+                await client.SendMailAsync(msg);
                 return true;
             }
-            catch(Exception e)
+            catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("FAIL:" + e);
-            }finally
-            {
-                smtp.Disconnect(true);
-                smtp.Dispose();
+                System.Diagnostics.Debug.WriteLine(ex);
             }
+
+
             return false;
 
         }
