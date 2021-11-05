@@ -1,7 +1,9 @@
 ﻿using Infrastructure.Models;
+using MailKit.Net.Smtp;
+using MailKit.Security;
 using Microsoft.Extensions.Configuration;
-using SendGrid;
-using SendGrid.Helpers.Mail;
+using MimeKit;
+using MimeKit.Text;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,25 +27,29 @@ namespace TeleMedicine_BE.ExternalService
 
         public async Task<bool> SendEmail(EmailForm model)
         {
+            using var smtp = new SmtpClient();
             try
             {
-                var apiKey = _configuration["SendGridAPILey"];
-                var client = new SendGridClient(apiKey);
-                System.Diagnostics.Debug.WriteLine("SomeText: " + apiKey);
-                var from = new EmailAddress("danhskipper18@gmail.com", "Tele-Medicine");
-                var subject = model.Subject;
-                var to = new EmailAddress(model.ToEmail);
-                var htmlContent = "<html><head></head><body><h3>" + model.Message + "</h3></body>";
-                var msg = MailHelper.CreateSingleEmail(from, to, subject, model.Message, htmlContent);
-                var response = await client.SendEmailAsync(msg);
-                if (response.IsSuccessStatusCode)
-                {
-                    System.Diagnostics.Debug.WriteLine("SUCCESS:");
-                    return true;
-                }
-            }catch(Exception e)
+                MimeMessage email = new MimeMessage();
+                email.From.Add(new MailboxAddress("System TeleMedicine", "mailclone1007@gmail.com"));
+                System.Diagnostics.Debug.WriteLine("TO:" + model.ToEmail);
+                email.To.Add(MailboxAddress.Parse(model.ToEmail));
+                email.Subject = model.Subject;
+                email.Body = new TextPart(TextFormat.Html) { Text = "<html><head></head><body><h3>" + model.Message + "</h3></body>" };
+
+                // send email
+                smtp.Connect("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+                smtp.Authenticate("mailclone1007@gmail.com", "vantam1007");
+                await smtp.SendAsync(email);
+                return true;
+            }
+            catch(Exception e)
             {
                 System.Diagnostics.Debug.WriteLine("FAIL:" + e);
+            }finally
+            {
+                smtp.Disconnect(true);
+                smtp.Dispose();
             }
             return false;
 
