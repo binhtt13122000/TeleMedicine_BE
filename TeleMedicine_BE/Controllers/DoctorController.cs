@@ -92,6 +92,7 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "hospitals")] List<int> hospitals,
             [FromQuery(Name = "order-by")] DoctorFieldEnum orderBy,
             [FromQuery(Name = "order-type")] SortTypeEnum orderType,
+            [FromQuery(Name = "is-update")] bool? isUpdate,
             [FromQuery(Name = "is-verify")] int isVerify = 0,
             [FromQuery(Name = "filtering")] string filters = null,
             int limit = 50,
@@ -114,25 +115,38 @@ namespace TeleMedicine_BE.Controllers
                         {
                             if (Request.QueryString.Value.ToString().ToLower().Trim() == "?limit=8&page-offset=1")
                             {
-                                NumarablePaged<DoctorVM> cache = await _redisService.Get<NumarablePaged<DoctorVM>>(doctorListKey);
-                                if (cache != null)
+                                
+                                if (isUpdate.HasValue)
                                 {
-                                    return Ok(cache);
+                                    IDictionary<String, DoctorVM> cache = await _redisService.GetList<DoctorVM>("UPDATE:*");
+                                    if(cache != null)
+                                    {
+                                        return Ok(cache);
+                                    }
                                 }
                                 else
                                 {
-                                    IQueryable<Doctor> doctorList = _doctorService.access().Include(s => s.CertificationDoctors).ThenInclude(s => s.Certification)
-                                                                                       .Include(s => s.HospitalDoctors).ThenInclude(s => s.Hospital)
-                                                                                       .Include(s => s.MajorDoctors).ThenInclude(s => s.Major)
-                                                                                       .Include(s => s.Slots).Where(s => s.IsVerify == true);
-                                    Paged<DoctorVM> paged = _pagingSupport.From(doctorList).GetRange(1, 8, s => s.Rating, 1).Paginate<DoctorVM>();
-                                    bool succcess = await _redisService.Set(doctorListKey, paged, 60);
-                                    if (succcess)
+                                    NumarablePaged<DoctorVM> cache = await _redisService.Get<NumarablePaged<DoctorVM>>(doctorListKey);
+                                    if (cache != null)
                                     {
-                                        return Ok(paged);
+                                        return Ok(cache);
                                     }
-                                    return BadRequest();
+                                    else
+                                    {
+                                        IQueryable<Doctor> doctorList = _doctorService.access().Include(s => s.CertificationDoctors).ThenInclude(s => s.Certification)
+                                                                                           .Include(s => s.HospitalDoctors).ThenInclude(s => s.Hospital)
+                                                                                           .Include(s => s.MajorDoctors).ThenInclude(s => s.Major)
+                                                                                           .Include(s => s.Slots).Where(s => s.IsVerify == true);
+                                        Paged<DoctorVM> paged = _pagingSupport.From(doctorList).GetRange(1, 8, s => s.Rating, 1).Paginate<DoctorVM>();
+                                        bool succcess = await _redisService.Set(doctorListKey, paged, 60);
+                                        if (succcess)
+                                        {
+                                            return Ok(paged);
+                                        }
+                                        return BadRequest();
+                                    }
                                 }
+                                
                             }
                         }
                     }
@@ -670,6 +684,21 @@ namespace TeleMedicine_BE.Controllers
                 bool isUpdated = await _doctorService.UpdateAsync(currentDoctor);
                 if (isUpdated)
                 {
+                    List<Notification> notifications = new();
+                    IQueryable<Account> accountList = _accountService.GetAll().Where(s => s.RoleId == 2);
+                    accountList.ToList().ForEach(s =>
+                    {
+                        _pushNotificationService.SendMessage("Có 1 tài khoản bác sĩ cần được xác thực.", "Tài khoản " + currentDoctor.Email +" yêu cầu xác thực!", s.Email, null);
+                        Notification notification = new Notification();
+                        notification.Content = "Có một yêu cầu xét duyệt-/doctors/" + currentDoctor.Email;
+                        notification.Type = Constants.Notification.REQUEST_VERIFY;
+                        notification.IsSeen = false;
+                        notification.IsActive = true;
+                        notification.UserId = s.Id;
+                        notification.CreatedDate = DateTime.Now;
+                        notifications.Add(notification);
+                    });
+                    await _redisService.Set("UPDATE:" + currentDoctor.Email, currentDoctor, 60);
                     return Ok(_mapper.Map<DoctorVM>(currentDoctor));
                 }
                 return BadRequest();
