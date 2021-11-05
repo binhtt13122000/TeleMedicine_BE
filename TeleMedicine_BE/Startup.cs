@@ -143,6 +143,8 @@ namespace TeleMedicine_BE
             services.AddTransient<IUploadFileService, UploadFileService>();
             services.AddTransient<IFirestoreService, FirestoreService>();
 
+            services.AddTransient<ISendEmailService, SendEmailService>();
+
             services
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>

@@ -17,7 +17,6 @@ namespace BusinessLogic.Services
         Doctor GetDoctorByEmail(string email);
         DbSet<Doctor> access();
 
-        public Task<bool> SendEmail(EmailForm model);
     }
     public class DoctorService : IDoctorService
     {
@@ -26,39 +25,6 @@ namespace BusinessLogic.Services
         public DoctorService(IDoctorRepository doctorRepository)
         {
             _doctorRepository = doctorRepository;
-        }
-
-        public async Task<bool> SendEmail(EmailForm model)
-        {
-            SmtpClient client = new SmtpClient();
-            client.DeliveryMethod = SmtpDeliveryMethod.Network;
-            client.EnableSsl = true;
-            client.Host = "smtp.gmail.com";
-            client.Port = 587;
-
-            NetworkCredential credentials =
-                new NetworkCredential("mailclone1007@gmail.com", "vantam1007");
-            client.UseDefaultCredentials = false;
-            client.Credentials = credentials;
-
-            MailMessage msg = new MailMessage();
-            msg.From = new MailAddress("mailclone1007@gmail.com", "Tele-Medicine");
-            msg.To.Add(new MailAddress(model.ToEmail));
-
-            msg.Subject = model.Subject;
-            msg.IsBodyHtml = true;
-            msg.Body = string.Format("<html><head></head><body><h3>" + model.Message + "</h3></body>");
-
-            try
-            {
-                await client.SendMailAsync(msg);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine(ex);
-            }
-            return false;
         }
 
         public DbSet<Doctor> access()

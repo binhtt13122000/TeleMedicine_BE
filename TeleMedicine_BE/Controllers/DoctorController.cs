@@ -36,14 +36,16 @@ namespace TeleMedicine_BE.Controllers
         private readonly IMapper _mapper;
         private readonly IPagingSupport<Doctor> _pagingSupport;
         private readonly IPushNotificationService _pushNotificationService;
+        private readonly ISendEmailService _sendEmailService;
         private readonly INotificationService _notificationService;
         private readonly IRedisService _redisService;
 
 
-        public DoctorController(IDoctorService doctorService,IJwtTokenProvider jwtTokenProvider, IRoleService roleService, IHospitalService hospitalService, IAccountService accountService, IMajorService majorService, IUploadFileService uploadFileService, ICertificationService certificationService, IMapper mapper, IPagingSupport<Doctor> pagingSupport, IPushNotificationService pushNotificationService, INotificationService notificationService, IRedisService redisService)
+        public DoctorController(IDoctorService doctorService,IJwtTokenProvider jwtTokenProvider, ISendEmailService sendEmailService, IRoleService roleService, IHospitalService hospitalService, IAccountService accountService, IMajorService majorService, IUploadFileService uploadFileService, ICertificationService certificationService, IMapper mapper, IPagingSupport<Doctor> pagingSupport, IPushNotificationService pushNotificationService, INotificationService notificationService, IRedisService redisService)
         {
             _accountService = accountService;
             _doctorService = doctorService;
+            _sendEmailService = sendEmailService;
             _roleService = roleService;
             _jwtTokenProvider = jwtTokenProvider;
             _hospitalService = hospitalService;
@@ -958,7 +960,7 @@ namespace TeleMedicine_BE.Controllers
                     mail.Subject = mode == DoctorStatusVerify.ACCEPT ? "Thông báo tài khoản được xác nhận" : "Thông báo tài khoản đã bị từ chối";
                     mail.Message = mode == DoctorStatusVerify.ACCEPT ? "Chúc mừng tài khoản của bạn đã được xác nhận. Bây giờ bạn đã có thể đăng nhập."
                                                          : "Tài khoản của bạn đã bị từ chối. Mong có thể làm việc với bạn trong tương lai.";
-                    await _doctorService.SendEmail(mail);
+                    await _sendEmailService.SendEmail(mail);
                     await _redisService.RemoveKey("DOCTOR_LIST");
                     return Ok(new
                     {
