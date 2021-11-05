@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -21,7 +22,7 @@ namespace TeleMedicine_BE.Controllers
 {
     [Route("api/v1/health-checks")]
     [ApiController]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class HealthCheckController : Controller
     {
         private readonly IHealthCheckService _healthCheckService;
@@ -29,18 +30,22 @@ namespace TeleMedicine_BE.Controllers
         private readonly ISymptomService _symptomService;
         private readonly IPatientService _patientService;
         private readonly IDoctorService _doctorService;
+        private readonly IRoleService _roleService;
         private readonly IMapper _mapper;
         private readonly IAgoraProvider _agoraProvider;
         private readonly IPagingSupport<HealthCheck> _pagingSupport;
         private readonly INotificationService _notificationService;
         private readonly IPushNotificationService _pushNotificationService;
+        private readonly IJwtTokenProvider _jwtTokenProvider;
         private readonly IAccountService _accountService;
         private readonly IFirestoreService _firestoreService;
 
 
-        public HealthCheckController(IHealthCheckService healthCheckService, ISlotService slotService, IDoctorService doctorService, ISymptomService symptomService, IPatientService patientService, IMapper mapper, IPagingSupport<HealthCheck> pagingSupport, IAgoraProvider agoraProvider, IPushNotificationService pushNotificationService, INotificationService notificationService, IAccountService accountService, IFirestoreService firestoreService)
+        public HealthCheckController(IHealthCheckService healthCheckService, IRoleService roleService, ISlotService slotService, IJwtTokenProvider jwtTokenProvider, IDoctorService doctorService, ISymptomService symptomService, IPatientService patientService, IMapper mapper, IPagingSupport<HealthCheck> pagingSupport, IAgoraProvider agoraProvider, IPushNotificationService pushNotificationService, INotificationService notificationService, IAccountService accountService, IFirestoreService firestoreService)
         {
             _healthCheckService = healthCheckService;
+            _jwtTokenProvider = jwtTokenProvider;
+            _roleService = roleService;
             _slotService = slotService;
             _doctorService = doctorService;
             _symptomService = symptomService;
@@ -581,6 +586,7 @@ namespace TeleMedicine_BE.Controllers
             {
                 return BadRequest();
             }
+            var token = Request.Headers[HeaderNames.Authorization];
             HealthCheck currentHealthCheck = await _healthCheckService.access().Include(s => s.Slots).ThenInclude(s => s.Doctor)
                                                                                     .Include(s => s.Patient).Where(x => x.Id == id).FirstOrDefaultAsync();
             if (currentHealthCheck == null)
@@ -596,6 +602,26 @@ namespace TeleMedicine_BE.Controllers
                 {
                     if (status.status.Equals("CANCELED"))
                     {
+                        var role = _jwtTokenProvider.GetPayloadFromToken(token[0].Replace("Bearer", "").Trim(), "role");
+
+                        int roleId;
+                        if (int.TryParse(role.Result, out roleId))
+                        {
+                            Role currentRole = _roleService.GetAll().Where(s => s.Id == roleId).FirstOrDefault();
+                            if (currentRole != null)
+                            {
+                                if (currentRole.Name.ToUpper().Equals("PATIENT"))
+                                {
+                                    List<Slot> slotList = currentHealthCheck.Slots.ToList();
+                                    for (int i = 0; i < slotList.Count; i++)
+                                    {
+                                        slotList[i].HealthCheck = null;
+                                        slotList[i].HealthCheckId = null;
+                                        await _slotService.UpdateAsync(slotList[i]);
+                                    }
+                                }
+                            }
+                        }
                         int doctorId = currentHealthCheck.Slots.Select(s => s.DoctorId).FirstOrDefault();
                         if (doctorId != 0)
                         {
