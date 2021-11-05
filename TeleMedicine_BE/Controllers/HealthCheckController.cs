@@ -447,7 +447,13 @@ namespace TeleMedicine_BE.Controllers
             {
                 if(data == null)
                 {
-                    
+                    if (model.Email.ToLower().Equals(healthCheck.Slots.ElementAt(0).Doctor.Email.ToLower()))
+                    {
+                        _ = _pushNotificationService.SendMessage("Bác sĩ của bạn đã vào phòng!", "Tham gia cuộc gọi", healthCheck.Patient.Email.ToLower(), new Dictionary<string, string> {
+                        {"click_action", "FLUTTER_NOTIFICATION_CLICK"},
+                        {"page", healthCheck.Id.ToString()}
+                    });
+                    }
                     Dictionary<string, object> createData = new Dictionary<string, object>()
                     {
                         {"1", model.DisplayName }
