@@ -701,7 +701,7 @@ namespace TeleMedicine_BE.Controllers
                         notification.CreatedDate = DateTime.Now;
                         notifications.Add(notification);
                     });
-                    await _redisService.Set("UPDATE:" + currentDoctor.Email, currentDoctor, 60);
+                    await _redisService.Set("UPDATE:" + currentDoctor.Email, _mapper.Map<DoctorVM>(currentDoctor), 60 * 24 * 7);
                     return Ok(_mapper.Map<DoctorVM>(currentDoctor));
                 }
                 return BadRequest();
