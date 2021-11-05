@@ -118,16 +118,7 @@ namespace TeleMedicine_BE.Controllers
                             if (Request.QueryString.Value.ToString().ToLower().Trim() == "?limit=8&page-offset=1")
                             {
                                 
-                                if (isUpdate.HasValue)
-                                {
-                                    IDictionary<String, DoctorVM> cache = await _redisService.GetList<DoctorVM>("UPDATE:*");
-                                    if(cache != null)
-                                    {
-                                        return Ok(cache);
-                                    }
-                                }
-                                else
-                                {
+                                
                                     NumarablePaged<DoctorVM> cache = await _redisService.Get<NumarablePaged<DoctorVM>>(doctorListKey);
                                     if (cache != null)
                                     {
@@ -147,7 +138,7 @@ namespace TeleMedicine_BE.Controllers
                                         }
                                         return BadRequest();
                                     }
-                                }
+                                
                                 
                             }
                         }
@@ -167,6 +158,16 @@ namespace TeleMedicine_BE.Controllers
             //{
 
             //}
+
+            if (isUpdate.HasValue)
+            {
+                IDictionary<String, DoctorVM> cache = await _redisService.GetList<DoctorVM>("UPDATE:*");
+                if (cache != null)
+                {
+                    return Ok(cache);
+                }
+            }
+            
             try
             {
                 IQueryable<Doctor> doctorList = _doctorService.access().Include(s => s.CertificationDoctors).ThenInclude(s => s.Certification)
