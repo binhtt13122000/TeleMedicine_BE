@@ -27,7 +27,7 @@ namespace BusinessLogic.Services
             {
                 DateTime currentDate = DateTime.Today;
                 TimeSpan currentTime = DateTime.Now.TimeOfDay;
-                
+                ISendEmailService sendEmailService = scope.ServiceProvider.GetService<ISendEmailService>();
                 IHealthCheckService healthCheckService = scope.ServiceProvider.GetService<IHealthCheckService>();
                 IPushNotificationService pushNotification = scope.ServiceProvider.GetService<IPushNotificationService>();
                 IDoctorService doctorService = scope.ServiceProvider.GetService<IDoctorService>();
@@ -37,11 +37,17 @@ namespace BusinessLogic.Services
                                                                                 .Where(s => s.AssignedDate.CompareTo(currentDate) == 0)
                                                                                 .Where(s => s.StartTime.CompareTo(currentTime) >= 0
                                                                                 && s.StartTime.CompareTo(DateTime.Now.AddHours(1).TimeOfDay) <= 0).ToList();
+                _logger.LogInformation("Rating:" + slots.Count());
                 if (slots != null && slots.Count() > 0)
                     {
                         for(int i= 0; i < slots.Count(); i++)
                         {
-                            _logger.LogInformation("Rating:" + slots[i].Doctor.Email);
+                        EmailForm mail = new EmailForm();
+                        mail.ToEmail = slots[i].Doctor.Email;
+                        mail.Subject = "CHECK";
+                        mail.Message = "Chúc mừng tài khoản của bạn đã được xác nhận. Bây giờ bạn đã có thể đăng nhập.";
+                        sendEmailService.SendEmail(mail).Wait();
+                        _logger.LogInformation("Rating:" + slots[i].Doctor.Email);
                             _logger.LogInformation("Rating:" + slots[i].HealthCheck.Patient.Email);
                             pushNotification.SendMessage("Bạn sắp có 1 lịch hẹn diễn ra.", "Thời gian diễn ra bắt đầu lúc: " + slots[i].StartTime, slots[i].Doctor.Email.ToLower(), null).Wait();
                             pushNotification.SendMessage("Bạn có cuộc hẹn với bác sĩ " + slots[i].Doctor.Name, "Thời gian diễn ra bắt đầu lúc: " + slots[i].StartTime, slots[i].HealthCheck.Patient.Email, null);
