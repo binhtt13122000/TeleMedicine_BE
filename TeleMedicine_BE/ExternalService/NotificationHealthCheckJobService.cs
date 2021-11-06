@@ -29,7 +29,7 @@ namespace BusinessLogic.Services
                 TimeSpan addSevenHour = new TimeSpan(7, 0, 0);
                 TimeSpan addOneHour = new TimeSpan(1, 0, 0);
 
-                TimeSpan totalTime = DateTime.Now.TimeOfDay.Add(addSevenHour);
+                TimeSpan totalTime = DateTime.Now.TimeOfDay;
                 TimeSpan currentTime = new TimeSpan(totalTime.Hours, totalTime.Minutes, totalTime.Seconds);
 
                 _logger.LogInformation("Current Time:" + currentTime);
@@ -68,8 +68,8 @@ namespace BusinessLogic.Services
                             sendEmailService.SendEmail(mailDoctor).Wait();
                             _logger.LogInformation("Rating:" + slots[i].Doctor.Email);
                             _logger.LogInformation("Rating:" + slots[i].HealthCheck.Patient.Email);
-                            pushNotification.SendMessage("Bạn sắp có 1 lịch hẹn diễn ra.", "Thời gian diễn ra bắt đầu lúc: " + slots[i].StartTime, slots[i].Doctor.Email.ToLower(), null);
-                            pushNotification.SendMessage("Bạn có cuộc hẹn với bác sĩ " + slots[i].Doctor.Name, "Thời gian diễn ra bắt đầu lúc: " + slots[i].StartTime, slots[i].HealthCheck.Patient.Email, null);
+                            pushNotification.SendMessage("Bạn sắp có 1 lịch hẹn diễn ra.", "Thời gian diễn ra bắt đầu lúc: " + slots[i].StartTime, slots[i].Doctor.Email.ToLower(), null).Wait();
+                            pushNotification.SendMessage("Bạn có cuộc hẹn với bác sĩ " + slots[i].Doctor.Name, "Thời gian diễn ra bắt đầu lúc: " + slots[i].StartTime, slots[i].HealthCheck.Patient.Email, null).Wait();
                         }
                     }
                 }
