@@ -61,6 +61,11 @@ namespace TeleMedicine_BE
                 jobType: typeof(ReviewJobService),
                 cronExpression: "0 0 12 * * ?"));
 
+            services.AddSingleton<NotificationHealthCheckJobService>();
+            services.AddSingleton(new JobSchedule(
+                jobType: typeof(NotificationHealthCheckJobService),
+                cronExpression: "*/5 * * * *"));
+
             // ...
             services.AddHostedService<QuartzHostedService>();
             services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
