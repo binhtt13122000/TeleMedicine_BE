@@ -26,33 +26,53 @@ namespace BusinessLogic.Services
             using (var scope = _serviceProvider.CreateScope())
             {
                 DateTime currentDate = DateTime.Today;
-                TimeSpan currentTime = DateTime.Now.TimeOfDay;
-                ISendEmailService sendEmailService = scope.ServiceProvider.GetService<ISendEmailService>();
-                IHealthCheckService healthCheckService = scope.ServiceProvider.GetService<IHealthCheckService>();
-                IPushNotificationService pushNotification = scope.ServiceProvider.GetService<IPushNotificationService>();
-                IDoctorService doctorService = scope.ServiceProvider.GetService<IDoctorService>();
-                ISlotService slotService = scope.ServiceProvider.GetService<ISlotService>();
-                var slots = slotService.GetAll(s => s.HealthCheck, s => s.Doctor, s => s.HealthCheck.Patient).AsEnumerable().Where(s => s.HealthCheckId != null)
-                                                                                .Where(s => s.HealthCheck.Status.Equals("BOOKED"))
-                                                                                .Where(s => s.AssignedDate.CompareTo(currentDate) == 0)
-                                                                                .Where(s => s.StartTime.CompareTo(currentTime) >= 0
-                                                                                && s.StartTime.CompareTo(DateTime.Now.AddHours(1).TimeOfDay) <= 0).ToList();
-                _logger.LogInformation("Rating:" + slots.Count());
-                if (slots != null && slots.Count() > 0)
+                TimeSpan addSevenHour = new TimeSpan(7, 0, 0);
+                TimeSpan addOneHour = new TimeSpan(1, 0, 0);
+
+                TimeSpan totalTime = DateTime.Now.TimeOfDay.Add(addSevenHour);
+                TimeSpan currentTime = new TimeSpan(totalTime.Hours, totalTime.Minutes, totalTime.Seconds);
+
+                _logger.LogInformation("Current Time:" + currentTime);
+                if (totalTime.Days > 0 )
+                {
+                    currentDate = currentDate.AddDays(totalTime.Days);
+                    _logger.LogInformation("Current Date:" + currentDate);
+                }  
+                if(totalTime.Hours >= 6 && totalTime.Hours <= 20)
+                {
+                    ISendEmailService sendEmailService = scope.ServiceProvider.GetService<ISendEmailService>();
+                    IHealthCheckService healthCheckService = scope.ServiceProvider.GetService<IHealthCheckService>();
+                    IPushNotificationService pushNotification = scope.ServiceProvider.GetService<IPushNotificationService>();
+                    IDoctorService doctorService = scope.ServiceProvider.GetService<IDoctorService>();
+                    ISlotService slotService = scope.ServiceProvider.GetService<ISlotService>();
+                    var slots = slotService.GetAll(s => s.HealthCheck, s => s.Doctor, s => s.HealthCheck.Patient).AsEnumerable().Where(s => s.HealthCheckId != null)
+                                                                                    .Where(s => s.HealthCheck.Status.Equals("BOOKED"))
+                                                                                    .Where(s => s.AssignedDate.CompareTo(currentDate) == 0)
+                                                                                    .Where(s => s.StartTime.CompareTo(currentTime) >= 0
+                                                                                    && s.StartTime.CompareTo(currentTime.Add(addOneHour)) <= 0).ToList();
+                    _logger.LogInformation("Rating:" + slots.Count());
+                    if (slots != null && slots.Count() > 0)
                     {
-                        for(int i= 0; i < slots.Count(); i++)
+                        for (int i = 0; i < slots.Count(); i++)
                         {
-                        EmailForm mail = new EmailForm();
-                        mail.ToEmail = slots[i].Doctor.Email;
-                        mail.Subject = "CHECK";
-                        mail.Message = "Chúc mừng tài khoản của bạn đã được xác nhận. Bây giờ bạn đã có thể đăng nhập.";
-                        sendEmailService.SendEmail(mail).Wait();
-                        _logger.LogInformation("Rating:" + slots[i].Doctor.Email);
+                            EmailForm mailPatient = new EmailForm();
+                            mailPatient.ToEmail = slots[i].HealthCheck.Patient.Email;
+                            mailPatient.Subject = "Thông báo có lịch hẹn với bác sĩ sắp tới.";
+                            mailPatient.Message = "Bạn sắp có 1 lịch hẹn diễn ra.Thời gian diễn ra bắt đầu lúc: " + slots[i].StartTime;
+                            sendEmailService.SendEmail(mailPatient).Wait();
+
+                            EmailForm mailDoctor = new EmailForm();
+                            mailDoctor.ToEmail = slots[i].Doctor.Email;
+                            mailDoctor.Subject = "Thông báo có lịch hẹn với bệnh nhận sắp tới.";
+                            mailDoctor.Message = "Bạn sắp có 1 lịch hẹn diễn ra.Thời gian diễn ra bắt đầu lúc: " + slots[i].StartTime;
+                            sendEmailService.SendEmail(mailDoctor).Wait();
+                            _logger.LogInformation("Rating:" + slots[i].Doctor.Email);
                             _logger.LogInformation("Rating:" + slots[i].HealthCheck.Patient.Email);
-                            pushNotification.SendMessage("Bạn sắp có 1 lịch hẹn diễn ra.", "Thời gian diễn ra bắt đầu lúc: " + slots[i].StartTime, slots[i].Doctor.Email.ToLower(), null).Wait();
+                            pushNotification.SendMessage("Bạn sắp có 1 lịch hẹn diễn ra.", "Thời gian diễn ra bắt đầu lúc: " + slots[i].StartTime, slots[i].Doctor.Email.ToLower(), null);
                             pushNotification.SendMessage("Bạn có cuộc hẹn với bác sĩ " + slots[i].Doctor.Name, "Thời gian diễn ra bắt đầu lúc: " + slots[i].StartTime, slots[i].HealthCheck.Patient.Email, null);
+                        }
                     }
-                    }
+                }
             }
             return Task.CompletedTask;
         }
