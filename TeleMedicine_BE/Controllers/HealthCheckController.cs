@@ -405,24 +405,27 @@ namespace TeleMedicine_BE.Controllers
                 HealthCheck healthCheckConvert = _mapper.Map<HealthCheck>(model);
                 healthCheckConvert.Status = HealthCheckSta.BOOKED.ToString();
                 healthCheckConvert.CreatedTime = DateTime.Now;
-                healthCheckConvert.Slots.Add(currentSlot);
                 healthCheckConvert.Token = _agoraProvider.GenerateToken("SLOT_" + model.SlotId, 0.ToString(), 0);
                 HealthCheck healthCheckCreated = await _healthCheckService.AddAsync(healthCheckConvert);
                 if (healthCheckCreated != null)
                 {
-                    Slot addedSlot = _slotService.GetAll(s => s.Doctor).Where(s => s.Id == model.SlotId).FirstOrDefault();
-                    await _pushNotificationService.SendMessage("Bạn có một lịch hẹn mới", "Bạn có một lịch hẹn mới", addedSlot.Doctor.Email, null);
-                    Notification notification = new();
-                    notification.Content = "Bạn có một lịch hẹn mới-/health-checks/" + healthCheckCreated.Id;
-                    notification.Type = Constants.Notification.REQUEST_HEALTHCHECK;
-                    notification.IsSeen = false;
-                    notification.IsActive = true;
-                    notification.CreatedDate = DateTime.Now;
-                    notification.UserId = _accountService.GetAccountByEmail(addedSlot.Doctor.Email).Id;
-                    await _notificationService.AddAsync(notification);
-                    return CreatedAtAction("GetHealthCheckById", new { id = healthCheckCreated.Id }, _mapper.Map<HealthCheckVM>(healthCheckCreated));
-
-                    
+                    currentSlot.HealthCheckId = healthCheckCreated.Id;
+                    bool success = await _slotService.UpdateAsync(currentSlot);
+                    if (success)
+                    {
+                        Slot addedSlot = _slotService.GetAll(s => s.Doctor).Where(s => s.Id == model.SlotId).FirstOrDefault();
+                        await _pushNotificationService.SendMessage("Bạn có một lịch hẹn mới", "Bạn có một lịch hẹn mới", addedSlot.Doctor.Email, null);
+                        Notification notification = new();
+                        notification.Content = "Bạn có một lịch hẹn mới-/health-checks/" + healthCheckCreated.Id;
+                        notification.Type = Constants.Notification.REQUEST_HEALTHCHECK;
+                        notification.IsSeen = false;
+                        notification.IsActive = true;
+                        notification.CreatedDate = DateTime.Now;
+                        notification.UserId = _accountService.GetAccountByEmail(addedSlot.Doctor.Email).Id;
+                        await _notificationService.AddAsync(notification);
+                        return CreatedAtAction("GetHealthCheckById", new { id = healthCheckCreated.Id }, _mapper.Map<HealthCheckVM>(healthCheckCreated));
+                    }
+                    return BadRequest();
                 }
                 return BadRequest(new
                 {
