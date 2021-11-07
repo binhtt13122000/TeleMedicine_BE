@@ -38,8 +38,6 @@ namespace BusinessLogic.Services
                     currentDate = currentDate.AddDays(totalTime.Days);
                     _logger.LogInformation("Current Date:" + currentDate);
                 }  
-                if(totalTime.Hours >= 6 && totalTime.Hours <= 20)
-                {
                     ISendEmailService sendEmailService = scope.ServiceProvider.GetService<ISendEmailService>();
                     IHealthCheckService healthCheckService = scope.ServiceProvider.GetService<IHealthCheckService>();
                     IPushNotificationService pushNotification = scope.ServiceProvider.GetService<IPushNotificationService>();
@@ -72,7 +70,6 @@ namespace BusinessLogic.Services
                             pushNotification.SendMessage("Bạn có cuộc hẹn với bác sĩ " + slots[i].Doctor.Name, "Thời gian diễn ra bắt đầu lúc: " + slots[i].StartTime, slots[i].HealthCheck.Patient.Email, null).Wait();
                         }
                     }
-                }
             }
             return Task.CompletedTask;
         }
