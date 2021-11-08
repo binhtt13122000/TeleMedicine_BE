@@ -57,14 +57,14 @@ namespace TeleMedicine_BE
 
             // Add our job
             services.AddSingleton<ReviewJobService>();
-            services.AddSingleton(new JobSchedule(
-                jobType: typeof(ReviewJobService),
-                cronExpression: "0 0 12 * * ?"));
+            //services.AddSingleton(new JobSchedule(
+            //    jobType: typeof(ReviewJobService),
+            //    cronExpression: "0 0 12 * * ?"));
 
-            services.AddSingleton<NotificationHealthCheckJobService>();
-            services.AddSingleton(new JobSchedule(
-                jobType: typeof(NotificationHealthCheckJobService),
-                cronExpression: "0 */5 * ? * *"));
+            //services.AddSingleton<NotificationHealthCheckJobService>();
+            //services.AddSingleton(new JobSchedule(
+            //    jobType: typeof(NotificationHealthCheckJobService),
+            //    cronExpression: "0 */5 * ? * *"));
 
             // ...
             services.AddHostedService<QuartzHostedService>();
