@@ -67,6 +67,7 @@ namespace BusinessLogic.Services
                             _logger.LogInformation("Rating:" + slots[i].Doctor.Email);
                             _logger.LogInformation("Rating:" + slots[i].HealthCheck.Patient.Email);
                             pushNotification.SendMessage("Bạn sắp có 1 lịch hẹn diễn ra.", "Thời gian diễn ra bắt đầu lúc: " + slots[i].StartTime, slots[i].Doctor.Email.ToLower(), null).Wait();
+                            System.Threading.Thread.Sleep(2000);
                             pushNotification.SendMessage("Bạn có cuộc hẹn với bác sĩ " + slots[i].Doctor.Name, "Thời gian diễn ra bắt đầu lúc: " + slots[i].StartTime, slots[i].HealthCheck.Patient.Email, null).Wait();
                         }
                     }
