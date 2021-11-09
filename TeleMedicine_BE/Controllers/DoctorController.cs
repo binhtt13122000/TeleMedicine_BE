@@ -821,9 +821,7 @@ namespace TeleMedicine_BE.Controllers
                                 message = "Hospital is not existed!"
                             });
                         }
-                        HospitalDoctor currentHospitalDoctor = _mapper.Map<HospitalDoctor>(newHospitalDoctors[i]);
-                        currentHospitalDoctor.IsWorking = true;
-                        convertHospitalDoctor.Add(currentHospitalDoctor);
+                        convertHospitalDoctor.Add(_mapper.Map<HospitalDoctor>(newHospitalDoctors[i]));
                     }
                 }
                 if (newMajorDoctors != null && newMajorDoctors.Count > 0)
