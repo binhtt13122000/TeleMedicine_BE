@@ -39,9 +39,10 @@ namespace TeleMedicine_BE.Controllers
         private readonly ISendEmailService _sendEmailService;
         private readonly INotificationService _notificationService;
         private readonly IRedisService _redisService;
+        private readonly IFirestoreService _firebaseService;
 
 
-        public DoctorController(IDoctorService doctorService,IJwtTokenProvider jwtTokenProvider, ISendEmailService sendEmailService, IRoleService roleService, IHospitalService hospitalService, IAccountService accountService, IMajorService majorService, IUploadFileService uploadFileService, ICertificationService certificationService, IMapper mapper, IPagingSupport<Doctor> pagingSupport, IPushNotificationService pushNotificationService, INotificationService notificationService, IRedisService redisService)
+        public DoctorController(IDoctorService doctorService,IJwtTokenProvider jwtTokenProvider, ISendEmailService sendEmailService, IRoleService roleService, IHospitalService hospitalService, IAccountService accountService, IMajorService majorService, IUploadFileService uploadFileService, ICertificationService certificationService, IMapper mapper, IPagingSupport<Doctor> pagingSupport, IPushNotificationService pushNotificationService, INotificationService notificationService, IRedisService redisService, IFirestoreService firestoreService)
         {
             _accountService = accountService;
             _doctorService = doctorService;
@@ -57,7 +58,7 @@ namespace TeleMedicine_BE.Controllers
             _pushNotificationService = pushNotificationService;
             _notificationService = notificationService;
             _redisService = redisService;
-            
+            _firebaseService = firestoreService;
         }
 
         /// <summary>
@@ -682,27 +683,75 @@ namespace TeleMedicine_BE.Controllers
                 currentDoctor.PlaceOfCertificate = model.PlaceOfCertificate.Trim();
                 currentDoctor.DateOfCertificate = model.DateOfCertificate;
                 currentDoctor.ScopeOfPractice = model.ScopeOfPractice.Trim();
-                currentDoctor.Description = model.Description.Trim();
-                currentDoctor.IsActive = model.IsActive;
-                bool isUpdated = await _doctorService.UpdateAsync(currentDoctor);
-                if (isUpdated)
+                if(model.Description != null)
                 {
-                    List<Notification> notifications = new();
-                    IQueryable<Account> accountList = _accountService.GetAll().Where(s => s.RoleId == 2);
-                    accountList.ToList().ForEach(s =>
+                    currentDoctor.Description = model.Description.Trim();
+                }
+                currentDoctor.IsActive = model.IsActive;
+                var token = Request.Headers[HeaderNames.Authorization];
+                if (!String.IsNullOrEmpty(token))
+                {
+                    var role = _jwtTokenProvider.GetPayloadFromToken(token[0].Replace("Bearer", "").Trim(), "role");
+                    int roleId;
+                    if (int.TryParse(role.Result, out roleId))
                     {
-                        _pushNotificationService.SendMessage("Có 1 tài khoản bác sĩ cần được xác thực.", "Tài khoản " + currentDoctor.Email +" yêu cầu xác thực!", s.Email, null);
-                        Notification notification = new Notification();
-                        notification.Content = "Có một yêu cầu xét duyệt-/doctors/" + currentDoctor.Email;
-                        notification.Type = Constants.Notification.REQUEST_VERIFY;
-                        notification.IsSeen = false;
-                        notification.IsActive = true;
-                        notification.UserId = s.Id;
-                        notification.CreatedDate = DateTime.Now;
-                        notifications.Add(notification);
-                    });
-                    await _redisService.Set("UPDATE:" + currentDoctor.Email, _mapper.Map<DoctorVM>(currentDoctor), 60 * 24 * 7);
-                    return Ok(_mapper.Map<DoctorVM>(currentDoctor));
+                        Role currentRole = _roleService.GetAll().Where(s => s.Id == roleId).FirstOrDefault();
+                        if (currentRole != null)
+                        {
+                            if (currentRole.Name.ToUpper().Equals("DOCTOR"))
+                            {
+                                var data = await _firebaseService.Get("update", currentDoctor.Id.ToString());
+                                if(data == null)
+                                {
+                                    await _firebaseService.Create("update", currentDoctor.Id.ToString(), new Dictionary<string, object>
+                                    {
+                                        {"email", currentDoctor.Email },
+                                        {"model", JsonConvert.SerializeObject(model) }
+                                    });
+                                } else
+                                {
+                                    await _firebaseService.Update("update", currentDoctor.Id.ToString(), new Dictionary<string, object>
+                                    {
+                                        {"email", currentDoctor.Email },
+                                        {"model", JsonConvert.SerializeObject(model) }
+                                    });
+                                }
+                                return Ok(new { message = "Saved!" });
+                            }
+                            if (currentRole.Name.ToUpper().Equals("ADMIN"))
+                            {
+                                var data = await _firebaseService.Get("update", currentDoctor.Id.ToString());
+                                if(data != null)
+                                {
+                                    await _firebaseService.Delete("update", currentDoctor.Id.ToString());
+                                }
+                                bool isUpdated = await _doctorService.UpdateAsync(currentDoctor);
+                                if (isUpdated)
+                                {
+                                    List<Notification> notifications = new();
+                                    IQueryable<Account> accountList = _accountService.GetAll().Where(s => s.RoleId == 2);
+                                    accountList.ToList().ForEach(s =>
+                                    {
+                                        _pushNotificationService.SendMessage("Có 1 tài khoản bác sĩ cần được xác thực.", "Tài khoản " + currentDoctor.Email + " yêu cầu xác thực!", s.Email, null);
+                                        Notification notification = new Notification();
+                                        notification.Content = "Có một yêu cầu xét duyệt-/doctors/" + currentDoctor.Email;
+                                        notification.Type = Constants.Notification.REQUEST_VERIFY;
+                                        notification.IsSeen = false;
+                                        notification.IsActive = true;
+                                        notification.UserId = s.Id;
+                                        notification.CreatedDate = DateTime.Now;
+                                        notifications.Add(notification);
+                                    });
+                                    await _redisService.Set("UPDATE:" + currentDoctor.Email, _mapper.Map<DoctorVM>(currentDoctor), 60 * 24 * 7);
+                                    return Ok(_mapper.Map<DoctorVM>(currentDoctor));
+                                }
+                                return BadRequest();
+                            }
+                            return BadRequest();
+                        }
+                        return BadRequest();
+                    }
+                    return BadRequest();
                 }
                 return BadRequest();
             }
@@ -772,7 +821,9 @@ namespace TeleMedicine_BE.Controllers
                                 message = "Hospital is not existed!"
                             });
                         }
-                        convertHospitalDoctor.Add(_mapper.Map<HospitalDoctor>(newHospitalDoctors[i]));
+                        HospitalDoctor currentHospitalDoctor = _mapper.Map<HospitalDoctor>(newHospitalDoctors[i]);
+                        currentHospitalDoctor.IsWorking = true;
+                        convertHospitalDoctor.Add(currentHospitalDoctor);
                     }
                 }
                 if (newMajorDoctors != null && newMajorDoctors.Count > 0)
