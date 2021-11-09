@@ -406,7 +406,6 @@ namespace TeleMedicine_BE.Controllers
                 }
 
                 string fileUrl = await _uploadFileService.UploadFile(model.Image, "service", "service-detail");
-
                 Account convertAccount = _mapper.Map<Account>(model);
                 convertAccount.Email = model.Email.Trim().ToLower();
                 convertAccount.FirstName = model.FirstName.Trim();
@@ -415,7 +414,6 @@ namespace TeleMedicine_BE.Controllers
                 convertAccount.StreetAddress = model.StreetAddress.Trim();
                 convertAccount.Ward = model.Ward.Trim();
                 convertAccount.RoleId = model.RoleId;
-                convertAccount.Role = currenRole;
                 Account accountCreated = await _accountService.AddAsync(convertAccount);
                 if (accountCreated != null)
                 {
@@ -426,9 +424,9 @@ namespace TeleMedicine_BE.Controllers
                     message = "Create account failed!"
                 });
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError);
+                return BadRequest(e);
             }
         }
     }

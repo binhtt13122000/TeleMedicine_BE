@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -21,7 +22,6 @@ namespace TeleMedicine_BE.Controllers
 {
     [Route("api/v1/health-checks")]
     [ApiController]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class HealthCheckController : Controller
     {
         private readonly IHealthCheckService _healthCheckService;
@@ -29,18 +29,22 @@ namespace TeleMedicine_BE.Controllers
         private readonly ISymptomService _symptomService;
         private readonly IPatientService _patientService;
         private readonly IDoctorService _doctorService;
+        private readonly IRoleService _roleService;
         private readonly IMapper _mapper;
         private readonly IAgoraProvider _agoraProvider;
         private readonly IPagingSupport<HealthCheck> _pagingSupport;
         private readonly INotificationService _notificationService;
         private readonly IPushNotificationService _pushNotificationService;
+        private readonly IJwtTokenProvider _jwtTokenProvider;
         private readonly IAccountService _accountService;
         private readonly IFirestoreService _firestoreService;
 
 
-        public HealthCheckController(IHealthCheckService healthCheckService, ISlotService slotService, IDoctorService doctorService, ISymptomService symptomService, IPatientService patientService, IMapper mapper, IPagingSupport<HealthCheck> pagingSupport, IAgoraProvider agoraProvider, IPushNotificationService pushNotificationService, INotificationService notificationService, IAccountService accountService, IFirestoreService firestoreService)
+        public HealthCheckController(IHealthCheckService healthCheckService, IRoleService roleService, ISlotService slotService, IJwtTokenProvider jwtTokenProvider, IDoctorService doctorService, ISymptomService symptomService, IPatientService patientService, IMapper mapper, IPagingSupport<HealthCheck> pagingSupport, IAgoraProvider agoraProvider, IPushNotificationService pushNotificationService, INotificationService notificationService, IAccountService accountService, IFirestoreService firestoreService)
         {
             _healthCheckService = healthCheckService;
+            _jwtTokenProvider = jwtTokenProvider;
+            _roleService = roleService;
             _slotService = slotService;
             _doctorService = doctorService;
             _symptomService = symptomService;
@@ -400,24 +404,27 @@ namespace TeleMedicine_BE.Controllers
                 HealthCheck healthCheckConvert = _mapper.Map<HealthCheck>(model);
                 healthCheckConvert.Status = HealthCheckSta.BOOKED.ToString();
                 healthCheckConvert.CreatedTime = DateTime.Now;
-                healthCheckConvert.Slots.Add(currentSlot);
                 healthCheckConvert.Token = _agoraProvider.GenerateToken("SLOT_" + model.SlotId, 0.ToString(), 0);
                 HealthCheck healthCheckCreated = await _healthCheckService.AddAsync(healthCheckConvert);
                 if (healthCheckCreated != null)
                 {
-                    Slot addedSlot = _slotService.GetAll(s => s.Doctor).Where(s => s.Id == model.SlotId).FirstOrDefault();
-                    await _pushNotificationService.SendMessage("Bạn có một lịch hẹn mới", "Bạn có một lịch hẹn mới", addedSlot.Doctor.Email, null);
-                    Notification notification = new();
-                    notification.Content = "Bạn có một lịch hẹn mới-/health-checks/" + healthCheckCreated.Id;
-                    notification.Type = Constants.Notification.REQUEST_HEALTHCHECK;
-                    notification.IsSeen = false;
-                    notification.IsActive = true;
-                    notification.CreatedDate = DateTime.Now;
-                    notification.UserId = _accountService.GetAccountByEmail(addedSlot.Doctor.Email).Id;
-                    await _notificationService.AddAsync(notification);
-                    return CreatedAtAction("GetHealthCheckById", new { id = healthCheckCreated.Id }, _mapper.Map<HealthCheckVM>(healthCheckCreated));
-
-                    
+                    currentSlot.HealthCheckId = healthCheckCreated.Id;
+                    bool success = await _slotService.UpdateAsync(currentSlot);
+                    if (success)
+                    {
+                        Slot addedSlot = _slotService.GetAll(s => s.Doctor).Where(s => s.Id == model.SlotId).FirstOrDefault();
+                        await _pushNotificationService.SendMessage("Bạn có một lịch hẹn mới", "Bạn có một lịch hẹn mới", addedSlot.Doctor.Email, null);
+                        Notification notification = new();
+                        notification.Content = "Bạn có một lịch hẹn mới-/health-checks/" + healthCheckCreated.Id;
+                        notification.Type = Constants.Notification.REQUEST_HEALTHCHECK;
+                        notification.IsSeen = false;
+                        notification.IsActive = true;
+                        notification.CreatedDate = DateTime.Now;
+                        notification.UserId = _accountService.GetAccountByEmail(addedSlot.Doctor.Email).Id;
+                        await _notificationService.AddAsync(notification);
+                        return CreatedAtAction("GetHealthCheckById", new { id = healthCheckCreated.Id }, _mapper.Map<HealthCheckVM>(healthCheckCreated));
+                    }
+                    return BadRequest();
                 }
                 return BadRequest(new
                 {
@@ -447,7 +454,13 @@ namespace TeleMedicine_BE.Controllers
             {
                 if(data == null)
                 {
-                    
+                    if (model.Email.ToLower().Equals(healthCheck.Slots.ElementAt(0).Doctor.Email.ToLower()))
+                    {
+                        _ = _pushNotificationService.SendMessage("Bác sĩ của bạn đã vào phòng!", "Tham gia cuộc gọi", healthCheck.Patient.Email.ToLower(), new Dictionary<string, string> {
+                        {"click_action", "FLUTTER_NOTIFICATION_CLICK"},
+                        {"page", healthCheck.Id.ToString()}
+                    });
+                    }
                     Dictionary<string, object> createData = new Dictionary<string, object>()
                     {
                         {"1", model.DisplayName }
@@ -575,6 +588,7 @@ namespace TeleMedicine_BE.Controllers
             {
                 return BadRequest();
             }
+            var token = Request.Headers[HeaderNames.Authorization];
             HealthCheck currentHealthCheck = await _healthCheckService.access().Include(s => s.Slots).ThenInclude(s => s.Doctor)
                                                                                     .Include(s => s.Patient).Where(x => x.Id == id).FirstOrDefaultAsync();
             if (currentHealthCheck == null)
@@ -588,22 +602,35 @@ namespace TeleMedicine_BE.Controllers
                 bool isUpdated = await _healthCheckService.UpdateAsync(currentHealthCheck);
                 if (isUpdated)
                 {
-                    if (status.status.Equals("CANCELED)"))
+                    if (status.status.Equals("CANCELED"))
                     {
-                        //int doctorId = currentHealthCheck.Slots.Select(s => s.DoctorId).FirstOrDefault();
-                        //if (doctorId != 0)
-                        //{
-                        //    Doctor currentDoctor = await _doctorService.GetByIdAsync(doctorId);
-                        //    currentDoctor.NumberOfCancels += 1;
-                        //    await _doctorService.UpdateAsync(currentDoctor);
-                        //    List<Slot> slotList = currentHealthCheck.Slots.ToList();
-                        //    for (int i = 0; i < slotList.Count; i++)
-                        //    {
-                        //        slotList[i].HealthCheck = null;
-                        //        slotList[i].HealthCheckId = null;
-                        //        await _slotService.UpdateAsync(slotList[i]);
-                        //    }
-                        //}
+                        var role = _jwtTokenProvider.GetPayloadFromToken(token[0].Replace("Bearer", "").Trim(), "role");
+
+                        int roleId;
+                        if (int.TryParse(role.Result, out roleId))
+                        {
+                            Role currentRole = _roleService.GetAll().Where(s => s.Id == roleId).FirstOrDefault();
+                            if (currentRole != null)
+                            {
+                                if (currentRole.Name.ToUpper().Equals("PATIENT"))
+                                {
+                                    List<Slot> slotList = currentHealthCheck.Slots.ToList();
+                                    for (int i = 0; i < slotList.Count; i++)
+                                    {
+                                        slotList[i].HealthCheck = null;
+                                        slotList[i].HealthCheckId = null;
+                                        await _slotService.UpdateAsync(slotList[i]);
+                                    }
+                                }
+                            }
+                        }
+                        int doctorId = currentHealthCheck.Slots.Select(s => s.DoctorId).FirstOrDefault();
+                        if (doctorId != 0)
+                        {
+                            Doctor currentDoctor = await _doctorService.GetByIdAsync(doctorId);
+                            currentDoctor.NumberOfCancels += 1;
+                            await _doctorService.UpdateAsync(currentDoctor);
+                        }
                         await _pushNotificationService.SendMessage("Lịch hẹn đã bị hủy", "Lịch hẹn đã bị hủy", currentHealthCheck.Patient.Email, null);
                         Notification notification = new();
                         notification.Content = "Lịch hẹn đã bị hủy";

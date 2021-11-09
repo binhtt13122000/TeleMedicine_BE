@@ -36,7 +36,9 @@ namespace TeleMedicine_BE.Utils
                         await messaging.SendAsync(notification.Value);
                     }
                     await _redisService.RemoveKeys("notification*");
-                } catch(Exception ex)
+                    await Task.Delay(1000 * 5);
+                }
+                catch (Exception ex)
                 {
                     System.Diagnostics.Debug.WriteLine("error");
                     System.Diagnostics.Debug.WriteLine(ex.Message);
@@ -44,7 +46,6 @@ namespace TeleMedicine_BE.Utils
                 }
                 finally
                 {
-                    await Task.Delay(1000 * 30);
                 }
             }
         }

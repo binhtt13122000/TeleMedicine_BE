@@ -32,6 +32,9 @@ using TeleMedicine_BE.ExternalService;
 using StackExchange.Redis.Extensions.Newtonsoft;
 using StackExchange.Redis.Extensions.Core.Configuration;
 using Google.Cloud.Firestore;
+using Quartz.Spi;
+using Quartz;
+using Quartz.Impl;
 
 namespace TeleMedicine_BE
 {
@@ -48,7 +51,23 @@ namespace TeleMedicine_BE
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddCors();
+            // Add Quartz services
+            services.AddSingleton<IJobFactory, SingletonJobFactory>();
+            services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
 
+            // Add our job
+            services.AddSingleton<ReviewJobService>();
+            //services.AddSingleton(new JobSchedule(
+            //    jobType: typeof(ReviewJobService),
+            //    cronExpression: "0 0 12 * * ?"));
+
+            //services.AddSingleton<NotificationHealthCheckJobService>();
+            //services.AddSingleton(new JobSchedule(
+            //    jobType: typeof(NotificationHealthCheckJobService),
+            //    cronExpression: "0 */5 * ? * *"));
+
+            // ...
+            services.AddHostedService<QuartzHostedService>();
             services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
 
             var pathToKey = Path.Combine(Directory.GetCurrentDirectory(), "Keys", "firebase_admin_sdk.json");
@@ -61,7 +80,7 @@ namespace TeleMedicine_BE
             FirestoreDb firestoreDb = FirestoreDb.Create("telemedicine-fc0ee");
 
             services.AddDbContext<TeleMedicineContext>(options =>
-                options.UseNpgsql(Configuration.GetConnectionString("DBConnection")));
+                options.UseNpgsql(Configuration.GetConnectionString("DBConnection")), ServiceLifetime.Transient);
 
             services.AddStackExchangeRedisExtensions<NewtonsoftSerializer>((options) =>
             {
@@ -128,6 +147,8 @@ namespace TeleMedicine_BE
 
             services.AddTransient<IUploadFileService, UploadFileService>();
             services.AddTransient<IFirestoreService, FirestoreService>();
+
+            services.AddTransient<ISendEmailService, SendEmailService>();
 
             services
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

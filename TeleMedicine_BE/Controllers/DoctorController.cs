@@ -36,14 +36,17 @@ namespace TeleMedicine_BE.Controllers
         private readonly IMapper _mapper;
         private readonly IPagingSupport<Doctor> _pagingSupport;
         private readonly IPushNotificationService _pushNotificationService;
+        private readonly ISendEmailService _sendEmailService;
         private readonly INotificationService _notificationService;
         private readonly IRedisService _redisService;
+        private readonly IFirestoreService _firebaseService;
 
 
-        public DoctorController(IDoctorService doctorService,IJwtTokenProvider jwtTokenProvider, IRoleService roleService, IHospitalService hospitalService, IAccountService accountService, IMajorService majorService, IUploadFileService uploadFileService, ICertificationService certificationService, IMapper mapper, IPagingSupport<Doctor> pagingSupport, IPushNotificationService pushNotificationService, INotificationService notificationService, IRedisService redisService)
+        public DoctorController(IDoctorService doctorService,IJwtTokenProvider jwtTokenProvider, ISendEmailService sendEmailService, IRoleService roleService, IHospitalService hospitalService, IAccountService accountService, IMajorService majorService, IUploadFileService uploadFileService, ICertificationService certificationService, IMapper mapper, IPagingSupport<Doctor> pagingSupport, IPushNotificationService pushNotificationService, INotificationService notificationService, IRedisService redisService, IFirestoreService firestoreService)
         {
             _accountService = accountService;
             _doctorService = doctorService;
+            _sendEmailService = sendEmailService;
             _roleService = roleService;
             _jwtTokenProvider = jwtTokenProvider;
             _hospitalService = hospitalService;
@@ -55,7 +58,7 @@ namespace TeleMedicine_BE.Controllers
             _pushNotificationService = pushNotificationService;
             _notificationService = notificationService;
             _redisService = redisService;
-            
+            _firebaseService = firestoreService;
         }
 
         /// <summary>
@@ -92,6 +95,7 @@ namespace TeleMedicine_BE.Controllers
             [FromQuery(Name = "hospitals")] List<int> hospitals,
             [FromQuery(Name = "order-by")] DoctorFieldEnum orderBy,
             [FromQuery(Name = "order-type")] SortTypeEnum orderType,
+            [FromQuery(Name = "is-update")] bool? isUpdate,
             [FromQuery(Name = "is-verify")] int isVerify = 0,
             [FromQuery(Name = "filtering")] string filters = null,
             int limit = 50,
@@ -114,25 +118,29 @@ namespace TeleMedicine_BE.Controllers
                         {
                             if (Request.QueryString.Value.ToString().ToLower().Trim() == "?limit=8&page-offset=1")
                             {
-                                NumarablePaged<DoctorVM> cache = await _redisService.Get<NumarablePaged<DoctorVM>>(doctorListKey);
-                                if (cache != null)
-                                {
-                                    return Ok(cache);
-                                }
-                                else
-                                {
-                                    IQueryable<Doctor> doctorList = _doctorService.access().Include(s => s.CertificationDoctors).ThenInclude(s => s.Certification)
-                                                                                       .Include(s => s.HospitalDoctors).ThenInclude(s => s.Hospital)
-                                                                                       .Include(s => s.MajorDoctors).ThenInclude(s => s.Major)
-                                                                                       .Include(s => s.Slots).Where(s => s.IsVerify == true);
-                                    Paged<DoctorVM> paged = _pagingSupport.From(doctorList).GetRange(1, 8, s => s.Rating, 1).Paginate<DoctorVM>();
-                                    bool succcess = await _redisService.Set(doctorListKey, paged, 60);
-                                    if (succcess)
+                                
+                                
+                                    NumarablePaged<DoctorVM> cache = await _redisService.Get<NumarablePaged<DoctorVM>>(doctorListKey);
+                                    if (cache != null)
                                     {
-                                        return Ok(paged);
+                                        return Ok(cache);
                                     }
-                                    return BadRequest();
-                                }
+                                    else
+                                    {
+                                        IQueryable<Doctor> doctorList = _doctorService.access().Include(s => s.CertificationDoctors).ThenInclude(s => s.Certification)
+                                                                                           .Include(s => s.HospitalDoctors).ThenInclude(s => s.Hospital)
+                                                                                           .Include(s => s.MajorDoctors).ThenInclude(s => s.Major)
+                                                                                           .Include(s => s.Slots).Where(s => s.IsVerify == true);
+                                        Paged<DoctorVM> paged = _pagingSupport.From(doctorList).GetRange(1, 8, s => s.Rating, 1).Paginate<DoctorVM>();
+                                        bool succcess = await _redisService.Set(doctorListKey, paged, 60);
+                                        if (succcess)
+                                        {
+                                            return Ok(paged);
+                                        }
+                                        return BadRequest();
+                                    }
+                                
+                                
                             }
                         }
                     }
@@ -151,6 +159,16 @@ namespace TeleMedicine_BE.Controllers
             //{
 
             //}
+
+            if (isUpdate.HasValue)
+            {
+                IDictionary<String, DoctorVM> cache = await _redisService.GetList<DoctorVM>("UPDATE:*");
+                if (cache != null)
+                {
+                    return Ok(cache);
+                }
+            }
+            
             try
             {
                 IQueryable<Doctor> doctorList = _doctorService.access().Include(s => s.CertificationDoctors).ThenInclude(s => s.Certification)
@@ -665,12 +683,75 @@ namespace TeleMedicine_BE.Controllers
                 currentDoctor.PlaceOfCertificate = model.PlaceOfCertificate.Trim();
                 currentDoctor.DateOfCertificate = model.DateOfCertificate;
                 currentDoctor.ScopeOfPractice = model.ScopeOfPractice.Trim();
-                currentDoctor.Description = model.Description.Trim();
-                currentDoctor.IsActive = model.IsActive;
-                bool isUpdated = await _doctorService.UpdateAsync(currentDoctor);
-                if (isUpdated)
+                if(model.Description != null)
                 {
-                    return Ok(_mapper.Map<DoctorVM>(currentDoctor));
+                    currentDoctor.Description = model.Description.Trim();
+                }
+                currentDoctor.IsActive = model.IsActive;
+                var token = Request.Headers[HeaderNames.Authorization];
+                if (!String.IsNullOrEmpty(token))
+                {
+                    var role = _jwtTokenProvider.GetPayloadFromToken(token[0].Replace("Bearer", "").Trim(), "role");
+                    int roleId;
+                    if (int.TryParse(role.Result, out roleId))
+                    {
+                        Role currentRole = _roleService.GetAll().Where(s => s.Id == roleId).FirstOrDefault();
+                        if (currentRole != null)
+                        {
+                            if (currentRole.Name.ToUpper().Equals("DOCTOR"))
+                            {
+                                var data = await _firebaseService.Get("update", currentDoctor.Id.ToString());
+                                if(data == null)
+                                {
+                                    await _firebaseService.Create("update", currentDoctor.Id.ToString(), new Dictionary<string, object>
+                                    {
+                                        {"email", currentDoctor.Email },
+                                        {"model", JsonConvert.SerializeObject(model) }
+                                    });
+                                } else
+                                {
+                                    await _firebaseService.Update("update", currentDoctor.Id.ToString(), new Dictionary<string, object>
+                                    {
+                                        {"email", currentDoctor.Email },
+                                        {"model", JsonConvert.SerializeObject(model) }
+                                    });
+                                }
+                                return Ok(new { message = "Saved!" });
+                            }
+                            if (currentRole.Name.ToUpper().Equals("ADMIN"))
+                            {
+                                var data = await _firebaseService.Get("update", currentDoctor.Id.ToString());
+                                if(data != null)
+                                {
+                                    await _firebaseService.Delete("update", currentDoctor.Id.ToString());
+                                }
+                                bool isUpdated = await _doctorService.UpdateAsync(currentDoctor);
+                                if (isUpdated)
+                                {
+                                    List<Notification> notifications = new();
+                                    IQueryable<Account> accountList = _accountService.GetAll().Where(s => s.RoleId == 2);
+                                    accountList.ToList().ForEach(s =>
+                                    {
+                                        _pushNotificationService.SendMessage("Có 1 tài khoản bác sĩ cần được xác thực.", "Tài khoản " + currentDoctor.Email + " yêu cầu xác thực!", s.Email, null);
+                                        Notification notification = new Notification();
+                                        notification.Content = "Có một yêu cầu xét duyệt-/doctors/" + currentDoctor.Email;
+                                        notification.Type = Constants.Notification.REQUEST_VERIFY;
+                                        notification.IsSeen = false;
+                                        notification.IsActive = true;
+                                        notification.UserId = s.Id;
+                                        notification.CreatedDate = DateTime.Now;
+                                        notifications.Add(notification);
+                                    });
+                                    await _redisService.Set("UPDATE:" + currentDoctor.Email, _mapper.Map<DoctorVM>(currentDoctor), 60 * 24 * 7);
+                                    return Ok(_mapper.Map<DoctorVM>(currentDoctor));
+                                }
+                                return BadRequest();
+                            }
+                            return BadRequest();
+                        }
+                        return BadRequest();
+                    }
+                    return BadRequest();
                 }
                 return BadRequest();
             }
@@ -958,7 +1039,7 @@ namespace TeleMedicine_BE.Controllers
                     mail.Subject = mode == DoctorStatusVerify.ACCEPT ? "Thông báo tài khoản được xác nhận" : "Thông báo tài khoản đã bị từ chối";
                     mail.Message = mode == DoctorStatusVerify.ACCEPT ? "Chúc mừng tài khoản của bạn đã được xác nhận. Bây giờ bạn đã có thể đăng nhập."
                                                          : "Tài khoản của bạn đã bị từ chối. Mong có thể làm việc với bạn trong tương lai.";
-                    await _doctorService.SendEmail(mail);
+                    await _sendEmailService.SendEmail(mail);
                     await _redisService.RemoveKey("DOCTOR_LIST");
                     return Ok(new
                     {
